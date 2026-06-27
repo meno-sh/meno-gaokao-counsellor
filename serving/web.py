@@ -380,7 +380,7 @@ class H(BaseHTTPRequestHandler):
         from core.interactive import InteractiveSession
         prior = {}
         try:
-            from core.web import AXES as _AX
+            from serving.web import AXES as _AX
         except Exception:
             _AX = AXES
         for (a, b, _), v in zip(_AX, body.get("sliders", []) or []):
