@@ -1,0 +1,239 @@
+{
+ "scenes": [
+  {
+   "key": "course_and_academic",
+   "label": "课程与学业",
+   "ask": "所选专业的课程设置是否与你的学习能力和兴趣匹配？",
+   "pattern": "兴趣·能力·前景",
+   "grounding": "许多学生在大学后发现专业课程与自己预期不符，导致学习动力下降。",
+   "when_relevant": "学生对所选专业的具体课程内容了解不足时",
+   "probes": [
+    "self_vs_external",
+    "process_vs_outcome",
+    "aptitude_fit"
+   ]
+  },
+  {
+   "key": "daily_and_social",
+   "label": "日常与社群",
+   "ask": "大学生活中的社交和日常管理是否与你的生活习惯相符？",
+   "pattern": "外部噪音vs内省",
+   "grounding": "一些学生在大学中因不适应集体生活而感到孤立。",
+   "when_relevant": "学生对大学生活的日常管理能力较弱时",
+   "probes": [
+    "agency_vs_observation",
+    "self_vs_external",
+    "voice_vs_silence"
+   ]
+  },
+  {
+   "key": "interest_and_strength",
+   "label": "兴趣与擅长",
+   "ask": "你的兴趣和擅长的领域是否与所选专业一致？",
+   "pattern": "兴趣·能力·前景",
+   "grounding": "许多学生因兴趣与专业不符而转专业或毕业后从事非本专业工作。",
+   "when_relevant": "学生对自身兴趣和擅长领域不够清晰时",
+   "probes": [
+    "material_vs_meaning",
+    "self_vs_external",
+    "aptitude_fit"
+   ]
+  },
+  {
+   "key": "economic_and_return",
+   "label": "经济与回报",
+   "ask": "所选专业的经济回报是否符合你的经济需求？",
+   "pattern": "经济与回报",
+   "grounding": "一些学生选择高薪专业后发现工作压力大，生活质量下降。",
+   "when_relevant": "学生对经济回报有较高期望时",
+   "probes": [
+    "material_vs_meaning",
+    "time_horizon",
+    "risk_appetite"
+   ]
+  },
+  {
+   "key": "city_and_opportunity",
+   "label": "城市与机会",
+   "ask": "所选城市是否提供足够的职业发展机会？",
+   "pattern": "机会成本与试错",
+   "grounding": "一些学生选择大城市后发现生活成本高，竞争激烈。",
+   "when_relevant": "学生对职业发展有明确目标时",
+   "probes": [
+    "risk_appetite",
+    "time_horizon",
+    "agency_vs_observation",
+    "city_vs_other"
+   ]
+  },
+  {
+   "key": "career_prospect",
+   "label": "职业前景",
+   "ask": "所选专业的职业前景是否与你的长期规划一致？",
+   "pattern": "兴趣·能力·前景",
+   "grounding": "一些学生选择热门专业后发现行业饱和，就业困难。",
+   "when_relevant": "学生对未来职业规划不明确时",
+   "probes": [
+    "time_horizon",
+    "risk_appetite",
+    "agency_vs_observation",
+    "employability_orientation"
+   ]
+  },
+  {
+   "key": "cost_and_sacrifice",
+   "label": "代价与放弃",
+   "ask": "选择这个专业是否意味着你需要放弃其他重要机会？",
+   "pattern": "机会成本与试错",
+   "grounding": "一些学生选择热门专业后发现失去其他发展机会。",
+   "when_relevant": "学生面临多个选择时",
+   "probes": [
+    "risk_appetite",
+    "time_horizon",
+    "process_vs_outcome",
+    "worklife_balance"
+   ]
+  },
+  {
+   "key": "ai_replaceability",
+   "label": "AI替代性",
+   "ask": "所选专业是否容易被AI技术替代？",
+   "pattern": "技术变迁",
+   "grounding": "一些学生选择技术类专业后发现AI技术快速发展，就业前景堪忧。",
+   "when_relevant": "学生对技术发展趋势不了解时",
+   "probes": [
+    "risk_appetite",
+    "time_horizon",
+    "employability_orientation"
+   ]
+  },
+  {
+   "key": "career_stability",
+   "label": "职业稳定性",
+   "ask": "所选职业是否提供足够的稳定性？",
+   "pattern": "家庭与稳定",
+   "grounding": "一些学生选择稳定职业后发现缺乏挑战，发展受限。",
+   "when_relevant": "学生家庭对稳定性有较高要求时",
+   "probes": [
+    "risk_appetite",
+    "material_vs_meaning",
+    "time_horizon"
+   ]
+  },
+  {
+   "key": "prestige_vs_skill",
+   "label": "声望vs技能",
+   "ask": "选择名校是否比选择技能导向专业更重要？",
+   "pattern": "声望vs技能",
+   "grounding": "一些学生选择名校后发现专业技能不足，就业困难。",
+   "when_relevant": "学生家庭或社会对名校有较高期望时",
+   "probes": [
+    "school_vs_major",
+    "material_vs_meaning",
+    "principle_vs_loyalty"
+   ]
+  },
+  {
+   "key": "external_noise_vs_introspection",
+   "label": "外部噪音vs内省",
+   "ask": "选择热门专业是否比根据兴趣和能力选择更重要？",
+   "pattern": "外部噪音vs内省",
+   "grounding": "一些学生选择热门专业后发现兴趣不符，学习动力下降。",
+   "when_relevant": "学生受外部信息影响较大时",
+   "probes": [
+    "truth_vs_protection",
+    "self_vs_external",
+    "voice_vs_silence"
+   ]
+  },
+  {
+   "key": "information_gap_and_resources",
+   "label": "信息差与资源",
+   "ask": "你是否有足够的信息和资源来做出明智的选择？",
+   "pattern": "信息差与资源",
+   "grounding": "一些学生因信息不对称而选择不适合的专业。",
+   "when_relevant": "学生对专业和职业了解不足时",
+   "probes": [
+    "agency_vs_observation",
+    "truth_vs_protection"
+   ]
+  },
+  {
+   "key": "major_change_and_cost",
+   "label": "转专业与试错",
+   "ask": "转专业的成本和风险是否值得？",
+   "pattern": "机会成本与试错",
+   "grounding": "一些学生转专业后发现时间和金钱成本高昂。",
+   "when_relevant": "学生对当前专业不满意时",
+   "probes": [
+    "risk_appetite",
+    "process_vs_outcome"
+   ]
+  },
+  {
+   "key": "postgraduate_and_barrier",
+   "label": "考研/保研门槛",
+   "ask": "考研或保研的隐性门槛是否影响你的选择？",
+   "pattern": "信息差与资源",
+   "grounding": "一些学生选择考研后发现竞争激烈，准备不足。",
+   "when_relevant": "学生有考研或保研计划时",
+   "probes": [
+    "rigor_vs_mercy",
+    "time_horizon"
+   ]
+  },
+  {
+   "key": "gender_and_industry",
+   "retired": true,
+   "retired_reason": "性别信息暂缺，暂时下线；待有更多人口统计信息后再启用 (ZH 2026-06-18)",
+   "label": "性别与行业",
+   "ask": "所选行业是否存在性别歧视或限制？",
+   "pattern": "家庭与稳定",
+   "grounding": "一些学生选择行业后发现性别限制，发展受阻。",
+   "when_relevant": "学生对行业性别限制不了解时",
+   "probes": [
+    "voice_vs_silence",
+    "principle_vs_loyalty",
+    "self_vs_external"
+   ]
+  },
+  {
+   "key": "region_and_employment",
+   "label": "地域户籍与就业",
+   "ask": "户籍所在地是否影响你的就业机会？",
+   "pattern": "信息差与资源",
+   "grounding": "一些学生选择大城市后发现户籍限制，就业困难。",
+   "when_relevant": "学生对户籍政策不了解时",
+   "probes": [
+    "self_vs_external",
+    "risk_appetite",
+    "city_vs_other"
+   ]
+  },
+  {
+   "key": "hot_major_and_involution",
+   "label": "热门专业内卷",
+   "ask": "热门专业的内卷程度是否影响你的选择？",
+   "pattern": "技术变迁",
+   "grounding": "一些学生选择热门专业后发现竞争激烈，就业困难。",
+   "when_relevant": "学生对热门专业不了解时",
+   "probes": [
+    "risk_appetite",
+    "worklife_balance"
+   ]
+  },
+  {
+   "key": "idealism_vs_realism",
+   "label": "理想主义vs现实妥协",
+   "ask": "你的理想主义是否与现实需求冲突？",
+   "pattern": "外部噪音vs内省",
+   "grounding": "一些学生选择理想专业后发现现实需求不符，发展受限。",
+   "when_relevant": "学生对理想与现实冲突有困惑时",
+   "probes": [
+    "material_vs_meaning",
+    "self_vs_external",
+    "truth_vs_protection"
+   ]
+  }
+ ]
+}

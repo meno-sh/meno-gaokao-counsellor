@@ -1,0 +1,1318 @@
+<!doctype html><html lang=zh><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=color-scheme content=light>
+<title>反思均衡 · 志愿推演</title>
+<link rel=preconnect href="https://fonts.googleapis.com"><link rel=preconnect href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel=stylesheet>
+<style>
+:root{
+  --ink:#2B2419; --ink-soft:#6E6354; --ink-faint:#9C9078;
+  --bg:#F3EBD8; --paper:#FCF7EC; --paper-2:#FFFDF6;
+  --line:#E6DBC4; --line-strong:#D7C9AC;
+  --terra:#BC6242; --terra-deep:#A14E2F; --terra-tint:#F8E9DE;
+  --blue:#3E6488; --blue-deep:#2F5174; --blue-tint:#E8EFF6;
+  --pine:#4A7A55; --pine-tint:#E8F0E6; --ok:#4A7A55;
+  --ochre:#C99B43; --sage:#7E9E6B; --slate:#6E8AAB; --gold:#C99B43;
+  --shadow-card:inset 0 1px 0 rgba(255,255,255,.55), 4px 5px 0 -1px rgba(43,36,25,.07), 0 14px 30px -16px rgba(43,36,25,.22);
+  --press:2px 2px 0 rgba(43,36,25,.85);
+  --serif:"Noto Serif SC", Georgia, "Songti SC", serif;
+  --sans:"Noto Sans SC", system-ui, -apple-system, "PingFang SC", sans-serif;
+  --hand:"Caveat", cursive;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;mix-blend-mode:multiply;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(130% 80% at 50% -12%, rgba(255,251,240,.75), rgba(243,235,216,0) 62%)}
+
+.wrap{max-width:1060px;margin:0 auto;padding:34px 22px 96px;display:grid;grid-template-columns:1fr;gap:24px;position:relative;z-index:1}
+@media(min-width:900px){.wrap.play{grid-template-columns:316px 1fr;align-items:start}}
+.topbar{display:flex;justify-content:flex-end;margin:-6px 0 8px}
+
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(1.7rem,1.25rem+1.6vw,2.25rem);line-height:1.32;margin:.1em 0 .35em;letter-spacing:.004em}
+.sub{color:var(--ink-soft);margin:0 0 1.1em;font-size:1.02rem;line-height:1.85}
+.kicker{font-family:var(--sans);font-size:.74rem;letter-spacing:.24em;color:var(--terra);margin:0 0 .8em;font-weight:600}
+.muted{color:var(--ink-soft)}
+
+.card{background:var(--paper);border:1.5px solid rgba(43,36,25,.9);border-radius:16px;padding:22px 24px;box-shadow:var(--shadow-card);position:relative}
+.cover{padding:34px 30px 30px}
+@media(min-width:900px){.cover{padding:50px 50px 42px}}
+.cover .sub{max-width:42em}
+.cover-cta{margin-top:20px}
+
+label{display:block;font-weight:500;margin:1em 0 .35em;color:var(--ink);font-size:.97rem;line-height:1.6}
+label .muted{font-weight:400}
+input[type=text],textarea{width:100%;padding:11px 13px;border:1.5px solid var(--line-strong);border-radius:11px;font:inherit;font-family:var(--sans);background:var(--paper-2);color:var(--ink);transition:border-color .15s,box-shadow .15s}
+input[type=text]:focus,textarea:focus{outline:none;border-color:var(--terra);box-shadow:0 0 0 3px var(--terra-tint)}
+textarea{line-height:1.7;resize:vertical}
+input[type=range]{width:100%;accent-color:var(--terra)}
+.qdiv{border:none;border-top:1px dashed var(--line-strong);margin:22px 0}
+
+button{font-family:var(--sans);font-weight:600;font-size:1rem;cursor:pointer;border:1.5px solid var(--ink);border-radius:11px;background:var(--terra);color:#FFFBF4;padding:11px 20px;box-shadow:var(--press);transition:transform .09s ease,box-shadow .09s ease,background .15s,color .15s}
+button:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 rgba(43,36,25,.85);background:var(--terra-deep)}
+button:active{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(43,36,25,.85)}
+button:disabled{opacity:.45;cursor:default;transform:none;box-shadow:var(--press);background:var(--terra)}
+button.ghost{background:var(--paper-2);color:var(--ink);box-shadow:1px 1px 0 rgba(43,36,25,.25);border-color:var(--line-strong)}
+button.ghost:hover{background:#fff;border-color:var(--terra);color:var(--terra-deep);box-shadow:2px 2px 0 rgba(43,36,25,.25)}
+
+/* ---- intake option rows ---- */
+.orow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.onum{flex:0 0 auto;width:1.2em;text-align:center;font-family:var(--hand);font-size:1.45rem;color:var(--terra);line-height:1}
+.orow .omajor{flex:2 1 190px;min-width:0;padding:10px 12px;border:1.5px solid var(--line-strong);border-radius:10px;font:inherit;font-family:var(--sans);background:var(--paper-2);box-sizing:border-box}
+.orow .onote{flex:3 1 220px;min-width:0;padding:10px 12px;border:1px dashed var(--line-strong);border-radius:10px;font:inherit;font-family:var(--sans);font-size:.92rem;background:#FBF5E7;color:var(--ink-soft);box-sizing:border-box}
+.orow .omic{flex:0 0 auto;padding:9px 11px;line-height:1}
+.orow .prog{flex:1 0 100%;font-size:.74rem;margin-left:1.7em}
+.ftrow{display:flex;gap:8px;align-items:flex-start}
+.ftrow textarea{flex:1;min-width:0}
+.ftrow button{flex:0 0 auto;white-space:nowrap}
+.startrow{margin-top:22px}
+
+/* ---- allocation sliders ---- */
+.alloc{margin:8px 0 14px}
+.allocbar{position:relative;height:18px;border-radius:10px;background:var(--line);display:flex;box-shadow:inset 0 1px 2px rgba(43,36,25,.13)}
+.seg{height:100%}
+#segM{background:var(--ochre);border-radius:9px 0 0 9px}#segI{background:var(--sage)}#segF{background:var(--slate);border-radius:0 9px 9px 0}
+.handle{position:absolute;top:50%;width:20px;height:20px;margin-left:-10px;transform:translateY(-50%);background:var(--paper-2);border:2px solid var(--ink);border-radius:50%;cursor:ew-resize;touch-action:none;box-shadow:0 2px 5px rgba(43,36,25,.25)}
+.handle:hover{border-color:var(--terra)}
+.alloclab{display:flex;justify-content:space-between;font-size:.84rem;margin-top:10px;color:var(--ink-soft);gap:8px}
+.alloclab b{font-family:var(--hand);font-size:1.1rem;color:var(--ink)}
+
+/* ---- quiz + checklist + destinations ---- */
+.q{margin:14px 0}
+.q>b{display:block;margin-bottom:7px;font-weight:600;font-family:var(--serif);font-size:1.02rem}
+.opt{display:flex;align-items:center;margin:6px 0;padding:9px 12px;border:1.5px solid var(--line-strong);border-radius:11px;cursor:pointer;background:var(--paper-2);transition:border-color .15s,background .2s}
+.opt:hover{border-color:var(--terra)}
+.opt:has(input:checked){border-color:var(--terra);background:var(--terra-tint)}
+.opt input{accent-color:var(--terra);margin-right:10px}
+.chk{display:flex;align-items:flex-start;gap:11px;margin:9px 0;padding:11px 14px;border:1.5px solid var(--line-strong);border-radius:12px;background:var(--paper-2);cursor:pointer;line-height:1.65;transition:border-color .15s,background .2s}
+.chk:hover{border-color:var(--pine)}
+.chk:has(input:checked){border-color:var(--pine);background:var(--pine-tint)}
+.chk input{accent-color:var(--pine);margin-top:5px;flex:0 0 auto}
+.destchips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.destchip{border:1.5px solid var(--line-strong);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:.92rem;user-select:none;background:var(--paper-2);transition:all .14s;display:inline-flex;align-items:center;gap:6px}
+.destchip:hover{border-color:var(--terra);color:var(--terra-deep)}
+.destchip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.destchip.on b{color:var(--paper);font-family:var(--hand);font-size:1.1rem;line-height:1}
+
+/* ---- side rank panel ---- */
+.side{position:sticky;top:18px;align-self:start}
+.factor{font-family:var(--serif);color:var(--blue-deep);font-weight:600;font-size:1.2rem;letter-spacing:.01em}
+.sidehdr{font-size:1.06rem;color:var(--ink);margin-bottom:10px;display:flex;align-items:baseline;gap:8px}
+.sidehdr .muted{font-size:.76rem;font-family:var(--sans);font-weight:400}
+.rankrow{display:flex;align-items:center;gap:10px;margin:8px 0;padding:10px 12px;border:1.5px solid var(--line-strong);border-radius:12px;background:var(--paper-2);transition:border-color .18s,background .25s}
+.rankrow.top{border-color:var(--terra);background:var(--terra-tint);box-shadow:0 1px 0 rgba(188,98,66,.16)}
+.rankrow .n{font-family:var(--hand);font-size:1.55rem;color:var(--terra);width:1.3em;text-align:center;line-height:1;flex:0 0 auto}
+.rankrow.top .n{color:var(--terra-deep)}
+.rankrow .lab{flex:1;font-size:.95rem;min-width:0;line-height:1.45}
+.rankrow .mv{display:flex;flex-direction:column;gap:3px;flex:0 0 auto}
+.rankrow .mv button{padding:1px 9px;font-size:.82rem;background:var(--paper-2);color:var(--ink-soft);box-shadow:none;border-radius:7px;border-color:var(--line-strong)}
+.rankrow .mv button:hover{background:#fff;border-color:var(--terra);color:var(--terra-deep);transform:none;box-shadow:none}
+.sidenote{font-size:.78rem;margin:.8em 0 0;line-height:1.6}
+.profhdr{font-size:.98rem;margin-top:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.profhdr button{font-size:.72rem;padding:2px 9px}
+.proftext{width:100%;min-height:160px;padding:11px 13px;border:1.5px solid var(--line-strong);border-radius:11px;font:inherit;font-family:var(--sans);line-height:1.6;background:var(--paper-2);resize:vertical;margin-top:8px}
+.profbtns{margin-top:7px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.profnote{font-size:.78rem;margin:.5em 0 0;line-height:1.6}
+
+/* ---- station / stage card ---- */
+.stationhdr{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.stationhdr .step{font-family:var(--hand);font-size:1.15rem;color:var(--ink-faint);line-height:1}
+.trail{display:flex;align-items:center;gap:0;margin:2px 0 4px}
+.tdot{flex:0 0 auto;width:12px;height:12px;border-radius:50%;border:2px solid var(--line-strong);background:var(--paper-2);transition:all .3s ease}
+.tdot.done{background:var(--terra);border-color:var(--terra)}
+.tdot.cur{width:16px;height:16px;background:var(--terra);border-color:var(--terra-deep);box-shadow:0 0 0 4px var(--terra-tint);animation:pulse 2.6s ease-in-out infinite}
+.tdot.todo{opacity:.55}
+.tline{flex:1 1 auto;height:2px;min-width:10px;background:var(--terra)}
+.tline.todo{background:transparent;border-top:2px dashed var(--line-strong);height:0}
+.tcap{font-size:.74rem;color:var(--ink-faint);text-align:right;margin:7px 2px 14px;letter-spacing:.02em;font-style:italic}
+.qfocus{font-size:.93rem;color:var(--ink-soft);margin:.3em 0 1em;padding-left:14px;border-left:3px solid var(--gold);line-height:1.7}
+.qfocus b{color:var(--ink);font-weight:600}
+.story{font-family:var(--serif);font-weight:400;font-size:1.08rem;line-height:1.95;color:var(--ink);margin:.4em 0 1.1em;max-width:38em;text-wrap:pretty}
+.invest{border-left:3px solid var(--blue);background:var(--blue-tint);border-radius:0 12px 12px 0;padding:14px 17px;margin:14px 0;line-height:1.8}
+.invest b{color:var(--blue-deep)}
+.invest .vs{color:var(--ink-faint);font-size:.86em}
+.dyk{border-left:3px solid var(--terra);background:var(--terra-tint);border-radius:0 12px 12px 0;padding:14px 17px;margin:14px 0;font-weight:500;line-height:1.8}
+.dyk b{color:var(--terra-deep)}
+.dyk ul{margin:.4em 0;padding-left:1.2em}
+.prog{color:var(--ink-faint);font-size:.84rem;letter-spacing:.01em}
+.src{margin:.5em 0 0}
+.hint{font-size:.85rem;margin:.7em 0 0;line-height:1.6}
+.note{background:#FBF1DC;border:1px solid var(--line-strong);border-radius:12px;padding:12px 15px;font-size:.92rem;color:var(--ink-soft);line-height:1.7}
+.stagebtns{margin-top:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.framebtns{margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.endcard h1{margin-top:.1em}
+
+/* ---- progress bar ---- */
+.pwrap{display:flex;align-items:center;gap:10px;font-size:.86rem;color:var(--ink-soft)}
+.pwrap .hg{font-size:1.05rem}
+.pbar{height:10px;background:var(--line);border-radius:7px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(43,36,25,.13);max-width:360px}
+.pfill{height:100%;width:0;background:linear-gradient(90deg,var(--terra),var(--ochre) 55%,var(--blue));transition:width .2s linear}
+.pct{font-variant-numeric:tabular-nums;color:var(--ink-faint)}
+
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px var(--terra-tint)}50%{box-shadow:0 0 0 7px rgba(188,98,66,.09)}}
+@keyframes rise{from{transform:translateY(12px)}to{transform:translateY(0)}}
+#stage>.card{animation:rise .42s cubic-bezier(.2,.7,.3,1)}
+
+@media(max-width:899px){
+  .wrap{padding:20px 14px 84px;gap:16px}
+  .wrap.play{grid-template-columns:1fr}
+  .card{padding:18px 17px}
+  .cover{padding:28px 22px 26px}
+  .side{position:static;top:auto}
+  .rankrow .mv button{padding:7px 14px;font-size:1.05rem}
+  button{padding:12px 18px}
+  input[type=text],textarea{font-size:16px}
+  input[type=range]{height:28px}
+  .ftrow{flex-direction:column}
+  .ftrow button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+.proftext::placeholder{color:#9aa8b3;font-style:italic}
+.caveat{font-size:.78rem;line-height:1.55;color:#8a6d3b;background:#fff8ea;border:1px solid #efe1c2;border-radius:8px;padding:7px 10px;margin:.55em 0}
+.fabricnote{font-size:.74rem;font-weight:400;color:#a06a2c}
+.lchecks{text-align:left;max-width:40em;margin:1.4em auto 2em}.lcheck{display:flex;gap:.65em;align-items:flex-start;margin:.55em 0;padding:.72em .9em;font-size:.92rem;line-height:1.6;cursor:pointer;border:1px solid var(--rule,#e3ddd0);border-radius:12px;background:#fff;transition:background .15s ease,border-color .15s ease}.lcheck:hover{border-color:var(--ok,#3f7d5b)}.lcheck:has(input:checked){background:var(--pine-tint,#eef5f0);border-color:var(--ok,#3f7d5b)}.lcheck input{margin-top:.22em;flex:0 0 auto;width:17px;height:17px;cursor:pointer;accent-color:var(--ok,#3f7d5b)}#startBtn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ===== 开场加载动画 · 剧院隐喻(入座→拉幕→推近→灯亮+小人)===== */
+#loadingScene{--ls-cream:#fff8ea;--ls-ink:#3a342c;--ls-pine:#3f7d5b;--ls-amber:#E9B44C;
+  position:fixed;inset:0;z-index:12000;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(18px,3.4vh,40px);
+  background:radial-gradient(120% 95% at 50% 30%,#fffdf6 0%,var(--ls-cream) 58%,#f4ecd8 100%);
+  font-family:"Noto Serif SC",Georgia,"Songti SC",serif;color:var(--ls-ink);overflow:hidden;opacity:1;-webkit-font-smoothing:antialiased}
+#loadingScene.ls-out{opacity:0;transition:opacity .9s ease;pointer-events:none}
+#loadingScene::after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.ls-stagewrap{position:relative;z-index:1;width:min(88vw,640px);aspect-ratio:8/5.6;max-height:64vh;overflow:hidden}
+.ls-scene{width:100%;height:100%;display:block}
+.ls-stroke{fill:none;stroke:var(--ls-ink);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ls-thin{stroke-width:1.6;opacity:.55}
+.ls-fill-cream{fill:var(--ls-cream)}
+.ls-stage{transform-box:view-box;transform-origin:400px 232px;animation:lsZoom 4.4s cubic-bezier(.45,.04,.25,1) 2.5s forwards}
+.ls-light{opacity:0;animation:lsLight 2.4s ease 4.1s forwards}
+.ls-glow{fill:var(--ls-amber)}
+.ls-halo{fill:var(--ls-amber);transform-box:view-box;transform-origin:400px 300px;animation:lsHalo 5s ease-in-out 4.8s infinite}
+.ls-beam{fill:url(#lsBeamGrad);animation:lsBeam 5s ease-in-out 4.8s infinite}
+.ls-floor{stroke:var(--ls-ink);stroke-width:2.4;stroke-linecap:round}
+.ls-actorRise{transform-box:view-box;transform-origin:400px 360px;opacity:0;animation:lsActorRise 2s cubic-bezier(.4,0,.2,1) 5.3s forwards}
+.ls-actor{transform-box:view-box;transform-origin:400px 360px;animation:lsBreath 5.4s ease-in-out 6.6s infinite}
+.ls-actor *{stroke:var(--ls-ink);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ls-curtain{fill:var(--ls-pine);fill-opacity:.16;stroke:var(--ls-pine);stroke-width:2.4}
+.ls-curtainFold{stroke:var(--ls-pine);stroke-width:1.4;opacity:.5;fill:none}
+.ls-cL{transform-box:view-box;transform-origin:140px 232px;animation:lsCurtainL 2.7s cubic-bezier(.5,.02,.2,1) 1.1s forwards}
+.ls-cR{transform-box:view-box;transform-origin:660px 232px;animation:lsCurtainR 2.7s cubic-bezier(.5,.02,.2,1) 1.1s forwards}
+.ls-seats{stroke:var(--ls-ink);fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0;animation:lsSeats 1.3s ease .2s both}
+@keyframes lsSeats{from{opacity:0;transform:translateY(10px)}to{opacity:.88;transform:none}}
+@keyframes lsCurtainL{from{transform:scaleX(1)}to{transform:scaleX(.05)}}
+@keyframes lsCurtainR{from{transform:scaleX(1)}to{transform:scaleX(.05)}}
+@keyframes lsZoom{from{transform:scale(1)}to{transform:scale(1.34) translateY(-16px)}}
+@keyframes lsLight{from{opacity:0}to{opacity:1}}
+@keyframes lsHalo{0%,100%{transform:scale(1);opacity:.34}50%{transform:scale(1.07);opacity:.5}}
+@keyframes lsBeam{0%,100%{opacity:.26}50%{opacity:.4}}
+@keyframes lsActorRise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes lsBreath{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-1.5px) scaleY(1.012)}}
+.ls-caps{position:relative;z-index:1;height:1.8em;width:min(88vw,640px);text-align:center}
+.ls-cap{position:absolute;left:0;right:0;top:0;opacity:0;font-size:clamp(1rem,.7rem+1.5vw,1.3rem);font-weight:500;letter-spacing:.06em;color:#6f6555}
+.ls-cap.c1{animation:lsCap 3s ease .4s both}
+.ls-cap.c2{animation:lsCap 3s ease 3.4s both}
+.ls-cap.c3{animation:lsCapHold 3s ease 6.4s forwards}
+@keyframes lsCap{0%{opacity:0;transform:translateY(7px)}12%,78%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-5px)}}
+@keyframes lsCapHold{0%{opacity:0;transform:translateY(7px)}20%,100%{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){
+  #loadingScene *{animation:none !important}
+  .ls-seats{opacity:.88}.ls-cL{transform:scaleX(.05)}.ls-cR{transform:scaleX(.05)}
+  .ls-light{opacity:1}.ls-actorRise{opacity:1}
+  .ls-cap.c1,.ls-cap.c2{opacity:0}.ls-cap.c3{opacity:1}}
+.elicitbox{background:#f6f3ec;border:1px solid var(--rule,#e3ddd0);border-radius:11px;padding:10px 12px;margin:.6em 0}.elicitq{margin:0 0 .5em;font-size:.95rem;line-height:1.5}.elicitrow{display:flex;gap:.5em;align-items:center}.elicitin{flex:1;min-width:0;padding:7px 10px;border:1.5px solid var(--rule,#e3ddd0);border-radius:9px;font:inherit;box-sizing:border-box}.elmic,.elsend{flex:0 0 auto}
+.reportbox{margin:14px 0;text-align:left}.reportbody h3{font-size:1rem;margin:.9em 0 .3em}.reportbody ul{margin:.3em 0;padding-left:1.3em}.reportbody li{margin:.25em 0}.reportbody p{margin:.45em 0;line-height:1.6}
+.inputnudge{font-size:.82rem;color:#8a7e6b;line-height:1.5;margin:.5em 0}
+.endreminder{font-size:.82rem;color:#8a7e6b;line-height:1.5;margin:.5em 0}
+.revisitcode{margin-top:12px;font-size:.85rem}.revisitcode code{background:#f3efe6;padding:.15em .5em;border-radius:6px;font-size:.95em}
+#chatlog{margin-bottom:.55em}.cmsg{margin:.3em 0;padding:.45em .75em;border-radius:11px;font-size:.92rem;line-height:1.55;max-width:92%;display:block}.cmsg-a{background:#fff;border:1px solid var(--rule,#e3ddd0)}.cmsg-h{background:var(--pine,#3f7d5b);color:#fff;margin-left:auto;text-align:right;width:fit-content}
+:root{--grey:#b7afa1;--green:#3f7d5b;--amber:#E9B44C}
+  .shelf{
+    display:flex;
+    flex-wrap:wrap;
+    gap:clamp(28px,6vw,72px);
+    align-items:flex-start;
+    justify-content:center;
+    max-width:900px;
+  }
+
+  .badge{
+    --accent:var(--green);
+    width:200px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+  }
+
+  /* ---------- medallion ---------- */
+  .medallion{
+    position:relative;
+    width:170px;
+    height:170px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform .35s ease;
+  }
+  .disc{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+  }
+  .icon{
+    position:relative;
+    width:96px;
+    height:96px;
+    z-index:2;
+  }
+
+  /* stroke colors driven by state */
+  .disc .ring,
+  .disc .tick,
+  .icon .stroke{
+    fill:none;
+    stroke:var(--grey);
+    stroke-width:2.2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    transition:stroke .4s ease;
+  }
+  .icon .fill{ fill:var(--grey); transition:fill .4s ease; }
+  .disc .face{ fill:#efe7d6; transition:fill .4s ease; }
+
+  /* ---------- unearned veil ---------- */
+  .lock{
+    position:absolute;
+    z-index:3;
+    bottom:12px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:12px;
+    letter-spacing:.18em;
+    color:var(--grey);
+    background:var(--paper);
+    padding:2px 9px;
+    border:1.5px solid var(--grey);
+    border-radius:999px;
+    opacity:1;
+    transition:opacity .3s ease;
+  }
+  .lock svg{width:11px;height:11px;}
+  .medallion::after{ /* subtle desat haze when locked */
+    content:"";
+    position:absolute;
+    inset:-4px;
+    border-radius:50%;
+    background:rgba(183,175,161,.12);
+    transition:opacity .4s ease;
+    z-index:1;
+  }
+
+  /* ---------- caption ---------- */
+  .caption{margin-top:20px;}
+  .ach-name{
+    font-size:22px;
+    font-weight:900;
+    letter-spacing:.12em;
+    color:var(--grey);
+    transition:color .4s ease;
+  }
+  .ach-desc{
+    margin-top:6px;
+    font-size:13px;
+    font-weight:400;
+    line-height:1.5;
+    color:#9a9183;
+    transition:color .4s ease;
+  }
+
+  /* ---------- EARNED state ---------- */
+  .badge.earned .disc .ring,
+  .badge.earned .disc .tick,
+  .badge.earned .icon .stroke{ stroke:var(--accent); }
+  .badge.earned .icon .fill{ fill:var(--accent); }
+  .badge.earned .disc .face{ fill:#fffdf6; }
+  .badge.earned .ach-name{ color:var(--ink); }
+  .badge.earned .ach-desc{ color:#6d6457; }
+  .badge.earned .lock{ opacity:0; pointer-events:none; }
+  .badge.earned .medallion::after{ opacity:0; }
+
+  /* restrained entrance: gentle pop */
+  @keyframes pop{
+    0%{ transform:scale(.84); }
+    55%{ transform:scale(1.05); }
+    78%{ transform:scale(.985); }
+    100%{ transform:scale(1); }
+  }
+  .badge.earned.celebrate .medallion{ animation:pop .62s cubic-bezier(.34,1.4,.5,1) both; }
+
+  /* restrained shimmer sweep, plays once on earn */
+  .sheen{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    overflow:hidden;
+    z-index:2;
+    pointer-events:none;
+    opacity:0;
+  }
+  .sheen span{
+    position:absolute;
+    top:-40%;
+    left:-60%;
+    width:55%;
+    height:180%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.85),transparent);
+    transform:rotate(18deg);
+  }
+  @keyframes sweep{
+    0%{ opacity:0; }
+    12%{ opacity:1; }
+    100%{ left:120%; opacity:0; }
+  }
+  .badge.earned.celebrate .sheen{ animation:none; }
+  .badge.earned.celebrate .sheen span{ animation:sweep .9s ease-out .12s both; }
+  .badge.earned.celebrate .sheen{ opacity:1; }
+
+  @media (max-width:560px){
+    .shelf{gap:36px;}
+    .badge{width:160px;}
+    .medallion{width:150px;height:150px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .badge.earned.celebrate .medallion{animation:none;}
+    .badge.earned.celebrate .sheen span{animation:none;}
+  }
+
+.shelf{margin:16px 0}
+.portrait-list{max-width:42em;margin:.4em 0 0;padding-left:1.2em;line-height:1.7}.portrait-list li{margin:.35em 0}
+/* ---- 3-page intake + per-page AI chat ---- */
+.iprog{display:flex;gap:8px;justify-content:center;margin:0 0 18px}
+.iprog span{width:30px;height:5px;border-radius:3px;background:var(--line-strong,#ddd);transition:background .2s}
+.iprog span.on{background:var(--terra,#C96442)}
+.ipgttl{font-size:1.25rem;margin:.1em 0 .9em;color:var(--ink)}
+.ipage #alloc,.ipage #quiz{max-width:580px;margin-left:auto;margin-right:auto}
+.inav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:24px}
+.inav .startrow{margin:0}
+.ichat{margin-top:18px;border-top:1px dashed var(--line,#e7ddcb);padding-top:14px}
+.ichat-ttl{font-size:.96rem;font-weight:600;color:var(--ink);margin-bottom:9px}
+.ichat-log{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;max-height:240px;overflow-y:auto}
+.ichat-log:empty{display:none}
+.ic-h{align-self:flex-end;background:var(--ink,#3a342e);color:var(--paper,#fff);padding:7px 12px;border-radius:14px 14px 3px 14px;max-width:85%;font-size:.9rem;line-height:1.5}
+.ic-a{align-self:flex-start;background:var(--paper-2,#f6efe2);padding:7px 12px;border-radius:14px 14px 14px 3px;max-width:85%;font-size:.9rem;line-height:1.55}
+.ic-wait{opacity:.55}
+.ichat-row{display:flex;gap:8px}
+.ichat-in{flex:1;padding:9px 12px;border:1.5px solid var(--line-strong,#ddd);border-radius:10px;font-size:.92rem;font-family:inherit;background:var(--paper,#fff)}
+</style></head><body>
+<div class="wrap" id=wrap>
+  <header id=landing>
+    <div class=topbar><button type=button class=ghost id=langToggle2 onclick="toggleLang()">EN</button></div>
+    <div class="cover card">
+      <p class=kicker>REFLECTIVE&nbsp;&nbsp;EQUILIBRIUM</p>
+      <h1 data-i18n=landingTitle>高考志愿 · 反思均衡</h1>
+      <p class=sub data-i18n=landingIntro>开始之前,请先确认你了解下面这几点。全部勾选后才能开始。</p>
+      <div class=lchecks>
+        <label class=lcheck><input type=checkbox class=lck onchange=updateStartGate()> <span data-i18n=chk1>我明白,这个游戏是用来启发我思考、帮我把自己的选择想得更清楚的。</span></label>
+        <label class=lcheck><input type=checkbox class=lck onchange=updateStartGate()> <span data-i18n=chk2>我明白,这里的数字、就业、薪资、故事等所有具体信息都是 AI 编的,不是事实。</span></label>
+        <label class=lcheck><input type=checkbox class=lck onchange=updateStartGate()> <span data-i18n=chk3>我明白,我不会把这里看到的任何「信息」当真,也不会拿它当决定的依据。</span></label>
+        <label class=lcheck><input type=checkbox class=lck onchange=updateStartGate()> <span data-i18n=chk4>我明白,真正的信息要靠我自己去查招生简章、官方数据、问学长学姐。</span></label>
+      </div>
+      <div class="trail" aria-hidden=true>
+        <span class="tdot cur"></span><span class="tline todo"></span>
+        <span class="tdot todo"></span><span class="tline todo"></span>
+        <span class="tdot todo"></span><span class="tline todo"></span>
+        <span class="tdot todo"></span><span class="tline todo"></span>
+        <span class="tdot todo"></span><span class="tline todo"></span>
+        <span class="tdot todo"></span>
+      </div>
+      <p class=cover-cta><button id=startBtn onclick="startGame()" data-i18n=landingBtn disabled>开始 →</button></p>
+    </div>
+  </header>
+  <section id=intake style="display:none">
+    <div class=topbar><button type=button class=ghost id=langToggle onclick="toggleLang()">EN</button></div>
+    <h1 data-i18n=title>反思均衡 · 志愿推演</h1>
+    <p class=sub data-i18n=sub>我们不替你做决定,只帮你想清楚自己到底想要什么。先给选择排个序,然后一站一站,把你可能没掂量过的因素摆出来。顺序随时能改。</p>
+    <div class=card>
+      <div class="iprog" id=iprog><span class="on"></span><span></span><span></span><span></span></div>
+      <div id=ipage1 class=ipage>
+        <h2 class=ipgttl data-i18n=ip1> </h2>
+      <label data-i18n=q1>① 把你在纠结的 <b>最多 5 个选择</b> 按当前偏好排序(专业@学校,如「临床医学@某985」)</label>
+      <div id=opts></div>
+      <div class="ichat" id=ichat1>
+        <div class="ichat-ttl" data-i18n=ichattl>和 AI 聊一聊你的想法</div>
+        <div class="ichat-log" id=ichatlog1></div>
+        <div class="ichat-row"><input id=ichatin1 class="ichat-in" data-i18n-ph=ichatph placeholder="跟 AI 聊聊这一步…(可选)" onkeydown="if(event.key==='Enter')intakeChat(1)"><button type=button class=ghost onclick="intakeChat(1)" data-i18n=iask>问问</button></div>
+      </div>
+        <div class=inav><span></span><button type=button onclick="igoto(2)" data-i18n=inext>下一步 →</button></div>
+      </div>
+      <div id=ipage2 class=ipage style="display:none">
+        <h2 class=ipgttl data-i18n=ip2> </h2>
+      <label data-i18n=q5>⑤ 一句话介绍你自己 / 你在纠结什么(可选,也可语音)</label>
+      <div class=ftrow>
+        <textarea id=ft0 rows=2 data-i18n-ph=ft0ph placeholder="比如从小喜欢画画,家里希望我读稳定专业,又怕选错后悔"></textarea>
+        <button type=button class=ghost onclick="recVoice(document.getElementById('vst0'),document.getElementById('ft0'),true)" data-i18n=voice>🎙 语音</button>
+      </div>
+      <span id=vst0 class=prog></span>
+      <p class=inputnudge data-i18n=inputNudge>💡 说得越多、越具体,AI 越懂你,模拟出的人生也越贴合你。</p>
+      <hr class=qdiv>
+      <label data-i18n=qmacro>你对未来有什么宏观的思考?(可选)</label>
+      <textarea id=ftmacro rows=2 data-i18n-ph=qmacroph placeholder="比如:我希望生活稳定,但也想做点有意义的事;我不想一辈子困在一个地方…"></textarea>
+      <div class="ichat" id=ichat2>
+        <div class="ichat-ttl" data-i18n=ichattl>和 AI 聊一聊你的想法</div>
+        <div class="ichat-log" id=ichatlog2></div>
+        <div class="ichat-row"><input id=ichatin2 class="ichat-in" data-i18n-ph=ichatph placeholder="跟 AI 聊聊这一步…(可选)" onkeydown="if(event.key==='Enter')intakeChat(2)"><button type=button class=ghost onclick="intakeChat(2)" data-i18n=iask>问问</button></div>
+      </div>
+        <div class=inav><button type=button class=ghost onclick="igoto(1)" data-i18n=iback>← 上一步</button><button type=button onclick="igoto(3)" data-i18n=inext>下一步 →</button></div>
+      </div>
+      <div id=ipage3 class=ipage style="display:none">
+        <h2 class=ipgttl data-i18n=ip3> </h2>
+      <label data-i18n=q3>③ 在这个选择里,这三样各占多重?(拖动两个滑块,合计 100%)</label>
+      <div id=alloc class=alloc><div class=allocbar id=allocbar><div class=seg id=segM></div><div class=seg id=segI></div><div class=seg id=segF></div><div class=handle id=ah1></div><div class=handle id=ah2></div></div><div class=alloclab><span><span data-i18n=money>💰 金钱</span> <b id=pM>34%</b></span><span><span data-i18n=interest>❤️ 兴趣</span> <b id=pI>33%</b></span><span><span data-i18n=influence>📢 影响力</span> <b id=pF>33%</b></span></div></div>
+      <hr class=qdiv>
+      <div id=destbox style="margin:.5em 0"></div>
+      <div class="ichat" id=ichat3>
+        <div class="ichat-ttl" data-i18n=ichattl>和 AI 聊一聊你的想法</div>
+        <div class="ichat-log" id=ichatlog3></div>
+        <div class="ichat-row"><input id=ichatin3 class="ichat-in" data-i18n-ph=ichatph placeholder="跟 AI 聊聊这一步…(可选)" onkeydown="if(event.key==='Enter')intakeChat(3)"><button type=button class=ghost onclick="intakeChat(3)" data-i18n=iask>问问</button></div>
+      </div>
+        <div class=inav><button type=button class=ghost onclick="igoto(2)" data-i18n=iback>← 上一步</button><button type=button onclick="igoto(4)" data-i18n=inext>下一步 →</button></div>
+      </div>
+      <div id=ipage4 class=ipage style="display:none">
+        <h2 class=ipgttl data-i18n=ip4> </h2>
+      <div id=quiz></div>
+      <hr class=qdiv>
+      <label><span data-i18n=q2>② 你现在有多确定第 1 名就是你的理想选择?</span> <span id=cv class=muted>60</span>/100</label>
+      <input type=range id=conf min=0 max=100 value=60 oninput="cv.textContent=this.value">
+      <div class="ichat" id=ichat4>
+        <div class="ichat-ttl" data-i18n=ichattl>和 AI 聊一聊你的想法</div>
+        <div class="ichat-log" id=ichatlog4></div>
+        <div class="ichat-row"><input id=ichatin4 class="ichat-in" data-i18n-ph=ichatph placeholder="跟 AI 聊聊这一步…(可选)" onkeydown="if(event.key==='Enter')intakeChat(4)"><button type=button class=ghost onclick="intakeChat(4)" data-i18n=iask>问问</button></div>
+      </div>
+        <div class=inav><button type=button class=ghost onclick="igoto(3)" data-i18n=iback>← 上一步</button><p class=startrow style="margin:0"><button onclick=startRank() data-i18n=start>开始推演</button> <span id=istat class=prog></span></p></div>
+      </div>
+    </div>
+  </section>
+  <aside id=side class="side card" style="display:none"></aside>
+  <main id=stage style="display:none"></main>
+</div>
+
+<!-- 开场加载动画 · 走进剧场(覆盖 /rank_start 的等待) -->
+<div id="loadingScene" role="status" aria-label="加载中,正在为你展开第一幕" style="display:none">
+  <div class="ls-stagewrap">
+    <svg class="ls-scene" viewBox="0 0 800 560" aria-hidden="true">
+      <defs>
+        <radialGradient id="lsBeamGrad" cx="50%" cy="2%" r="85%">
+          <stop offset="0%" stop-color="#E9B44C" stop-opacity=".55"/>
+          <stop offset="60%" stop-color="#E9B44C" stop-opacity=".12"/>
+          <stop offset="100%" stop-color="#E9B44C" stop-opacity="0"/>
+        </radialGradient>
+        <clipPath id="lsStageClip"><rect x="140" y="70" width="520" height="324" rx="10"/></clipPath>
+      </defs>
+      <g class="ls-stage">
+        <rect class="ls-stroke ls-thin" x="120" y="50" width="560" height="364" rx="16"/>
+        <rect class="ls-stroke ls-fill-cream" x="140" y="70" width="520" height="324" rx="10"/>
+        <g clip-path="url(#lsStageClip)">
+          <g class="ls-light">
+            <polygon class="ls-beam" points="400,72 318,392 482,392"/>
+            <ellipse class="ls-halo" cx="400" cy="316" rx="150" ry="118"/>
+            <rect class="ls-glow" x="158" y="86" width="484" height="220" rx="6" opacity=".18"/>
+          </g>
+          <line class="ls-floor" x1="172" y1="368" x2="628" y2="368"/>
+          <line class="ls-stroke ls-thin" x1="196" y1="384" x2="604" y2="384"/>
+          <g class="ls-actorRise"><g class="ls-actor">
+            <circle cx="400" cy="296" r="13"/>
+            <path d="M400 309 V352"/>
+            <path d="M400 318 L379 336 M400 318 L421 336"/>
+            <path d="M400 352 L385 368 M400 352 L415 368"/>
+          </g></g>
+        </g>
+        <g class="ls-curtains">
+          <g class="ls-cL">
+            <rect class="ls-curtain" x="140" y="70" width="262" height="324" rx="6"/>
+            <path class="ls-curtainFold" d="M178 74 V390 M216 74 V390 M254 74 V390 M292 74 V390 M330 74 V390 M368 74 V390"/>
+          </g>
+          <g class="ls-cR">
+            <rect class="ls-curtain" x="398" y="70" width="262" height="324" rx="6"/>
+            <path class="ls-curtainFold" d="M432 74 V390 M470 74 V390 M508 74 V390 M546 74 V390 M584 74 V390 M622 74 V390"/>
+          </g>
+        </g>
+        <path class="ls-curtain" d="M132 60 H668 V92 Q610 116 552 92 Q494 116 436 92 Q400 110 364 92 Q306 116 248 92 Q190 116 132 92 Z"/>
+      </g>
+      <g class="ls-seats"></g>
+    </svg>
+  </div>
+  <div class="ls-caps" aria-hidden="true">
+    <span class="ls-cap c1">正在读你写下的东西…</span>
+    <span class="ls-cap c2">正在拼出你的人物画像…</span>
+    <span class="ls-cap c3">正在为你展开第一幕…</span>
+  </div>
+</div>
+<script>
+(function(){
+  var seats=document.querySelector('#loadingScene .ls-seats');
+  if(seats){
+    function arch(x,y,w,h,sw){
+      return '<path stroke-width="'+sw+'" d="M'+x+' '+y+' q'+(w/2)+' '+(-h)+' '+w+' 0"/>'
+           + '<path stroke-width="'+sw+'" d="M'+x+' '+y+' v18 M'+(x+w)+' '+y+' v18"/>';}
+    var s='',x=36;
+    for(var i=0;i<7;i++){ s+=arch(x,474,104,22,2.0); x+=104; }
+    var bx=-30;
+    for(var j=0;j<7;j++){ s+=arch(bx,526,132,30,2.6); bx+=132; }
+    seats.innerHTML=s;
+  }
+  var MIN_MS=6900, FADE_MS=900;
+  window.showLoading=function(){var o=document.getElementById('loadingScene');if(!o)return;
+    o.__done=false;o.__t0=Date.now();o.classList.remove('ls-out');o.style.display='flex';};
+  window.finishLoading=function(cb){var o=document.getElementById('loadingScene');
+    if(!o||o.__done)return;o.__done=true;
+    var wait=Math.max(0,MIN_MS-(Date.now()-(o.__t0||Date.now())));
+    setTimeout(function(){o.classList.add('ls-out');
+      setTimeout(function(){o.style.display='none';if(typeof cb==='function')cb();},FADE_MS);},wait);};
+  window.hideLoading=function(){var o=document.getElementById('loadingScene');if(!o)return;
+    o.__done=true;o.classList.remove('ls-out');o.style.display='none';};
+})();
+</script>
+<script>
+/* ============================================================================
+   PREVIEW / OFFLINE MOCK. Stays inert when the real Python backend is present.
+   Whenever a real endpoint answers with JSON, that answer is used as-is. This
+   only fills in sample data when the request fails, like opening the file with
+   no server, so the design renders live in preview. Safe to delete in production.
+   ============================================================================ */
+(function(){
+  const realFetch=window.fetch.bind(window);
+  const MOCK_ON=/[?&](mock|preview)=1/.test(location.search);  // mock only in explicit preview; prod = always real, real errors surface
+  const APP=/\/(rank_quiz|rank_start|rank_next|rank_reorder|rank_profile|rank_translate|rank_frametest|rank_feedback|rank_replay|rank_end|resolve_options|voice_profile|intake_chat)(\?|$)/;
+  const J=o=>new Response(JSON.stringify(o),{status:200,headers:{'Content-Type':'application/json'}});
+  const M={opts:[],order:[],stage:0,cap:7};
+  const QUIZ=[
+    {id:"image",q:"毕业五年后,你最希望别人怎么形容你?",q_en:"Five years after graduation, how would you most want to be described?",options:["靠谱、稳定、让人安心","有想法、敢闯、走自己的路","专业、厉害、做得很深"],options_en:["Reliable, stable, reassuring","Original, bold, forging my own path","Expert, impressive, deeply skilled"]},
+    {id:"object",q:"你更喜欢和什么打交道?",q_en:"What do you most like working with?",options:["人,沟通、合作、影响他人","事和物,系统、技术、把东西做出来","想法,理论、研究、把问题想透"],options_en:["People, communicating, collaborating, influencing","Things and systems, tech, building things","Ideas, theory, research, thinking problems through"]},
+    {id:"risk",q:"关于风险,你更接近哪个?",q_en:"On risk, which is closer to you?",options:["宁可稳一点,不想赌","愿意为更大的可能去冒险"],options_en:["I'd rather play it safe","I'll take risks for a bigger upside"]},
+    {id:"authority",q:"当你的选择和父母/老师不一致?",q_en:"When your choice differs from your parents / teachers?",options:["他们经验多,我会很重视他们的意见","听一听,但最终按我自己的判断来"],options_en:["They have experience; I weigh their views heavily","I'll listen, but decide for myself in the end"]},
+    {id:"satisfy",q:"下面哪种更让你满足?",q_en:"Which is more satisfying to you?",options:["把一件难事做到极致","结果达成、目标实现","实实在在帮到了具体的人"],options_en:["Mastering one hard thing to the extreme","Achieving the goal, getting results","Genuinely helping real people"]}
+  ];
+  const DESTS=[
+    {key:"保研",key_en:"Grad school (recommended)",desc:"免试推荐读研，看重绩点与科研",desc_en:"Recommended to grad school (no exam); GPA & research matter"},
+    {key:"考研",key_en:"Grad school (exam)",desc:"考试升学，深造换平台/换方向",desc_en:"Grad school via entrance exam; switch tier/direction"},
+    {key:"出国留学",key_en:"Study abroad",desc:"申请海外院校，看重语言/科研/资金",desc_en:"Apply abroad; language / research / funding matter"},
+    {key:"就业",key_en:"Employment",desc:"本科毕业直接工作，看重实习与行业",desc_en:"Work right after the bachelor's; internships & industry"},
+    {key:"考公考编",key_en:"Civil / public sector",desc:"公务员/事业编/教师编，看重稳定",desc_en:"Civil service / public institution / teacher posts; stability"},
+    {key:"创业",key_en:"Startup / early-stage",desc:"自己做事/加入早期团队，看重机会与风险",desc_en:"Own venture / early-stage team; opportunity & risk"}
+  ];
+  const FACTORS=[
+    {label:"转专业这道门",q:"进去之后，还能不能换到你真正想读的方向？",
+      prose:(t,c)=>`你以「${t}」走进大学。开学第一周就去打听转专业，名额按绩点排，全院只放出前 5%，而你想转的那个热门方向，报名的人是名额的十几倍。`,
+      top:t=>`光环和平台都在，但"换一个方向"这件事，可能要用四年去够。`,con:c=>`一进门就是想读的，省去了这场内耗；要权衡的是另一些代价。`,src:["各校转专业实施办法","录取位次库"]},
+    {label:"第一学历的隐形门槛",q:"几年后找工作、考研时，本科出身会被怎么看？",
+      prose:(t,c)=>`时间快进到大四秋招。简历投出去，HR 先扫的那一栏常常是"本科院校"。同样的能力，「${t}」和「${c}」会被分进不同的简历堆。`,
+      top:t=>`牌子帮你过第一道筛，也容易让人只看牌子、忽略你本人。`,con:c=>`出身这关要多费力气证明自己，过了之后反而走得踏实。`,src:["头部企业校招名单","推免数据"]},
+    {label:"保研这条窄路",q:"想继续深造，这条路给你留了多大的口子？",
+      prose:(t,c)=>`大三你才发现，身边一半人都在卷保研。「${t}」的保研率和名额，直接决定了你要把绩点逼到多高才算安全。`,
+      top:t=>`平台高、推免名额多，但庙大和尚也多，竞争一点不轻松。`,con:c=>`名额相对宽，做"鸡头"更容易冒头，代价是平台天花板低一些。`,src:["各校推免比例","升学质量报告"]},
+    {label:"城市决定了视野半径",q:"学校所在的城市，会给你多少机会、又拿走什么？",
+      prose:(t,c)=>`大二暑假，你想找一份像样的实习。城市不同，机会的密度天差地别。一线城市里，大厂的门就在地铁沿线；偏远些的地方，一次面试可能要跨省、烧钱、请假。`,
+      top:t=>`机会多、眼界开，但落不下户、可能一直漂着。`,con:c=>`安稳、离家近，代价是信息相对闭塞、好机会要自己挤出去。`,src:["毕业生就业地流向","实习岗位分布"]},
+    {label:"课程强度与那个深夜",q:"真正读起来，它会不会把你压垮？",
+      prose:(t,c)=>`选课系统打开的那一刻你才意识到，「${t}」的培养方案里堆着高数、专业核心课和做不完的项目。喜欢，能不能扛过一次次接近挂科的深夜？`,
+      top:t=>`难，但每一关都在长真本事；扛过去，含金量就在那里。`,con:c=>`轻松些、空间大，要小心四年下来"什么都学了一点"。`,src:["专业培养方案","挂科率匿名调查"]},
+    {label:"行业的周期",q:"等你毕业那年，这个方向是在风口还是退潮？",
+      prose:(t,c)=>`四年是一个不短的周期。今天最热的赛道，毕业时可能正在裁员；今天冷门的方向，也许悄悄回暖。「${t}」押的是哪一边？`,
+      top:t=>`眼下热、起薪高，但越热的赛道越容易在你毕业时降温。`,con:c=>`眼下平淡，胜在稳定、波动小，不太会被周期一把掀翻。`,src:["行业景气与薪资曲线","招聘需求趋势"]},
+    {label:"那句「意难平」",q:"很多年以后回望，你会为哪一个留下遗憾？",
+      prose:(t,c)=>`夜深时人最诚实。如果选了「${t}」，某个加班很晚的晚上，你会不会想起「${c}」？反过来又如何？这一站，我们把两种"如果当初"都摆到桌面上。`,
+      top:t=>`选它，你大概率不会怪自己"没敢"，但要接受它平淡的部分。`,con:c=>`选它，你保住了那点不甘心，代价是要直面它现实的难。`,src:["往届毕业生回访","后悔度匿名问卷"]}
+  ];
+  const order=()=>M.order.length?M.order:(M.opts.length?M.opts:["你的首选","次选"]);
+  function stage(n){const o=order();const f=FACTORS[(n-1)%FACTORS.length];
+    return {stage:n,cap:M.cap,order:o.slice(),last:n>=M.cap,factor:{label:f.label},question:f.q,
+      prose:f.prose(o[0],o[1]||"另一个选择"),top:o[0],top_take:f.top(o[0]),contender:o[1]||"另一个选择",contender_take:f.con(o[1]||"另一个选择"),sources:f.src};}
+  function ending(){const o=order();
+    return {final_order:o.slice(),options:o.slice(),scenes_visited:FACTORS.slice(0,M.cap).map(f=>f.label),
+      portrait:"你想把一件事做深，也在意它能不能换来稳稳的生活；你愿意听取意见，但最后想自己拍板",
+      checklist:["这条路最坏的情况，你设想过、并且能接受吗？","你要的是这个选择本身，还是它带来的身份与评价？","如果没有人会知道你的选择，你还会这么选吗？","除了那些高光时刻，它平淡的日常，你也愿意过吗？","几年后若结果不如意，你会后悔，还是觉得「当时我想清楚了」？"]};}
+  function frames(){const t=order()[0];return [
+    {pitch:`"别犯傻了，「${t}」听着就不稳，那种专业出来能干嘛？"`,frame:"稳妥/从众",bias:"损失厌恶"},
+    {pitch:`"我表哥当年也这么选，现在月入好几万，你看，没问题的。"`,frame:"个例佐证",bias:"幸存者偏差"},
+    {pitch:`"现在不冲一把，过了这个村就没这个店了，机会就这一次。"`,frame:"紧迫/稀缺",bias:"稀缺错觉"}];}
+  window.fetch=async function(input,init){
+    const url=(typeof input==='string'?input:(input&&input.url)||'');
+    if(!APP.test(url) || !MOCK_ON) return realFetch(input,init);  // prod: no fake-data fallback
+    try{const r=await realFetch(input,init);const ct=(r.headers.get('content-type')||'');if(r.ok&&ct.indexOf('json')>=0) return r;}catch(e){}
+    let body={};try{body=init&&init.body?JSON.parse(init.body):{};}catch(e){}
+    if(/rank_quiz/.test(url)) return J({quiz:QUIZ,destinations:DESTS});
+    if(/resolve_options/.test(url)) return J({results:(body.options||[]).map(o=>({status:'ok',canonical:o}))});
+    if(/rank_start/.test(url)){M.opts=(body.options||[]).map(o=>o.label);M.order=M.opts.slice();M.stage=1;M.cap=7;
+      return J({sid:'mock-'+Date.now(),narrative:"（示例画像）你从小就着迷于「做出点东西」，家里更希望你求稳；你怕选错，又不甘心将就。这是 AI 读完你输入后对你的理解，随时可以改，改完后面每一站都按新版本走。",stage:stage(1)});}
+    if(/rank_reorder/.test(url)){M.order=(body.order||M.order).slice();return J({order:M.order.slice(),top:M.order[0]||''});}
+    if(/rank_replay/.test(url)){M.stage=1;M.cap=M.cap||7;return J({stage:stage(1),confidence_initial:CONF0});}
+    if(/rank_profile/.test(url)) return J({ok:true,profile:body.narrative||body.free_text||''});
+    if(/rank_next/.test(url)){if(body.end) return J({phase:'ending',ending:ending()});M.stage++;if(M.stage>M.cap) return J({phase:'ending',ending:ending()});return J({stage:stage(M.stage)});}
+    if(/rank_translate/.test(url)){const t=order()[0];return J({official:`「${t}」在招生简章里通常写着"宽口径、厚基础、复合型人才培养"，课程涵盖核心理论与实践环节，毕业去向"多元"。`,plain:`翻译成人话，前两年基础课很重，方向要到大二大三才分得清；说"去向多元"，往往是没有特别对口的单一出口，得靠自己找准发力点。`,hidden:["真正决定就业的，往往是细分方向和实习，而不是专业名字本身。","同名专业在不同学校，培养重心可能完全不同。"]});}
+    if(/rank_frametest/.test(url)) return J({top:order()[0],frames:frames()});
+    if(/rank_feedback/.test(url)) return J({ok:true});
+    if(/rank_end/.test(url)) return J({ending:ending()});
+    if(/intake_chat/.test(url)){return J({reply:(LANG==="en"?"(demo) What draws you to that one?":"(示例)你更被它哪一点吸引呢?")});}
+    if(/voice_profile/.test(url)){const fast=/fast=1/.test(url);return fast?J({transcript:"（示例转写）我从小就喜欢自己捣鼓东西，但家里希望我读个稳定的专业……"}):J({transcript:"（示例转写）我从小就喜欢自己捣鼓东西。",summary:"喜欢动手创造，家里偏向稳定，担心选错。",tags:["创造","求稳的家庭","怕后悔"],justifications:[],sliders:{},sid:'mockv'});}
+    return J({error:'mock: unhandled '+url});
+  };
+})();
+
+let NARR='';let SID=null, ORDER=[], CAP=7, CONF0=60, STAGE_CONF=60, _stageT=0, LAST=false, QUIZ=[], FR=[], FREE_TEXT='', MR=null, CHUNKS=[], DESTS=[], DEST_ORDER=[], DEST_OTHER='', ALLOC=[34,33,33];
+let LANG=(localStorage.getItem('rg_lang')||'cn');
+const T={
+ cn:{title:"反思均衡 · 志愿推演",
+  sub:"我们不替你做决定,只帮你想清楚自己到底想要什么。先给选择排个序,然后一站一站,把你可能没掂量过的因素摆出来。顺序随时能改。",
+  landingTitle:"高考志愿 · 反思均衡",landingBody:"欢迎。这里没有标准答案,也不替你查分数、报数据。你心里大概已经有几个想去的方向,这个小游戏会陪你把它们放进几段可能的生活里走一走,看看哪儿让你心动,哪儿让你犹豫。要记住,这里讲的所有东西都不是真的,数字、故事、分析全是 AI 编来帮你思考的,别把任何一条当成事实。真正的信息,得你自己去翻招生简章、问学长学姐、亲自查。等你想明白了,这个选择才真的是你的。",landingBtn:"开始 →",landingIntro:"开始之前,请先确认你了解下面这几点。全部勾选后才能开始。",chk1:"我明白,这个游戏是用来启发我思考、帮我把自己的选择想得更清楚的。",chk2:"我明白,这里的数字、就业、薪资、故事等所有具体信息都是 AI 编的,不是事实。",chk3:"我明白,我不会把这里看到的任何「信息」当真,也不会拿它当决定的依据。",chk4:"我明白,真正的信息要靠我自己去查招生简章、官方数据、问学长学姐。",caveatApp:"⚠️ 先说最重要的。这个 App 里所有具体信息,数字、薪资、就业、课程、政策、人物、故事,全都是 AI 编的,不是真的。请把它们当虚构,任何一条都别当事实,也别拿来当决定的依据。它唯一的用处是引你去想。真要查证,只信招生简章、官方数据,以及你自己核实过的来源。",inputNudge:"💡 说得越多、越具体,AI 越懂你,模拟出的人生也越贴合你。",endReminder:"💭 想清楚了、觉得已经达到自己的反思均衡,就随时点「结束并反思」。",caveatScene:"⚠️ 这一段里的人物、数字、情节都是 AI 戏剧化后的产物,不是真事,也不代表你在大学中一定会有这样的经历。只把它当成引你思考的素材,里面任何「信息」都别当真。",caveatOfficial:"⚠️ 这不是真的招生简章,是 AI 仿写的,可能完全不对。别把它当学校的真实信息,一切以学校官方发布的为准。",fabric:"(以下分析纯属 AI 虚构,别当真)",
+  q1:"① 把你在纠结的 <b>最多 5 个选择</b> 按当前偏好排序(专业@学校,如「临床医学@某985」)",
+  q2:"② 你现在有多确定第 1 名就是你的理想选择?",
+  q3:"③ 在这个选择里,这三样各占多重?(拖动两个滑块,合计 100%)",
+  q5:"⑤ 你最纠结的是什么?换个角度也行,假如你选定了其中一个,另一个里最让你放不下的会是什么?把心里最真实的想法说出来,这样我们的 AI 才能更好地陪你想清楚这个决定。(可选,可打字或语音)",
+  quizHdr:"③ 几个小问题,帮我更懂你(用于让场景与你相关,不会评判对错)",
+  destHdr:"④ 你更想要哪种<b>毕业去向</b>?按想要程度<b>点选排序</b>(可多选;再点一次取消)",
+  destOther:"其他",destOtherPh:"填写你的方向…",
+  oMajor:"第 {n} 选择",oNote:"你怎么看这个专业?(可选)",micTitle:"语音输入,说说你怎么看这个专业",
+  ft0ph:"比如从小喜欢画画,家里希望我读稳定专业,又怕选错后悔",
+  voice:"🎙 语音",start:"开始推演",ip1:"专业选择",ip2:"你的纠结 · 对未来的思考",ip3:"你看重什么",ip4:"更懂你一点",qmacro:"你对未来有什么宏观的思考?(可选)",qmacroph:"比如:我希望生活稳定,但也想做点有意义的事;我不想一辈子困在一个地方…",inext:"下一步 \u2192",iback:"\u2190 上一步",iask:"问问",ichattl:"和 AI 聊一聊你的想法",ichatph:"跟 AI 聊聊这一步…(可选)",money:"💰 金钱",interest:"❤️ 兴趣",influence:"📢 影响力",
+  need2:"至少填 2 个选择",building:"正在为你展开第一站,请稍等…",checking:"正在核对专业 / 学校…",endBtn:"结束并反思 →",softEnd:"你已经看了足够多了。如果觉得已经看清自己更想要什么,随时可以结束,去好好想想你的决定。"},
+ en:{title:"Reflective Equilibrium · Major-Choice Playthrough",
+  sub:"We won't tell you what to pick. We help you work out what you actually want. Rank your options first, then we walk you through the factors you may not have weighed, one station at a time. Reorder them anytime.",
+  landingTitle:"高考志愿 · Reflective Equilibrium",landingBody:"Welcome. There are no right answers here, and we will not look up scores or data for you. You probably already have a few directions in mind. This small game walks them through a few possible lives with you, so you can notice what pulls you in and what makes you pause. Keep in mind that nothing said here is real. The numbers, the stories, the analysis are all invented by AI to help you think, so do not take any of it as fact. For the real information you have to read the official brochures, ask people who study there, and check it yourself. Once you have thought it through, the choice is really yours.",landingBtn:"Start →",landingIntro:"Before you start, please confirm you understand the points below. You must check all of them to begin.",chk1:"I understand this game is here to spark my thinking and help me see my own choice more clearly.",chk2:"I understand that all the specifics here (numbers, jobs, salaries, stories) are made up by AI and are not facts.",chk3:"I understand that I will not treat any information here as true or use it as a basis for my decision.",chk4:"I understand that for the real information I have to check official brochures and data and ask people myself.",caveatApp:"⚠️ Read this first. Everything specific in this app, the numbers, salaries, job prospects, courses, policies, people and stories, is made up by AI and is not real. Treat all of it as fiction. Do not take any of it as fact and do not base a decision on it. Its only use is to get you thinking. To verify anything, trust only the official brochures, official data, and sources you have checked yourself.",inputNudge:"💡 The more — and more concretely — you share, the better the AI understands you, and the better-fitted your simulated lives.",endReminder:"💭 Once you feel you've thought it through and reached your own reflective equilibrium, you can end & reflect anytime.",caveatScene:"⚠️ The people, numbers and events in this scene are dramatized by AI — not real, and not a sign you would necessarily have such an experience in college. Treat it only as material to think with, and do not believe any of the information in it.",caveatOfficial:"⚠️ This is not a real admissions brochure. It is an AI imitation and may be completely wrong. Do not treat it as the school\u0027s real information. Go only by what the school officially publishes.",fabric:"(the analysis below is pure AI invention, do not believe it)",
+  q1:"① Rank the <b>up to 5 options</b> you're torn between, by current preference (major@school, e.g. 'Clinical Medicine@a 985 univ')",
+  q2:"② How sure are you that #1 is really your ideal choice?",
+  q3:"③ In this choice, how much does each of these weigh? (drag the two handles; sums to 100%)",
+  q5:"⑤ What are you most torn about? Or picture this. You've picked one option, so what in the other one would you least be able to let go of? Tell us how you really feel, so our AI can help you think it through. (optional · type or 🎙)",
+  quizHdr:"③ A few quick questions so we understand you better (they make the scenes fit you, with no right or wrong)",
+  destHdr:"④ Which <b>post-grad path</b> do you want more? <b>Tap to rank</b> (multi-select; tap again to deselect)",
+  destOther:"Other",destOtherPh:"Type your own…",
+  oMajor:"Choice #{n}",oNote:"What do you think of this major? (optional)",micTitle:"Voice. Say what you think of this major",
+  ft0ph:"e.g. loved drawing since childhood; family wants a stable major; afraid of choosing wrong",
+  voice:"🎙 Voice",start:"Start",ip1:"Your choices",ip2:"Your dilemma & the bigger picture",ip3:"What you value",ip4:"A bit more about you",qmacro:"Any big-picture thoughts about your future? (optional)",qmacroph:"e.g. I want a stable life but also to do something meaningful; I do not want to be stuck in one place…",inext:"Next \u2192",iback:"\u2190 Back",iask:"Ask",ichattl:"Chat with the AI about your thoughts",ichatph:"Chat with the AI about this step (optional)",money:"💰 Money",interest:"❤️ Interest",influence:"📢 Influence",
+  need2:"Fill at least 2 choices",building:"Opening your first station, just a moment…",checking:"Checking majors / schools…",endBtn:"End and reflect →",softEnd:"You've seen enough now. If you feel you know what you want, you can end anytime and sit with your decision."}
+};
+function tr(k){return (T[LANG]&&T[LANG][k]!=null)?T[LANG][k]:(T.cn[k]!=null?T.cn[k]:k);}
+function applyLang(){
+  document.documentElement.lang=(LANG==='en'?'en':'zh-CN');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.innerHTML=tr(el.getAttribute('data-i18n'));});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{el.placeholder=tr(el.getAttribute('data-i18n-ph'));});
+  const _ltt=(LANG==='en'?'中文':'EN');['langToggle','langToggle2'].forEach(id=>{const lt=document.getElementById(id); if(lt) lt.textContent=_ltt;});
+  for(let i=0;i<5;i++){const o=document.getElementById('o'+i),n=document.getElementById('n'+i),mb=document.querySelector(`#o${i}~button.omic`);
+    if(o)o.placeholder=tr('oMajor').replace('{n}',i+1); if(n)n.placeholder=tr('oNote'); if(mb)mb.title=tr('micTitle');}
+  if(QUIZ.length) renderQuiz();
+  if(DESTS.length) renderDest();
+}
+function toggleLang(){LANG=(LANG==='en'?'cn':'en');localStorage.setItem('rg_lang',LANG);applyLang();}
+function updateStartGate(){const a=[...document.querySelectorAll('#landing .lck')];const b=document.getElementById('startBtn');if(b)b.disabled=!(a.length&&a.every(c=>c.checked));}
+function startGame(){const a=[...document.querySelectorAll('#landing .lck')];if(a.length&&!a.every(c=>c.checked))return;document.getElementById('landing').style.display='none';document.getElementById('intake').style.display='';}
+function igoto(n){for(let k=1;k<=4;k++){const pg=document.getElementById('ipage'+k);if(pg)pg.style.display=(k===n)?'':'none';}const pr=document.getElementById('iprog');if(pr){[...pr.children].forEach((c,idx)=>c.className=(idx<n)?'on':'');}window.scrollTo({top:0,behavior:'smooth'});}
+function collectIntakeState(){const opts=[];for(let i=0;i<5;i++){const e=document.getElementById('o'+i);if(e&&e.value.trim())opts.push(e.value.trim());}const st={candidates:opts};const ft=document.getElementById('ft0');let _f=ft&&ft.value.trim()?ft.value.trim():'';const _mc=document.getElementById('ftmacro');if(_mc&&_mc.value.trim())_f=(_f?_f+'\n':'')+'【宏观】'+_mc.value.trim();if(_f)st.free_text=_f;try{st.confidence=+document.getElementById('conf').value;}catch(e){}try{st.value_weights={money:ALLOC[0],interest:ALLOC[1],influence:ALLOC[2]};}catch(e){}try{if(DEST_ORDER&&DEST_ORDER.length)st.destination_pref=DEST_ORDER.slice();}catch(e){}return st;}
+const _IHIST={1:[],2:[],3:[],4:[]};const _ICAP=6;
+async function intakeChat(n){const inp=document.getElementById('ichatin'+n),log=document.getElementById('ichatlog'+n);if(!inp||!log)return;const msg=inp.value.trim();if(!msg)return;if(_IHIST[n].filter(h=>h[0]==='h').length>=_ICAP){log.insertAdjacentHTML('beforeend','<div class="ic-a">'+(LANG==='en'?'(enough for this step)':'(这一步聊得差不多啦,去下一步吧)')+'</div>');log.scrollTop=log.scrollHeight;return;}inp.value='';_IHIST[n].push(['h',msg]);log.insertAdjacentHTML('beforeend','<div class="ic-h">'+msg.replace(/[<>]/g,'')+'</div>');const wait=document.createElement('div');wait.className='ic-a ic-wait';wait.textContent='…';log.appendChild(wait);log.scrollTop=log.scrollHeight;try{const r=await fetch('/intake_chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,page:String(n),state:collectIntakeState(),history:_IHIST[n],lang:LANG})});const d=await r.json();wait.remove();const reply=((d.reply||'').replace(/[<>]/g,''))||(LANG==='en'?'(no reply, try again)':'(没回应,稍后再试)');_IHIST[n].push(['a',reply]);log.insertAdjacentHTML('beforeend','<div class="ic-a">\u{1F4AC} '+reply+'</div>');}catch(e){wait.remove();log.insertAdjacentHTML('beforeend','<div class="ic-a">'+(LANG==='en'?'(chat unavailable)':'(对话暂时连不上)')+'</div>');}log.scrollTop=log.scrollHeight;}
+const oc=document.getElementById('opts');
+for(let i=0;i<5;i++) oc.insertAdjacentHTML('beforeend',`<div class=orow><span class=onum>${i+1}</span><input type=text id=o${i} class=omajor placeholder="${tr('oMajor').replace('{n}',i+1)}"><input type=text id=n${i} class=onote placeholder="${tr('oNote')}"><button type=button class="ghost omic" title="${tr('micTitle')}" onclick="recVoice(document.getElementById('vn${i}'),document.getElementById('n${i}'),true)">🎙</button><span id=vn${i} class=prog></span></div>`);
+(function setupAlloc(){let t1=34,t2=67;const bar=document.getElementById('allocbar');if(!bar)return;
+ function rnd(){document.getElementById('segM').style.width=t1+'%';document.getElementById('segI').style.width=(t2-t1)+'%';document.getElementById('segF').style.width=(100-t2)+'%';
+  document.getElementById('ah1').style.left=t1+'%';document.getElementById('ah2').style.left=t2+'%';
+  const M=Math.round(t1),I=Math.round(t2-t1),F=100-M-I;document.getElementById('pM').textContent=M+'%';document.getElementById('pI').textContent=I+'%';document.getElementById('pF').textContent=F+'%';ALLOC=[M,I,F];}
+ function drag(h,which){h.addEventListener('pointerdown',e=>{e.preventDefault();
+   const move=ev=>{const r=bar.getBoundingClientRect();let p=Math.max(0,Math.min(100,(ev.clientX-r.left)/r.width*100));
+     if(which===1)t1=Math.max(5,Math.min(p,t2-5));else t2=Math.min(95,Math.max(p,t1+5));rnd();};
+   const up=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);};
+   document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);});}
+ drag(document.getElementById('ah1'),1);drag(document.getElementById('ah2'),2);rnd();})();
+let QALLOC={};
+function makeAlloc(host,key,labels){const id=key;
+ host.innerHTML=`<div class=allocbar id=bar_${id}><div class=seg style="background:#C99B43;border-radius:9px 0 0 9px" id=s0_${id}></div><div class=seg style="background:#7E9E6B" id=s1_${id}></div><div class=seg style="background:#6E8AAB;border-radius:0 9px 9px 0" id=s2_${id}></div><div class=handle id=g1_${id}></div><div class=handle id=g2_${id}></div></div><div class=alloclab><span>${labels[0]} <b id=p0_${id}>34%</b></span><span>${labels[1]} <b id=p1_${id}>33%</b></span><span>${labels[2]} <b id=p2_${id}>33%</b></span></div>`;
+ let t1=34,t2=67;const bar=document.getElementById('bar_'+id);
+ function rnd(){document.getElementById('s0_'+id).style.width=t1+'%';document.getElementById('s1_'+id).style.width=(t2-t1)+'%';document.getElementById('s2_'+id).style.width=(100-t2)+'%';
+  document.getElementById('g1_'+id).style.left=t1+'%';document.getElementById('g2_'+id).style.left=t2+'%';
+  const a=Math.round(t1),b=Math.round(t2-t1),c=100-a-b;document.getElementById('p0_'+id).textContent=a+'%';document.getElementById('p1_'+id).textContent=b+'%';document.getElementById('p2_'+id).textContent=c+'%';QALLOC[id]=[a,b,c];}
+ function drag(h,which){h.addEventListener('pointerdown',e=>{e.preventDefault();
+   const move=ev=>{const r=bar.getBoundingClientRect();let q=Math.max(0,Math.min(100,(ev.clientX-r.left)/r.width*100));if(which===1)t1=Math.max(5,Math.min(q,t2-5));else t2=Math.min(95,Math.max(q,t1+5));rnd();};
+   const up=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);};
+   document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);});}
+ drag(document.getElementById('g1_'+id),1);drag(document.getElementById('g2_'+id),2);rnd();}
+function makeBinary(host,key,labels){const id=key;
+ host.innerHTML=`<div class=allocbar id=bar_${id}><div class=seg style="background:#C99B43;border-radius:9px 0 0 9px" id=s0_${id}></div><div class=seg style="background:#6E8AAB;border-radius:0 9px 9px 0" id=s1_${id}></div><div class=handle id=g1_${id}></div></div><div class=alloclab><span>${labels[0]} <b id=p0_${id}>50%</b></span><span>${labels[1]} <b id=p1_${id}>50%</b></span></div>`;
+ let t=50;const bar=document.getElementById('bar_'+id);
+ function rnd(){document.getElementById('s0_'+id).style.width=t+'%';document.getElementById('s1_'+id).style.width=(100-t)+'%';document.getElementById('g1_'+id).style.left=t+'%';
+  const a=Math.round(t),b=100-a;document.getElementById('p0_'+id).textContent=a+'%';document.getElementById('p1_'+id).textContent=b+'%';QALLOC[id]=[a,b];}
+ function drag(h){h.addEventListener('pointerdown',e=>{e.preventDefault();
+   const move=ev=>{const r=bar.getBoundingClientRect();t=Math.max(0,Math.min(100,(ev.clientX-r.left)/r.width*100));rnd();};
+   const up=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);};
+   document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);});}
+ drag(document.getElementById('g1_'+id));rnd();}
+fetch('/rank_quiz').then(r=>r.json()).then(q=>{QUIZ=q.quiz||[];DESTS=q.destinations||[];renderQuiz();renderDest();});
+applyLang();
+(function(){var rk=(location.search.match(/[?&]run=([a-zA-Z0-9]+)/)||[])[1]; if(!rk)return;
+  var L=document.getElementById('landing'); if(L)L.style.display='none';
+  var stg=document.getElementById('stage'); stg.style.display='block';
+  stg.innerHTML='<div class=card style="text-align:center"><span class=prog>'+(LANG==='en'?'loading your run…':'正在载入你的存档…')+'</span></div>';
+  fetch('/rank_revisit?key='+encodeURIComponent(rk)).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.end){renderRevisit(d);} else {stg.innerHTML='<div class=card>'+(LANG==='en'?'No saved ending for this code — only runs played through to the end can be revisited.':'没找到这局的结尾 —— 只有完整玩到结尾的局才能凭码回看。')+' <a href="/">'+(LANG==='en'?'Start new':'开始新的一局')+'</a></div>';}
+  }).catch(function(){stg.innerHTML='<div class=card>'+(LANG==='en'?'Failed to load.':'载入失败。')+' <a href="/">'+(LANG==='en'?'Start new':'开始新的一局')+'</a></div>';});
+})();
+function renderQuiz(){
+  const qd=document.getElementById('quiz'); if(!qd||!QUIZ.length)return; qd.innerHTML='';
+  qd.insertAdjacentHTML('beforeend',`<label>${tr('quizHdr')}</label>`);
+  QUIZ.forEach(q=>{
+    const qq=LANG==='en'?(q.q_en||q.q):q.q;
+    const opts=LANG==='en'?(q.options_en||q.options):q.options;
+    const n=(opts||[]).length;
+    if(n===3){qd.insertAdjacentHTML('beforeend',`<div class=q><b>${qq}</b><div class=alloc id=qa_${q.id}></div></div>`);makeAlloc(document.getElementById('qa_'+q.id),q.id,opts);}
+    else if(n===2){qd.insertAdjacentHTML('beforeend',`<div class=q><b>${qq}</b><div class=alloc id=qa_${q.id}></div></div>`);makeBinary(document.getElementById('qa_'+q.id),q.id,opts);}
+    else{let h=`<div class=q><b>${qq}</b>`;opts.forEach((o,i)=>h+=`<label class=opt><input type=radio name=${q.id} value=${i}>${o}</label>`);qd.insertAdjacentHTML('beforeend',h+'</div>');}
+  });
+}
+function renderDest(){
+  const db=document.getElementById('destbox'); if(!db||!DESTS.length)return;
+  let h=`<label>${tr('destHdr')}</label><div class=destchips>`;
+  DESTS.forEach(d=>{const r=DEST_ORDER.indexOf(d.key); const on=r>=0; const disp=LANG==='en'?(d.key_en||d.key):d.key; const tip=LANG==='en'?(d.desc_en||d.desc):d.desc;
+    h+=`<span class="destchip${on?' on':''}" onclick="toggleDest('${d.key}')" title="${tip}">${on?('<b>'+(r+1)+'</b> '):''}${disp}</span>`;});
+  const ro=DEST_ORDER.indexOf('__other__'), oon=ro>=0;
+  h+=`<span class="destchip${oon?' on':''}" onclick="toggleDest('__other__')">${oon?('<b>'+(ro+1)+'</b> '):''}${tr('destOther')}</span>`;
+  h+='</div>';
+  if(oon) h+=`<input id=destother style="width:100%;margin-top:8px;box-sizing:border-box" placeholder="${tr('destOtherPh')}" value="${(DEST_OTHER||'').replace(/"/g,'&quot;')}" oninput="DEST_OTHER=this.value">`;
+  db.innerHTML=h;
+}
+function toggleDest(k){const i=DEST_ORDER.indexOf(k); if(i>=0)DEST_ORDER.splice(i,1); else DEST_ORDER.push(k); renderDest();}
+
+function pbar(el, secs, label){
+  // Soft estimate tuned to real inference time so the fill doesn't slam to 95%
+  // and stall. label = context message (世界构建 / 调研). showTranslate calls
+  // _d(false) so it doesn't self-clear.
+  secs=secs||35;
+  el.innerHTML=`<div class=pwrap><span class=hg id=hg>⏳</span><div class=pbar style="flex:1"><div class=pfill id=pf></div></div><span id=pct class=pct>0%</span></div><div class=prog>${label||''}</div>`;
+  const fill=el.querySelector('#pf'), pct=el.querySelector('#pct'), hg=el.querySelector('#hg');
+  let p=0; const step=95/(secs*5);
+  const iv=setInterval(()=>{ p=Math.min(95,p+step); if(fill)fill.style.width=p+'%'; if(pct)pct.textContent=Math.round(p)+'%';
+    if(hg)hg.textContent=hg.textContent==='⏳'?'⌛':'⏳'; }, 200);
+  return (ok)=>{ clearInterval(iv); if(fill)fill.style.width='100%'; if(pct)pct.textContent='100%';
+    setTimeout(()=>{ if(ok!==false) el.innerHTML=''; }, 250); };
+}
+async function startRank(){
+  let opts=[];for(let i=0;i<5;i++){const v=document.getElementById('o'+i).value.trim();if(v){const _nt=((document.getElementById('n'+i)||{}).value||'').trim();opts.push({label:v,note:_nt});}}
+  if(opts.length<2){document.getElementById('istat').textContent=tr('need2');return;}
+  if(!/[?&]resolve=0/.test(location.search)){ const _r=await resolveOptions(opts); if(_r===null)return; opts=_r; }
+  const answers={};QUIZ.forEach(q=>{if(QALLOC[q.id]){answers[q.id]=QALLOC[q.id];}else{const s=document.querySelector(`input[name=${q.id}]:checked`);if(s)answers[q.id]=+s.value;}});
+  CONF0=+document.getElementById('conf').value; STAGE_CONF=CONF0; FREE_TEXT=document.getElementById('ft0').value.trim();{const _mc=document.getElementById('ftmacro');if(_mc&&_mc.value.trim())FREE_TEXT=(FREE_TEXT?FREE_TEXT+'\n\n':'')+'【对未来的宏观思考】'+_mc.value.trim();}
+  {const _do=document.getElementById('destother'); if(_do)DEST_OTHER=_do.value;}
+  const DEST_PREF=DEST_ORDER.map(k=>k==='__other__'?(DEST_OTHER||'').trim():k).filter(Boolean);
+  const _done=pbar(document.getElementById('istat'),40,tr('building'));
+  showLoading(); document.getElementById('istat').textContent='';
+  try{const r=await fetch('/rank_start',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({options:opts,confidence_initial:CONF0,quiz:answers,free_text:FREE_TEXT,destination_pref:DEST_PREF,value_weights:{money:ALLOC[0],interest:ALLOC[1],influence:ALLOC[2]},lang:LANG})});
+    const d=await r.json();if(d.error){hideLoading();_done(false);document.getElementById('istat').textContent='出错:'+d.error;return;}
+    _done();SID=d.sid;CAP=d.stage.cap;NARR=d.narrative||'';document.getElementById('intake').style.display='none';
+    document.getElementById('wrap').classList.add('play');
+    const side=document.getElementById('side');side.style.display='block';side.innerHTML='<div id=rankPanel></div><div id=profilePanel></div>';
+    document.getElementById('stage').style.display='block';
+    renderStage(d.stage); buildProfilePanel();
+    finishLoading();
+  }catch(e){hideLoading();_done(false);document.getElementById('istat').textContent='网络错误:'+e.message;}
+}
+// ---- intake entity-resolution (Yuhe 2026-06-21): resolve major@school to real entities ----
+async function resolveOptions(opts){
+  const _ld=document.createElement('div');
+  _ld.setAttribute('style','position:fixed;inset:0;background:rgba(43,36,25,.45);display:flex;align-items:center;justify-content:center;z-index:10000');
+  _ld.innerHTML='<div style="background:#FCF7EC;color:#2B2419;padding:1.1rem 1.4rem;border-radius:14px;border:2px solid #2B2419;font-size:.95rem;text-align:center;font-family:var(--sans)"><div style="width:32px;height:32px;border:4px solid #E6DBC4;border-top-color:#BC6242;border-radius:50%;margin:0 auto .6rem;animation:_sp .8s linear infinite"></div>'+tr('checking')+'</div>';
+  if(!document.getElementById('_spincss')){const st=document.createElement('style');st.id='_spincss';st.textContent='@keyframes _sp{to{transform:rotate(360deg)}}';document.head.appendChild(st);}
+  document.body.appendChild(_ld);
+  const _close=()=>{try{_ld.remove()}catch(e){}};
+  let res;
+  try{
+    const r=await fetch('/resolve_options',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({options:opts.map(o=>o.label)})});
+    res=((await r.json())||{}).results;
+  }catch(e){ _close(); return opts; }       // fail-open: proceed with raw input
+  if(!res||!res.length){ _close(); return opts; }   // fail-open
+  if(res.every(x=>x.status==='ok')){ _close(); return res.map((x,i)=>({label:x.canonical||opts[i].label, note:opts[i].note})); }
+  if(!document.getElementById('rmodalCss')){ const st=document.createElement('style'); st.id='rmodalCss';
+    st.textContent='.rmov{position:fixed;inset:0;background:rgba(43,36,25,.4);display:flex;align-items:center;justify-content:center;z-index:9999}.rmod{background:var(--paper,#fff);color:var(--ink,#222);max-width:520px;width:92%;border:2px solid var(--ink,#222);border-radius:14px;padding:1rem 1.1rem;box-shadow:4px 4px 0 rgba(43,36,25,.15);font-size:.95rem;font-family:var(--sans)}.rrow{margin:.5rem 0;padding:.4rem 0;border-bottom:1px solid var(--line,#eee)}.rok{color:#4A7A55}.rwarn{color:#A14E2F;font-size:.8rem}.rsel{margin:.2rem .3rem .2rem 0;padding:.25rem;max-width:48%}.rbtns{margin-top:.8rem;text-align:right}.rbtns button{margin-left:.5rem}.rbtns .primary{background:var(--terra,#BC6242);color:#fff}';
+    document.head.appendChild(st); }
+  _close();
+  return await new Promise(resolve=>{
+    const ov=document.createElement('div'); ov.className='rmov';
+    const rows=res.map((x,i)=>{
+      const raw=opts[i].label, parts=raw.split(/[@＠]/), rm=(parts[0]||'').trim(), rs=(parts[1]||'').trim();
+      if(x.status==='ok') return `<div class=rrow><b>${raw}</b> → <span class=rok>${x.canonical||raw}</span></div>`;
+      const mk=(part,cands,rawv)=>{ if(part.status==='ok'&&part.canonical) return `<span data-fix="${part.canonical}"></span>${part.canonical}`;
+        const o=(cands||[]).map(c=>`<option value="${c}">${c}</option>`).join('')+`<option value="__keep__">保留:${rawv}</option>`;
+        return `<select class=rsel>${o}</select>`; };
+      const warn=x.status==='notfound'?'没找到,确认或改正':'有歧义,请选';
+      return `<div class=rrow data-i=${i}><div><b>${raw}</b> <span class=rwarn>${warn}</span></div>
+        <div>专业 ${mk(x.major,x.major.candidates,rm)} ${rs?(' · 学校 '+mk(x.school,x.school.candidates,rs)):''}</div></div>`;
+    }).join('');
+    ov.innerHTML=`<div class=rmod><h3 style="margin:.2rem 0 .6rem">确认你的专业 / 学校</h3>${rows}
+      <div class=rbtns><button class=ghost id=rcancel>返回修改</button><button id=rok class=primary>确认开始</button></div></div>`;
+    document.body.appendChild(ov);
+    ov.querySelector('#rcancel').onclick=()=>{ov.remove();resolve(null);};
+    ov.querySelector('#rok').onclick=()=>{
+      const rowEls=ov.querySelectorAll('.rrow[data-i]');
+      const out=res.map((x,i)=>{
+        if(x.status==='ok') return {label:x.canonical||opts[i].label, note:opts[i].note};
+        const el=[...rowEls].find(e=>+e.dataset.i===i);
+        const raw=opts[i].label, parts=raw.split(/[@＠]/), rm=(parts[0]||'').trim(), rs=(parts[1]||'').trim();
+        const sels=el?el.querySelectorAll('select.rsel'):[]; let si=0;
+        const pick=(part,rawv)=>{ if(part.status==='ok'&&part.canonical) return part.canonical;
+          const sel=sels[si++]; const v=sel?sel.value:'__keep__'; return v==='__keep__'?rawv:v; };
+        const mj=pick(x.major,rm); const sc=rs?pick(x.school,rs):'';
+        return {label: sc? (mj+'@'+sc) : mj, note:opts[i].note};
+      });
+      ov.remove(); resolve(out);
+    };
+  });
+}
+function renderSide(){
+  const s=document.getElementById('rankPanel')||document.getElementById('side');
+  let h='<div class="factor sidehdr">你的排序 <span class=muted>随时调整</span></div>';
+  ORDER.forEach((l,i)=>{h+=`<div class="rankrow ${i==0?'top':''}"><span class=n>${i+1}</span><span class=lab>${escHtml(l)}</span>`+
+    `<span class=mv><button onclick=move(${i},-1) ${i==0?'disabled':''}>▲</button><button onclick=move(${i},1) ${i==ORDER.length-1?'disabled':''}>▼</button></span></div>`;});
+  h+='<p class="muted sidenote">第 1 名决定你正在走的那条路。换了第 1 名,后面的推演会跟着改。</p>';
+  s.innerHTML=h;
+}
+async function move(i,dir){const j=i+dir;if(j<0||j>=ORDER.length)return;
+  const x=ORDER.slice();[x[i],x[j]]=[x[j],x[i]];
+  const r=await fetch('/rank_reorder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID,order:x})});
+  const d=await r.json();ORDER=d.order||x;renderSide();}
+function startDots(el,label){let n=0;el.textContent=label;return setInterval(()=>{n=(n+1)%4;el.textContent=label+'.'.repeat(n);},400);}
+function stopDots(iv){if(iv)clearInterval(iv);}
+async function recVoice(statusEl, ta, fast){
+  if(MR && MR.state==='recording'){ MR.stop(); return; }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    MR=new MediaRecorder(stream); CHUNKS=[];
+    MR.ondataavailable=e=>CHUNKS.push(e.data);
+    MR.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      const blob=new Blob(CHUNKS,{type:'audio/webm'});
+      const b64=await new Promise(function(res){var fr=new FileReader();fr.onloadend=function(){res(((fr.result||'')+'').split(',')[1]||'');};fr.readAsDataURL(blob);});
+      let dots=null;
+      if(fast){ statusEl.textContent='转写中…'; } else { dots=startDots(statusEl,'画像生成中,请稍候'); }
+      try{const r=await fetch(fast?'/voice_profile?fast=1':'/voice_profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio_b64:b64})});
+        const d=await r.json(); stopDots(dots);
+        if(d.error){statusEl.textContent=d.error;return;}
+        ta.value=(ta.value?ta.value+' ':'')+(d.transcript||''); statusEl.textContent='✓ 已加入,可编辑';
+      }catch(e){stopDots(dots);statusEl.textContent=fast?'转写失败':'生成失败';}
+    };
+    MR.start(); statusEl.textContent='🔴 录音中…再点一次停止';
+  }catch(e){statusEl.textContent='无法录音:'+(e.message||e);}
+}
+function buildProfilePanel(){
+  const pp=document.getElementById('profilePanel'); if(!pp)return;
+  pp.innerHTML=`<div class="factor profhdr">🪞 你和AI共同理解的你 <button class=ghost id=pexp onclick=toggleProfile()>展开 ⤢</button></div>`+
+    `<textarea id=pft class=proftext rows=8 placeholder="${(_isSamplePortrait(NARR||FREE_TEXT)?((NARR||FREE_TEXT||'').replace(/[<>"]/g,'')):'（这里会显示 AI 读完你输入后对你的理解…）')}">${_isSamplePortrait(NARR||FREE_TEXT)?'':(NARR||FREE_TEXT||'').replace(/[<>]/g,'')}</textarea>`+
+    `<div class=profbtns><button class=ghost onclick="recVoice(document.getElementById('pvst'),document.getElementById('pft'),true)">🎙 语音补充</button> `+
+    `<button class=ghost onclick=updateProfile()>更新画像</button> <span id=pvst class=prog></span></div>`+
+    `<p class="muted profnote">这是 AI 读完你的输入后,对你的理解。你可以改,改完后面每一站都按新的版本走。</p>`;
+}
+function toggleProfile(){
+  const ta=document.getElementById('pft'), b=document.getElementById('pexp');
+  if(ta.style.minHeight==='70vh'){ta.style.minHeight='160px';ta.rows=8;b.textContent='展开 ⤢';}
+  else{ta.style.minHeight='70vh';b.textContent='收起 ⤡';}
+}
+function _isSamplePortrait(t){return /^[（(]\s*示例画像/.test(t||'');}
+async function updateProfile(){
+  let ft=document.getElementById('pft').value;
+  if(_isSamplePortrait(ft)) ft='';          // sample is display-only — never fed to the engine
+  const st=document.getElementById('pvst');
+  if(!ft.trim()){st.textContent='（这是示例,先写下你自己的想法再更新）';setTimeout(()=>{st.textContent='';},2600);return;}
+  NARR=ft; st.textContent='…';
+  try{await fetch('/rank_profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID,narrative:ft})});
+    st.textContent='✓ 已更新,后面每一站按这个版本走'; setTimeout(()=>{st.textContent='';},2500);
+  }catch(e){st.textContent='更新失败';}
+}
+function journeyTrail(stage, cap){
+  cap=cap||7; let h='<div class="trail" aria-hidden="true">';
+  for(let i=1;i<=cap;i++){
+    const cls=i<stage?'done':(i===stage?'cur':'todo');
+    h+=`<span class="tdot ${cls}"></span>`;
+    if(i<cap) h+=`<span class="tline ${i<stage?'done':'todo'}"></span>`;
+  }
+  h+='</div><div class=tcap>'+(LANG==='en'?'the fog clears as you walk →':'迷雾随你走过而散开 →')+'</div>';
+  return h;
+}
+function renderStage(st){ _stageT=Date.now();
+  ORDER=st.order;renderSide();LAST=st.last;
+  window.EL={stage:st.stage,scene:(st.factor||{}).label||'',q:st.elicit||''};
+  const s=document.getElementById('stage');
+  s.innerHTML=`<div class="card stationcard">
+    <div class=stationhdr><span class=step>第 ${st.stage} / ${st.cap} 站</span><span class=factor>${escHtml(st.factor.label)}</span></div>
+    ${journeyTrail(st.stage, st.cap)}
+    ${st.question?`<p class=qfocus>这一站,想和你一起想想这个问题。<b>${st.question}</b></p>`:''}
+    <p class=story>${escHtml(st.prose)}</p>
+    <div class=invest><b>🔎 调查员视角 · ${escHtml(st.factor.label)}</b> <span class=fabricnote>${tr('fabric')}</span><br>
+      <b>${escHtml(st.top)}</b>:${escHtml(st.top_take)}<br>
+      <span class=vs>对照</span> <b>${escHtml(st.contender)}</b>:${escHtml(st.contender_take)}</div>
+    ${(st.sources&&st.sources.length)?`<p class="prog src">AI 参考过 ${st.sources.join('、')},但写出来的内容仍是虚构,请自己核实</p>`:''}
+    <p class=caveat>${tr('caveatScene')}</p>
+    ${st.elicit?`<div class=elicitbox><div id=chatlog><div class="cmsg cmsg-a">💬 ${st.elicit}</div></div><div class=elicitrow id=screlrow><input type=text id=elcin class=elicitin placeholder="${LANG==='en'?'Tell us what you really think… (optional)':'说说你的真实想法…(可选)'}"><button type=button class="ghost elmic" title="${tr('micTitle')}" onclick="recVoice(document.getElementById('elvst'),document.getElementById('elcin'),true)">🎙</button><button type=button class=elsend onclick="sendChat('elcin','chatlog','scene','screlrow')">${LANG==='en'?'Send':'发送'}</button></div><p class=inputnudge style="margin:.5em 0 0">${tr('inputNudge')}</p><span id=elvst class=prog></span> <span id=elstat class=prog></span></div>`:''}
+    <p class="muted hint">这一站要是让你想换换顺序,随时调。想好了就点继续。</p>
+    ${st.stage>=9?`<p class=note>${tr('softEnd')}</p>`:(LAST?'':`<p class=endreminder>${tr('endReminder')}</p>`)}
+    <div class=confrow style="margin:12px 0 4px"><label class=hint>你现在对第 1 名「<b>${escHtml(st.top)}</b>」有多确定?<span id=scv class=prog> ${STAGE_CONF}</span>/100</label><input type=range id=stageconf min=0 max=100 value=${STAGE_CONF} style="width:100%;margin-top:4px" oninput="document.getElementById('scv').textContent=' '+this.value;STAGE_CONF=+this.value"></div>
+    <p class=stagebtns><button id=nx onclick="next()">${LAST?'看看结论 →':'下一站 →'}</button> ${LAST?'':`<button class=ghost onclick="endNow()">${tr('endBtn')}</button>`} <span id=nstat class=prog></span></p>
+  </div>`;
+}
+async function next(){
+  document.getElementById('nx').disabled=true;const _d=pbar(document.getElementById('nstat'),40,'正在生成下一站,请稍等…');
+  try{const r=await fetch('/rank_next',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID,confidence:STAGE_CONF,dwell_ms:_stageT?Date.now()-_stageT:null})});
+    const d=await r.json();if(d.error){_d(false);document.getElementById('nstat').textContent='出错:'+d.error;document.getElementById('nx').disabled=false;return;}
+    _d();if(d.phase==='ending')return renderEnd(d.ending);
+    renderStage(d.stage);
+  }catch(e){_d(false);document.getElementById('nstat').textContent='网络错误:'+e.message;document.getElementById('nx').disabled=false;}
+}
+async function endNow(){
+  document.getElementById('nx').disabled=true;const _d=pbar(document.getElementById('nstat'),8,'整理结论中…');
+  try{const r=await fetch('/rank_next',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID,end:1,confidence:STAGE_CONF})});
+    const d=await r.json();_d();if(d.error){document.getElementById('nstat').textContent='出错:'+d.error;document.getElementById('nx').disabled=false;return;}
+    if(d.phase==='ending')return renderEnd(d.ending);
+  }catch(e){_d(false);document.getElementById('nstat').textContent='网络错误:'+e.message;document.getElementById('nx').disabled=false;}
+}
+async function replay(){
+  const fs=document.getElementById('fstat'); if(fs) fs.textContent='';
+  showLoading();
+  try{const r=await fetch('/rank_replay',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID})});
+    const d=await r.json();
+    if(d.error){hideLoading();if(fs)fs.textContent='出错:'+d.error;return;}
+    if(typeof d.confidence_initial==='number') CONF0=d.confidence_initial;
+    LAST=false; renderStage(d.stage); finishLoading();
+  }catch(e){hideLoading();if(fs)fs.textContent='网络错误,请重试';}
+}
+function renderRevisit(d){
+  const e=d.end||{}; const EN=LANG==='en';
+  const order=(e.final_order||[]).join(' > '); const opts=(e.final_order||[]).join(EN?', ':'、');
+  const scenes=Array.from(new Set((e.steps||[]).map(function(x){return x.factor;}).filter(Boolean))).join(EN?', ':'、');
+  const portrait=(e.narrative||'').replace(/[<>]/g,''); const ci=e.confidence_initial, cf=e.confidence_final; CONF0=ci||0;
+  const summary=EN?('In this run we walked your options ('+opts+') through different lives and surfaced the easily-overlooked factors ('+scenes+').')
+                  :('这一局里,我们把你的选择('+opts+')放进不同人生走了走,也聊了那些容易被忽略的因素('+scenes+')。');
+  const decision=EN?('Your final order: <b>'+order+'</b>. Confidence '+ci+' → '+cf+'.'):('你最终的排序:<b>'+order+'</b>。确定度 '+ci+' → '+cf+'。');
+  const s=document.getElementById('stage'); s.style.display='block';
+  s.innerHTML='<div class="card endcard"><p class=kicker>'+(EN?'YOUR SAVED RUN':'你的存档')+'</p><h1>'+(EN?'Welcome back.':'欢迎回来。')+'</h1>'
+    +'<p class=story style="max-width:42em">'+summary+'</p>'+portraitBlock(portrait,EN)+'<p class=story style="max-width:42em">'+decision+'</p>'
+    +badgeShelfHTML()
+    +(d.report?'<div class=reportbox><div class=factor>📄 '+(EN?'Your reflection report':'你的反思报告')+'</div><div class=reportbody>'+mdLite(d.report)+'</div></div>':'')
+    +'<p class=stagebtns style="margin-top:18px"><a href="/"><button>'+(EN?'Start a new run':'开始新的一局')+'</button></a></p></div>';
+  updateBadges(cf);
+}
+function badgeShelfHTML(){const EN=LANG==='en';return `  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="rough" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4"/>
+    </filter>
+  </svg>
+  <div class="shelf">
+
+    <!-- ============ 1 · 笃定 ============ -->
+    <div class="badge" data-key="over80" style="--accent:var(--green)">
+      <div class="medallion">
+        <svg class="disc" viewBox="0 0 100 100" filter="url(#rough)" aria-hidden="true">
+          <circle class="face" cx="50" cy="50" r="46"/>
+          <circle class="ring" cx="50" cy="50" r="46"/>
+          <circle class="ring" cx="50" cy="50" r="40" stroke-dasharray="1.2 6"/>
+          <g class="tick">
+            <line x1="50" y1="6" x2="50" y2="11"/>
+            <line x1="94" y1="50" x2="89" y2="50"/>
+            <line x1="50" y1="94" x2="50" y2="89"/>
+            <line x1="6" y1="50" x2="11" y2="50"/>
+          </g>
+        </svg>
+        <svg class="icon" viewBox="0 0 100 100" filter="url(#rough)" aria-hidden="true">
+          <!-- target -->
+          <circle class="stroke" cx="46" cy="50" r="30"/>
+          <circle class="stroke" cx="46" cy="50" r="19"/>
+          <circle class="fill" cx="46" cy="50" r="7"/>
+          <!-- arrow striking center -->
+          <line class="stroke" x1="84" y1="84" x2="51" y2="55"/>
+          <path class="stroke" d="M51 55 L60 56 M51 55 L52 64"/>
+          <path class="stroke" d="M84 84 L77 82 M84 84 L82 77"/>
+        </svg>
+        <div class="sheen"><span></span></div>
+        <div class="lock">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>
+          ${EN?'locked':'待解锁'}
+        </div>
+      </div>
+      <div class="caption">
+        <div class="ach-name">${EN?'Resolved':'笃定'}</div>
+        <div class="ach-desc">${EN?'&gt;80% sure of your top choice':'对第一选择的信心 &gt; 80%'}</div>
+      </div>
+    </div>
+
+    <!-- ============ 2 · 满格 ============ -->
+    <div class="badge" data-key="full" style="--accent:var(--amber)">
+      <div class="medallion">
+        <svg class="disc" viewBox="0 0 100 100" filter="url(#rough)" aria-hidden="true">
+          <circle class="face" cx="50" cy="50" r="46"/>
+          <circle class="ring" cx="50" cy="50" r="46"/>
+          <circle class="ring" cx="50" cy="50" r="40" stroke-dasharray="1.2 6"/>
+          <g class="tick">
+            <line x1="50" y1="6" x2="50" y2="11"/>
+            <line x1="94" y1="50" x2="89" y2="50"/>
+            <line x1="50" y1="94" x2="50" y2="89"/>
+            <line x1="6" y1="50" x2="11" y2="50"/>
+          </g>
+        </svg>
+        <svg class="icon" viewBox="0 0 100 100" filter="url(#rough)" aria-hidden="true">
+          <!-- full battery -->
+          <rect class="stroke" x="16" y="34" width="58" height="33" rx="5"/>
+          <path class="stroke" d="M78 44 q5 0 5 6 q0 6 -5 6"/>
+          <rect class="fill" x="22" y="40" width="11" height="21" rx="1.5"/>
+          <rect class="fill" x="38" y="40" width="11" height="21" rx="1.5"/>
+          <rect class="fill" x="54" y="40" width="11" height="21" rx="1.5"/>
+          <!-- spark mark -->
+          <path class="stroke" d="M45 18 L40 27 L47 27 L42 36" />
+        </svg>
+        <div class="sheen"><span></span></div>
+        <div class="lock">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>
+          ${EN?'locked':'待解锁'}
+        </div>
+      </div>
+      <div class="caption">
+        <div class="ach-name">${EN?'Maxed':'满格'}</div>
+        <div class="ach-desc">${EN?'100% sure':'信心 100%'}</div>
+      </div>
+    </div>
+
+    <!-- ============ 3 · 跃升 ============ -->
+    <div class="badge" data-key="leap" style="--accent:var(--green)">
+      <div class="medallion">
+        <svg class="disc" viewBox="0 0 100 100" filter="url(#rough)" aria-hidden="true">
+          <circle class="face" cx="50" cy="50" r="46"/>
+          <circle class="ring" cx="50" cy="50" r="46"/>
+          <circle class="ring" cx="50" cy="50" r="40" stroke-dasharray="1.2 6"/>
+          <g class="tick">
+            <line x1="50" y1="6" x2="50" y2="11"/>
+            <line x1="94" y1="50" x2="89" y2="50"/>
+            <line x1="50" y1="94" x2="50" y2="89"/>
+            <line x1="6" y1="50" x2="11" y2="50"/>
+          </g>
+        </svg>
+        <svg class="icon" viewBox="0 0 100 100" filter="url(#rough)" aria-hidden="true">
+          <!-- axis -->
+          <path class="stroke" d="M22 22 L22 76 L80 76" opacity=".55"/>
+          <!-- rising line -->
+          <polyline class="stroke" points="28,66 44,54 56,60 76,30"/>
+          <!-- arrow head -->
+          <path class="stroke" d="M76 30 L65 31 M76 30 L75 41"/>
+          <circle class="fill" cx="44" cy="54" r="3.4"/>
+          <circle class="fill" cx="56" cy="60" r="3.4"/>
+        </svg>
+        <div class="sheen"><span></span></div>
+        <div class="lock">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>
+          ${EN?'locked':'待解锁'}
+        </div>
+      </div>
+      <div class="caption">
+        <div class="ach-name">${EN?'Leap':'跃升'}</div>
+        <div class="ach-desc">${EN?'+20% confidence in one run':'单局信心提升 ≥ 20%'}</div>
+      </div>
+    </div>
+
+  </div>`;}
+function updateBadges(cf){ if(window.setBadges) window.setBadges({over80:cf>80, full:cf>=100, leap:(cf-CONF0)>=20}); }
+  var KEYS = ["over80","full","leap"];
+
+  function badgeFor(key){
+    return document.querySelector('.badge[data-key="'+key+'"]');
+  }
+
+  function setOne(key, earned){
+    var el = badgeFor(key);
+    if(!el) return;
+    var wasEarned = el.classList.contains("earned");
+    if(earned){
+      el.classList.add("earned");
+      // (re)play the restrained entrance only on a fresh earn
+      if(!wasEarned){
+        el.classList.remove("celebrate");
+        void el.offsetWidth; // reflow so the animation can restart
+        el.classList.add("celebrate");
+      }
+    }else{
+      el.classList.remove("earned","celebrate");
+    }
+  }
+
+  // Public API: window.setBadges({over80:bool, full:bool, leap:bool})
+  // Any omitted key is left unchanged.
+  window.setBadges = function(state){
+    state = state || {};
+    KEYS.forEach(function(k){
+      if(Object.prototype.hasOwnProperty.call(state, k)){
+        setOne(k, !!state[k]);
+      }
+    });
+  };
+async function loadReport(){
+  const box=document.getElementById('reportbody'); if(!box)return; const EN=LANG==='en';
+  const dots=startDots(box,EN?'writing your report':'正在为你生成报告');
+  try{const r=await fetch('/rank_report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID})});
+    const d=await r.json(); stopDots(dots);
+    box.innerHTML = d.report ? mdLite(d.report) : (EN?'<p class=muted>(report unavailable)</p>':'<p class=muted>(报告暂不可用)</p>');
+  }catch(e){stopDots(dots);box.innerHTML=EN?'<p class=muted>failed to load</p>':'<p class=muted>报告加载失败</p>';}
+}
+function mdLite(t){
+  const esc=function(x){return x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+  let html='',inUl=false;
+  (t||'').split('\n').forEach(function(ln){
+    let m=esc(ln.trim()).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+    if(/^##\s+/.test(m)){if(inUl){html+='</ul>';inUl=false;}html+='<h3>'+m.replace(/^##\s+/,'')+'</h3>';}
+    else if(/^[-\u00b7]\s+/.test(m)){if(!inUl){html+='<ul>';inUl=true;}html+='<li>'+m.replace(/^[-\u00b7]\s+/,'')+'</li>';}
+    else if(m){if(inUl){html+='</ul>';inUl=false;}html+='<p>'+m+'</p>';}
+  });
+  if(inUl)html+='</ul>'; return html;
+}
+function escHtml(x){return (x||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function portraitBlock(portrait, EN){
+  const p=(portrait||'').replace(/[<>]/g,'').trim(); if(!p) return '';
+  const items=p.split(/\s*[·•‧]\s*/).map(function(x){return x.trim();}).filter(Boolean);
+  const head='<p class=story style="max-width:42em;margin-top:1.1em"><b>'+(EN?'What you and the AI came to understand about you':'你和 AI 一起认识到的你')+'</b></p>';
+  if(items.length>1) return head+'<ul class=portrait-list>'+items.map(function(x){return '<li>'+escHtml(x)+'</li>';}).join('')+'</ul>';
+  return head+'<p class=story style="max-width:42em">'+escHtml(p)+'</p>';
+}
+async function sendChat(inpId, logId, ctx, rowId){
+  const inp=document.getElementById(inpId); if(!inp)return; const a=(inp.value||'').trim(); const EN=LANG==='en';
+  const log=document.getElementById(logId); if(!a||!log)return;
+  inp.value=''; inp.disabled=true;
+  log.innerHTML='<div class="cmsg cmsg-h">'+escHtml(a)+'</div><div class="cmsg cmsg-a"><span class=prog>…</span></div>';
+  try{const r=await fetch('/rank_chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID,message:a,ctx:ctx})});
+    const d=await r.json();
+    if(d.error==='limit'){log.innerHTML='<div class="cmsg cmsg-a">'+(EN?'(we have chatted enough here)':'(这里聊得差不多啦)')+'</div>'; const rr=document.getElementById(rowId); if(rr)rr.style.display='none'; return;}
+    if(d.error){log.innerHTML='<div class="cmsg cmsg-h">'+escHtml(a)+'</div><div class="cmsg cmsg-a">'+(EN?'error':'出错')+'</div>';}
+    else {if(d.narrative){NARR=d.narrative; buildProfilePanel();}
+      if(typeof d.turns_left==='number' && d.turns_left<=0){
+        // cap reached: drop the AI's dangling (unanswerable) question; show user msg + a clean close
+        log.innerHTML='<div class="cmsg cmsg-h">'+escHtml(a)+'</div><div class=muted style="font-size:.78rem;margin-top:.4em">'+(EN?'(chat closed for this step)':'(本环节对话已结束)')+'</div>';
+        const rr=document.getElementById(rowId); if(rr)rr.style.display='none';
+      } else {
+        log.innerHTML='<div class="cmsg cmsg-h">'+escHtml(a)+'</div><div class="cmsg cmsg-a">💬 '+escHtml(d.reply||'')+'</div>';
+      }}
+  }catch(e){log.innerHTML='<div class="cmsg cmsg-h">'+escHtml(a)+'</div><div class="cmsg cmsg-a">'+(EN?'network error':'网络错误')+'</div>';}
+  inp.disabled=false; inp.focus();
+}
+async function submitElicit(){
+  const inp=document.getElementById('elcin'); if(!inp)return; const a=(inp.value||'').trim();
+  const st=document.getElementById('elstat'); const EN=LANG==='en';
+  if(!a){if(st)st.textContent=EN?'Write something first':'说点什么吧';return;}
+  inp.disabled=true; const dots=startDots(st,EN?'AI is updating its read of you':'AI 正在更新对你的理解');
+  try{const r=await fetch('/rank_elicit',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({sid:SID,stage:(window.EL||{}).stage,scene:(window.EL||{}).scene,q:(window.EL||{}).q,answer:a})});
+    const d=await r.json(); stopDots(dots);
+    if(d.error){if(st)st.textContent=(EN?'Error: ':'出错:')+d.error;inp.disabled=false;return;}
+    if(d.narrative){NARR=d.narrative; buildProfilePanel();}
+    if(st)st.textContent=EN?'✓ folded into your portrait':'✓ 已并入你的画像';
+  }catch(e){stopDots(dots);if(st)st.textContent=EN?'Network error':'网络错误';inp.disabled=false;}
+}
+async function showTranslate(){
+  const b=document.getElementById('trbtn');b.disabled=true;b.textContent='翻译中…';const _d=pbar(document.getElementById('trpanel'),25,'正在了解这个专业,请稍等…');
+  try{const r=await fetch('/rank_translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID})});
+    const d=await r.json();if(d.error){_d(false);document.getElementById('trpanel').innerHTML='';b.textContent='出错,点重试';b.disabled=false;return;}
+    _d(false);document.getElementById('trpanel').innerHTML=`<div class=invest><b>📋 招生简章怎么说</b><br>${d.official||''}</div>`+
+      `<div class=invest style="border-color:var(--ok);background:var(--pine-tint)"><b>🗣️ 说人话</b><br>${d.plain||''}</div>`+
+      `<div class=dyk><b>⚠️ 没告诉你的</b><ul style="margin:.3em 0">${(d.hidden||[]).map(h=>'<li>'+h+'</li>').join('')}</ul></div>`+`<p class=caveat>${tr('caveatOfficial')}</p>`;
+    b.style.display='none';
+  }catch(e){_d(false);b.textContent='网络错误,点重试';b.disabled=false;}
+}
+async function frameTest(){
+  const nx=document.getElementById('nx');nx.disabled=true;const _d=pbar(document.getElementById('nstat'),30,'正在准备最后一步,请稍等…');
+  try{const r=await fetch('/rank_frametest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID})});
+    const d=await r.json();if(d.error){_d(false);document.getElementById('nstat').textContent='出错:'+d.error;nx.disabled=false;return;}
+    _d();renderFrameTest(d);
+  }catch(e){_d(false);document.getElementById('nstat').textContent='网络错误:'+e.message;nx.disabled=false;}
+}
+function renderFrameTest(d){
+  FR=[];window._FRAMES=d.frames||[];
+  let h=`<div class="card"><div class=factor>在你定下来之前,听听别人可能会怎么劝你</div>`+
+    `<p class=muted>有人会这样劝你<b style="color:var(--ink)">放弃 ${d.top}</b>。凭直觉看,哪一句会让你有点动摇?</p>`;
+  window._FRAMES.forEach((f,i)=>{h+=`<div class=invest id=fr${i}>${f.pitch}`+
+    `<div class=framebtns><button class=ghost onclick=markFrame(${i},false)>不会</button> `+
+    `<button class=ghost onclick=markFrame(${i},true)>会想动一动</button> <span id=frs${i} class=prog></span></div></div>`;});
+  h+=`<div id=reveal></div><p class=stagebtns><button id=geb onclick=goEnd() disabled style="display:none">看看结论 →</button> <span id=gstat class=prog></span></p></div>`;
+  document.getElementById('stage').innerHTML=h;
+}
+function markFrame(i,swayed){
+  const f=window._FRAMES[i];FR=FR.filter(x=>x._i!==i);FR.push({_i:i,frame:f.frame,bias:f.bias,swayed:swayed});
+  document.getElementById('frs'+i).textContent=swayed?'✓ 会动一动':'✓ 不动';
+  document.querySelectorAll('#fr'+i+' button').forEach(b=>b.disabled=true);
+  if(FR.length>=window._FRAMES.length){
+    const sway=FR.filter(x=>x.swayed);
+    document.getElementById('reveal').innerHTML=`<div class=dyk>其实那三句话,分别在利用 <b>${window._FRAMES.map(f=>f.bias).join('、')}</b> 这三种认知偏差。`+
+      (sway.length?`你在其中 <b>${sway.length}</b> 句上动了心,那正是 <b>${sway.map(x=>x.bias).join('、')}</b> 在对你起作用。`:`三句都没带动你,这个选择你想得挺透。`)+
+      ` 同一个选择,换种说法你就动摇。这往往是话术在起作用,选择本身其实没变。`+`</div>`;
+    const geb=document.getElementById('geb');geb.disabled=false;geb.style.display='inline-block';
+  }
+}
+async function goEnd(){
+  document.getElementById('geb').disabled=true;document.getElementById('gstat').textContent='…';
+  try{const r=await fetch('/rank_next',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID})});
+    const d=await r.json();renderEnd(d.ending||{});
+  }catch(e){document.getElementById('gstat').textContent='网络错误';}
+}
+function renderEnd(e){
+  ORDER=e.final_order;renderSide();
+  const EN=LANG==='en';
+  const opts=(e.options||e.final_order||[]).join('、');
+  const scenes=[...new Set(e.scenes_visited||[])].join('、');
+  const order=(e.final_order||[]).join(' > ');
+  const first=(e.final_order||[])[0]||'';
+  const portrait=(e.portrait||'').replace(/[<>]/g,'');
+  const summary=EN
+    ? `In this 高考志愿 · Reflective-Equilibrium game, we walked your options through a few different lives with you (${opts}) and thought together about the sides of each choice that are easy to overlook (${scenes}). None of this is a conclusion and none of it should be taken as fact. It is here to help you see what you care about more.`
+    : `在这场「高考志愿 · 反思均衡」里,我们陪你把几种选择放进不同的人生走了走(${opts}),也一起想了想每个选择背后那些容易被忽略的方面(${scenes})。这些都不是结论,里面的说法也都别当真,它只是帮你看清自己更在意什么。`;
+  const decision=EN
+    ? `Your final order is <b>${order}</b>. If all goes well, your life starts at <b>${first}</b>. Ready?`
+    : `你最终的排序是 <b>${order}</b>。一切顺利的话,你的人生会从「<b>${first}</b>」开始。准备好了吗?`;
+  const blurb=EN
+    ? `After this short simulated life, the portrait of you we put together, and a good look at the factors behind each path, we hope you pick one you won't regret. If you do, this little game has done its job.`
+    : `走完这场短短的模拟人生,看过我们一起拼出的那张你的画像,也比过了每条路背后的种种因素,希望你能选一个不会后悔的。能做到这一点,这个小游戏就值了。`;
+  const chk=(e.checklist||[]).map(c=>`<label class=chk><input type=checkbox> ${c}</label>`).join('');
+  const s=document.getElementById('stage');
+  s.innerHTML=`<div class="card endcard">
+    <p class=kicker>${EN?'REFLECTIVE\u00a0\u00a0EQUILIBRIUM':'反\u00a0·\u00a0思\u00a0·\u00a0均\u00a0·\u00a0衡'}</p>
+    <h1>${EN?'You made it.':'走完了。'}</h1>
+    <p class=story style="max-width:42em">${summary}</p>
+    ${portraitBlock(portrait,EN)}
+    <p class=story style="max-width:42em">${decision}</p>
+    <div id=reportbox class=reportbox><div class=factor>📄 ${EN?'Your reflection report':'你的反思报告'}</div><div id=reportbody class=reportbody></div></div>
+    <div class=elicitbox style="margin:14px 0"><div class=factor style="font-size:.95rem">💬 ${EN?'One more thing':'临走前'}</div>
+      <div id=endchatlog><div class="cmsg cmsg-a">${EN?'I feel I understand you fairly well now. Anything you want to talk through before you go?':'AI 对你已经有了相当深的了解,临走前,还有什么想聊聊的吗?'}</div></div>
+      <div class=elicitrow id=endchatrow><input type=text id=endcin class=elicitin placeholder="${EN?'Type or use 🎙…':'说点什么…(可语音)'}"><button type=button class="ghost elmic" title="${tr('micTitle')}" onclick="recVoice(document.getElementById('endvst'),document.getElementById('endcin'),true)">🎙</button><button type=button class=elsend onclick="sendChat('endcin','endchatlog','end','endchatrow')">${EN?'Send':'发送'}</button></div><span id=endvst class=prog></span></div>
+    <hr class=qdiv>
+    <div class=factor>📋 ${EN?'Reflective-equilibrium checklist':'反思均衡检查清单'} <span class=muted style="font-size:.8rem;font-family:var(--sans);font-weight:400">(叶晓阳)</span></div>
+    <p class=muted style="font-size:.9rem;margin:.3em 0 .6em">${EN?'Before you submit, ask yourself each one.':'提交志愿前,一条一条问问自己。'}</p>
+    ${chk}
+    <label style="margin-top:16px">${EN?'How sure are you now that':'现在,你有多确定'} <b>${first}</b> ${EN?'is your ideal choice?':'是你的理想选择?'} <span id=fcv class=muted>${CONF0}</span>/100</label>
+    <input type=range id=fconf min=0 max=100 value=${CONF0} oninput="fcv.textContent=this.value;updateBadges(+this.value)">
+    ${badgeShelfHTML()}
+    <p class=note style="margin-top:16px">${blurb}</p>
+    <p class=stagebtns style="margin-top:18px"><button onclick=finish()>${EN?'Done':'完成'}</button> <button class=ghost onclick="toggleFeedback()">${EN?'💬 Give us feedback':'💬 给我们反馈,让我们做得更好!'}</button> <span id=fstat class=prog></span></p>
+    <p class=revisitcode>${EN?'Your revisit code:':'你的回访码:'} <code>${SID}</code> <button class=ghost onclick="(navigator.clipboard&&navigator.clipboard.writeText(location.origin+'/?run=${SID}'));this.textContent='${EN?'copied ✓':'已复制链接 ✓'}'">${EN?'copy link':'复制回访链接'}</button><br><span class=muted style="font-size:.78rem">${EN?'Keep it to return to this result later.':'保存它,以后可凭此回到这个结果。'}</span></p>
+    <div id=fbbox style="display:none;margin-top:12px">
+      <textarea id=fbtext rows=3 placeholder="${EN?'Anything goes. What worked, what felt off, ideas…':'随便说说,哪里好用、哪里别扭、有什么想法都行…'}"></textarea>
+      <p style="margin-top:8px"><button onclick=sendFeedback()>${EN?'Submit':'提交反馈'}</button> <span id=fbstat class=prog></span></p>
+    </div>
+  </div>`;
+}
+function toggleFeedback(){const b=document.getElementById('fbbox');b.style.display=b.style.display==='none'?'':'none';}
+async function sendFeedback(){const t=(document.getElementById('fbtext').value||'').trim();const EN=LANG==='en';
+  if(!t){document.getElementById('fbstat').textContent=EN?'Write something first':'写点什么吧';return;}
+  document.getElementById('fbstat').textContent=EN?'Submitting…':'提交中…';
+  try{await fetch('/rank_feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID,feedback:t})});
+    document.getElementById('fbstat').textContent=EN?'✓ Thank you!':'✓ 谢谢!收到了。';document.getElementById('fbtext').disabled=true;
+  }catch(e){document.getElementById('fbstat').textContent=EN?'Failed, try later':'提交失败,稍后再试';}
+}
+async function finish(){
+  const cf=+document.getElementById('fconf').value;
+  const checks=[...document.querySelectorAll('#stage .chk input')].map(c=>c.checked);
+  document.getElementById('fstat').textContent='已记录。';
+  try{await fetch('/rank_end',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({sid:SID,confidence_final:cf,checklist:checks,frame_results:FR})});}catch(e){}
+  document.getElementById('fstat').innerHTML=`✓ 完成。确定度 ${CONF0} → ${cf}。 <button class=ghost onclick=replay()>再玩一次</button>`;
+}
+</script></body></html>

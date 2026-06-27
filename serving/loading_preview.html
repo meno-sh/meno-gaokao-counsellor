@@ -1,0 +1,227 @@
+<!doctype html><html lang=zh><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=color-scheme content=light>
+<title>开场 · 走进剧场</title>
+<link rel=preconnect href="https://fonts.googleapis.com">
+<link rel=preconnect href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&display=swap" rel=stylesheet>
+<style>
+/* ===========================================================================
+   开场加载动画 · 剧院隐喻
+   入座 → 帷幕分开 → 推近舞台 → 灯亮 + 孤身的小人
+   自包含;唯一外部依赖是 Google Fonts。暴露 window.finishLoading()。
+   把 #loadingScene 这一块(markup + 这段 css + 末尾 script)整体搬进宿主页面即可复用。
+   =========================================================================== */
+:root{
+  --ls-cream:#fff8ea; --ls-ink:#3a342c; --ls-pine:#3f7d5b; --ls-amber:#E9B44C;
+}
+html,body{margin:0;height:100%}
+body{background:var(--ls-cream)}
+
+#loadingScene{
+  position:fixed; inset:0; z-index:12000;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:clamp(18px,3.4vh,40px);
+  background:
+    radial-gradient(120% 95% at 50% 30%, #fffdf6 0%, var(--ls-cream) 58%, #f4ecd8 100%);
+  font-family:"Noto Serif SC", Georgia, "Songti SC", serif;
+  color:var(--ls-ink);
+  overflow:hidden; opacity:1;
+  -webkit-font-smoothing:antialiased;
+}
+#loadingScene.ls-out{opacity:0; transition:opacity .9s ease; pointer-events:none}
+
+/* faint paper grain over the cream */
+#loadingScene::after{
+  content:""; position:absolute; inset:0; pointer-events:none; mix-blend-mode:multiply; opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.ls-stagewrap{
+  position:relative; z-index:1;
+  width:min(88vw, 640px); aspect-ratio:8/5.6; max-height:64vh;
+  overflow:hidden;
+}
+.ls-scene{width:100%; height:100%; display:block}
+
+.ls-stroke{fill:none; stroke:var(--ls-ink); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round}
+.ls-thin{stroke-width:1.6; opacity:.55}
+.ls-fill-cream{fill:var(--ls-cream)}
+
+/* the whole proscenium pushes in (camera zoom toward stage centre) */
+.ls-stage{transform-box:view-box; transform-origin:400px 232px;
+  animation:lsZoom 4.4s cubic-bezier(.45,.04,.25,1) 2.5s forwards}
+
+/* light that comes up behind the curtain */
+.ls-light{opacity:0; animation:lsLight 2.4s ease 4.1s forwards}
+.ls-glow{fill:var(--ls-amber)}
+.ls-halo{fill:var(--ls-amber); transform-box:view-box; transform-origin:400px 300px;
+  animation:lsHalo 5s ease-in-out 4.8s infinite}
+.ls-beam{fill:url(#lsBeamGrad); animation:lsBeam 5s ease-in-out 4.8s infinite}
+.ls-floor{stroke:var(--ls-ink); stroke-width:2.4; stroke-linecap:round}
+
+/* the lone figure — "you" — fades up on the lit stage */
+.ls-actorRise{transform-box:view-box; transform-origin:400px 360px; opacity:0;
+  animation:lsActorRise 2s cubic-bezier(.4,0,.2,1) 5.3s forwards}
+.ls-actor{transform-box:view-box; transform-origin:400px 360px;
+  animation:lsBreath 5.4s ease-in-out 6.6s infinite}
+.ls-actor *{stroke:var(--ls-ink); stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round}
+
+/* curtains: two pine panels that part outward from the centre */
+.ls-curtain{fill:var(--ls-pine); fill-opacity:.16; stroke:var(--ls-pine); stroke-width:2.4}
+.ls-curtainFold{stroke:var(--ls-pine); stroke-width:1.4; opacity:.5; fill:none}
+.ls-cL{transform-box:view-box; transform-origin:140px 232px;
+  animation:lsCurtainL 2.7s cubic-bezier(.5,.02,.2,1) 1.1s forwards}
+.ls-cR{transform-box:view-box; transform-origin:660px 232px;
+  animation:lsCurtainR 2.7s cubic-bezier(.5,.02,.2,1) 1.1s forwards}
+
+/* front-row seats (audience), foreground, static */
+.ls-seats{stroke:var(--ls-ink); fill:none; stroke-linecap:round; stroke-linejoin:round;
+  opacity:0; animation:lsSeats 1.3s ease .2s both}
+
+@keyframes lsSeats{from{opacity:0; transform:translateY(10px)} to{opacity:.88; transform:none}}
+@keyframes lsCurtainL{from{transform:scaleX(1)} to{transform:scaleX(.05)}}
+@keyframes lsCurtainR{from{transform:scaleX(1)} to{transform:scaleX(.05)}}
+@keyframes lsZoom{from{transform:scale(1)} to{transform:scale(1.34) translateY(-16px)}}
+@keyframes lsLight{from{opacity:0} to{opacity:1}}
+@keyframes lsHalo{0%,100%{transform:scale(1); opacity:.34} 50%{transform:scale(1.07); opacity:.5}}
+@keyframes lsBeam{0%,100%{opacity:.26} 50%{opacity:.4}}
+@keyframes lsActorRise{from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:none}}
+@keyframes lsBreath{0%,100%{transform:translateY(0) scaleY(1)} 50%{transform:translateY(-1.5px) scaleY(1.012)}}
+
+/* captions — strictly one line at a time, cross-fading */
+.ls-caps{position:relative; z-index:1; height:1.8em; width:min(88vw,640px); text-align:center}
+.ls-cap{position:absolute; left:0; right:0; top:0; opacity:0;
+  font-size:clamp(1rem,.7rem+1.5vw,1.3rem); font-weight:500; letter-spacing:.06em; color:#6f6555}
+.ls-cap.c1{animation:lsCap 3s ease .4s both}
+.ls-cap.c2{animation:lsCap 3s ease 3.4s both}
+.ls-cap.c3{animation:lsCapHold 3s ease 6.4s forwards}
+@keyframes lsCap{0%{opacity:0; transform:translateY(7px)} 12%,78%{opacity:1; transform:none} 100%{opacity:0; transform:translateY(-5px)}}
+@keyframes lsCapHold{0%{opacity:0; transform:translateY(7px)} 20%,100%{opacity:1; transform:none}}
+
+@media(prefers-reduced-motion:reduce){
+  #loadingScene *{animation:none !important}
+  .ls-seats{opacity:.88}
+  .ls-cL{transform:scaleX(.05)} .ls-cR{transform:scaleX(.05)}
+  .ls-light{opacity:1} .ls-actorRise{opacity:1}
+  .ls-cap.c1,.ls-cap.c2{opacity:0} .ls-cap.c3{opacity:1}
+}
+</style></head><body>
+
+<div id="loadingScene" role="status" aria-label="加载中,正在为你展开第一幕">
+  <div class="ls-stagewrap">
+    <svg class="ls-scene" viewBox="0 0 800 560" aria-hidden="true">
+      <defs>
+        <radialGradient id="lsBeamGrad" cx="50%" cy="2%" r="85%">
+          <stop offset="0%" stop-color="#E9B44C" stop-opacity=".55"/>
+          <stop offset="60%" stop-color="#E9B44C" stop-opacity=".12"/>
+          <stop offset="100%" stop-color="#E9B44C" stop-opacity="0"/>
+        </radialGradient>
+        <clipPath id="lsStageClip"><rect x="140" y="70" width="520" height="324" rx="10"/></clipPath>
+      </defs>
+
+      <!-- ===== STAGE (zooms in) ===== -->
+      <g class="ls-stage">
+        <!-- proscenium frame -->
+        <rect class="ls-stroke ls-thin" x="120" y="50" width="560" height="364" rx="16"/>
+        <rect class="ls-stroke ls-fill-cream" x="140" y="70" width="520" height="324" rx="10"/>
+
+        <!-- everything inside the opening is clipped to the stage -->
+        <g clip-path="url(#lsStageClip)">
+          <!-- light coming up -->
+          <g class="ls-light">
+            <polygon class="ls-beam" points="400,72 318,392 482,392"/>
+            <ellipse class="ls-halo" cx="400" cy="316" rx="150" ry="118"/>
+            <rect class="ls-glow" x="158" y="86" width="484" height="220" rx="6" opacity=".18"/>
+          </g>
+
+          <!-- stage floor -->
+          <line class="ls-floor" x1="172" y1="368" x2="628" y2="368"/>
+          <line class="ls-stroke ls-thin" x1="196" y1="384" x2="604" y2="384"/>
+
+          <!-- the lone figure (you) -->
+          <g class="ls-actorRise">
+            <g class="ls-actor">
+              <circle cx="400" cy="296" r="13"/>
+              <path d="M400 309 V352"/>
+              <path d="M400 318 L379 336 M400 318 L421 336"/>
+              <path d="M400 352 L385 368 M400 352 L415 368"/>
+            </g>
+          </g>
+        </g>
+
+        <!-- curtains part outward, on top of the opening -->
+        <g class="ls-curtains">
+          <g class="ls-cL">
+            <rect class="ls-curtain" x="140" y="70" width="262" height="324" rx="6"/>
+            <path class="ls-curtainFold" d="M178 74 V390 M216 74 V390 M254 74 V390 M292 74 V390 M330 74 V390 M368 74 V390"/>
+          </g>
+          <g class="ls-cR">
+            <rect class="ls-curtain" x="398" y="70" width="262" height="324" rx="6"/>
+            <path class="ls-curtainFold" d="M432 74 V390 M470 74 V390 M508 74 V390 M546 74 V390 M584 74 V390 M622 74 V390"/>
+          </g>
+        </g>
+
+        <!-- valance / pelmet across the top -->
+        <path class="ls-curtain" d="M132 60 H668 V92 Q610 116 552 92 Q494 116 436 92 Q400 110 364 92 Q306 116 248 92 Q190 116 132 92 Z"/>
+      </g>
+
+      <!-- ===== AUDIENCE: front-row seats (foreground, static) ===== -->
+      <g class="ls-seats"></g>
+    </svg>
+  </div>
+
+  <div class="ls-caps" aria-hidden="true">
+    <span class="ls-cap c1">正在读你写下的东西…</span>
+    <span class="ls-cap c2">正在拼出你的人物画像…</span>
+    <span class="ls-cap c3">正在为你展开第一幕…</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---- build the front-row seats (line-art chair backs), two rows ----
+  var seats=document.querySelector('#loadingScene .ls-seats');
+  if(seats){
+    function arch(x,y,w,h,sw){
+      return '<path stroke-width="'+sw+'" d="M'+x+' '+y+' q'+(w/2)+' '+(-h)+' '+w+' 0"/>'
+           + '<path stroke-width="'+sw+'" d="M'+x+' '+y+' v18 M'+(x+w)+' '+y+' v18"/>';
+    }
+    var s='';
+    // back row — further, smaller
+    var aW=104, aH=22, aY=474, x=36;
+    for(var i=0;i<7;i++){ s+=arch(x,aY,aW,aH,2.0); x+=aW; }
+    // front row — closer, larger, offset between the back ones
+    var bW=132, bH=30, bY=526, bx=-30;
+    for(var j=0;j<7;j++){ s+=arch(bx,bY,bW,bH,2.6); bx+=bW; }
+    seats.innerHTML=s;
+  }
+
+  // ---- finishLoading(): graceful wrap-up, but never cut the reveal short ----
+  var MIN_MS=6900;   // let the curtain open / light come up before we can fade
+  var FADE_MS=900;
+  var ov=document.getElementById('loadingScene');
+  if(ov) ov.__t0=Date.now();
+  window.finishLoading=function(cb){
+    var o=document.getElementById('loadingScene');
+    if(!o || o.__done) return; o.__done=true;
+    var wait=Math.max(0, MIN_MS-(Date.now()-(o.__t0||Date.now())));
+    setTimeout(function(){
+      o.classList.add('ls-out');
+      setTimeout(function(){ o.style.display='none'; if(typeof cb==='function') cb(); }, FADE_MS);
+    }, wait);
+  };
+  // expose a way to (re)show it, for host pages that reuse the overlay
+  window.showLoading=function(){
+    var o=document.getElementById('loadingScene');
+    if(!o) return; o.__done=false; o.__t0=Date.now();
+    o.classList.remove('ls-out'); o.style.display='flex';
+  };
+  // immediate teardown (e.g. on error) — no graceful fade
+  window.hideLoading=function(){
+    var o=document.getElementById('loadingScene');
+    if(!o) return; o.__done=true; o.classList.remove('ls-out'); o.style.display='none';
+  };
+})();
+</script>
+</body></html>

@@ -1,0 +1,179 @@
+[
+ {
+  "key": "truth_vs_protection",
+  "label": "真实vs保护",
+  "pole_a": "真实",
+  "pole_b": "保护",
+  "type": "value-tradeoff",
+  "note": "在志愿决策中选择真实面对问题还是保护自己不受伤害",
+  "probed_by": [
+   "external_noise_vs_introspection",
+   "idealism_vs_realism"
+  ]
+ },
+ {
+  "key": "principle_vs_loyalty",
+  "label": "原则vs忠诚",
+  "pole_a": "原则",
+  "pole_b": "忠诚",
+  "type": "value-tradeoff",
+  "note": "在志愿决策中坚持原则还是对家庭或社会忠诚",
+  "probed_by": [
+   "prestige_vs_skill"
+  ]
+ },
+ {
+  "key": "voice_vs_silence",
+  "label": "发声vs沉默",
+  "pole_a": "发声",
+  "pole_b": "沉默",
+  "type": "locus",
+  "note": "在志愿决策中表达自我还是保持沉默",
+  "probed_by": [
+   "external_noise_vs_introspection",
+   "daily_and_social"
+  ]
+ },
+ {
+  "key": "agency_vs_observation",
+  "label": "行动vs观察",
+  "pole_a": "行动",
+  "pole_b": "观察",
+  "type": "risk-posture",
+  "note": "在志愿决策中主动行动还是观察等待",
+  "probed_by": [
+   "city_and_opportunity",
+   "career_prospect"
+  ]
+ },
+ {
+  "key": "process_vs_outcome",
+  "label": "过程vs结果",
+  "pole_a": "过程",
+  "pole_b": "结果",
+  "type": "value-tradeoff",
+  "note": "在志愿决策中注重过程还是结果",
+  "probed_by": [
+   "cost_and_sacrifice",
+   "major_change_and_cost"
+  ]
+ },
+ {
+  "key": "time_horizon",
+  "label": "当下/短期 vs 未来/长期",
+  "pole_a": "当下/短期",
+  "pole_b": "未来/长期",
+  "type": "time-horizon",
+  "note": "在志愿决策中更看重眼前/短期回报,还是未来/长期发展",
+  "probed_by": [
+   "economic_and_return",
+   "career_stability"
+  ]
+ },
+ {
+  "key": "self_vs_external",
+  "label": "自我 vs 他人/家庭",
+  "pole_a": "自我",
+  "pole_b": "他人/家庭",
+  "type": "identity",
+  "note": "在志愿决策中优先自我意愿,还是顺应他人/家庭期望(家庭是最常见的'他人')",
+  "probed_by": [
+   "gender_and_industry",
+   "region_and_employment"
+  ]
+ },
+ {
+  "key": "rigor_vs_mercy",
+  "label": "严谨vs宽容",
+  "pole_a": "严谨",
+  "pole_b": "宽容",
+  "type": "bias",
+  "note": "在志愿决策中追求严谨还是宽容",
+  "probed_by": []
+ },
+ {
+  "key": "risk_appetite",
+  "label": "稳定/避险 vs 闯荡/冒险",
+  "pole_a": "稳定/避险",
+  "pole_b": "闯荡/冒险",
+  "type": "risk-posture",
+  "note": "在志愿决策中对风险的接受程度:求稳避险 vs 为更大可能去冒险",
+  "probed_by": [
+   "career_stability",
+   "city_and_opportunity",
+   "economic_and_return",
+   "ai_replaceability"
+  ]
+ },
+ {
+  "key": "material_vs_meaning",
+  "label": "物质vs意义",
+  "pole_a": "物质回报",
+  "pole_b": "意义",
+  "type": "value-tradeoff",
+  "note": "在志愿决策中追求物质回报还是意义",
+  "probed_by": [
+   "economic_and_return",
+   "idealism_vs_realism"
+  ]
+ },
+ {
+  "key": "worklife_balance",
+  "label": "生活质量 vs 事业强度",
+  "pole_a": "生活/作息可控",
+  "pole_b": "高强度高回报",
+  "type": "value-tradeoff",
+  "note": "在志愿决策中更看重工作生活平衡、可控作息,还是接受高强度以换取更高回报/成就(如医学、土木的高负荷,'没有生活只有施工')",
+  "probed_by": [
+   "cost_and_sacrifice",
+   "hot_major_and_involution"
+  ]
+ },
+ {
+  "key": "aptitude_fit",
+  "label": "能力匹配 vs 抱负冲高",
+  "pole_a": "选学得来/擅长的",
+  "pole_b": "冲更高/更难但未必擅长",
+  "type": "ability-fit",
+  "note": "在志愿决策中量力而行、选自己学得来且擅长的,还是冲更高/更难的专业(专业难度 × 自身能力的权衡)",
+  "probed_by": [
+   "interest_and_strength",
+   "course_and_academic"
+  ]
+ },
+ {
+  "key": "city_vs_other",
+  "label": "城市/地域 vs 学校/专业",
+  "pole_a": "优先城市/地域",
+  "pole_b": "优先学校/专业(可接受地点不理想)",
+  "type": "value-tradeoff",
+  "note": "在志愿决策中为了理想城市/地域,是否愿意在学校或专业上让步(反之亦然)",
+  "probed_by": [
+   "city_and_opportunity",
+   "region_and_employment"
+  ]
+ },
+ {
+  "key": "employability_orientation",
+  "label": "就业对口/前景 vs 其他",
+  "pole_a": "以就业对口/行业前景主导",
+  "pole_b": "兴趣/其他价值优先于就业",
+  "type": "value-tradeoff",
+  "note": "在志愿决策中以'毕业好就业/行业前景好'为主导标准,还是把就业放在兴趣/其他价值之后",
+  "probed_by": [
+   "career_prospect",
+   "ai_replaceability"
+  ]
+ },
+ {
+  "key": "school_vs_major",
+  "label": "学校层次 vs 专业契合",
+  "pole_a": "优先学校层次/平台",
+  "pole_b": "优先专业契合/兴趣(可接受学校一般)",
+  "type": "value-tradeoff",
+  "note": "在志愿决策中优先冲更好的学校/平台,还是优先选更契合/想读的专业(经典'文科选学校、理工选专业'之争)",
+  "probed_by": [
+   "prestige_vs_skill"
+  ]
+ }
+]
