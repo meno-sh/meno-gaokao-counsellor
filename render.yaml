@@ -1,0 +1,23 @@
+# Render blueprint for meno-gaokao-counsellor. Secrets are set in the Render
+# dashboard (sync:false) — never in git. Mirrors the old gaokao/yulai services.
+services:
+  - type: web
+    name: meno-gaokao-counsellor
+    runtime: python
+    plan: starter
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "PYTHONPATH=. python3 -m serving.web --port $PORT"
+    healthCheckPath: /
+    envVars:
+      - key: OPENROUTER_API_KEY   # LLM (scene/profile/report)
+        sync: false
+      - key: OPENAI_API_KEY       # voice STT
+        sync: false
+      - key: GAOKAO_LOG_SINK      # off-box durable session-log collector (box tunnel)
+        sync: false
+      - key: GAOKAO_API_KEYS      # yulai/雨来 deploy: set 雨来's bearer key; public deploy: leave empty
+        sync: false
+      - key: GAOKAO_ADMIN_TOKEN
+        sync: false
+      - key: YULAI_API_KEY        # to call 雨来's evidence API for grounding
+        sync: false

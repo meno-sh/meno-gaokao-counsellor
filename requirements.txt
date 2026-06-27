@@ -1,0 +1,1 @@
+# meno-gaokao-counsellor: stdlib-only engine; no third-party deps.
