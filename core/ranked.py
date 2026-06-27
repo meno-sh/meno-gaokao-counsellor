@@ -154,19 +154,34 @@ def intake_chat_reply(page, state, history, message) -> str:
     except Exception:
         return ""
 
+def _fallback_report(profile, final_order) -> str:
+    """Deterministic, LLM-free report so rank_report is never empty."""
+    order = " > ".join(final_order or []) or "(暂无排序)"
+    narr = (getattr(profile, "narrative", "") or "").strip() or "(暂无画像)"
+    return ("## 你的反思小结\n\n"
+            f"**当前排序：** {order}\n\n"
+            f"**我对你的理解：**\n{narr}\n\n"
+            "（这份小结是基于你这一路的选择自动生成的简版——它不替你做决定，只把你已经表露的倾向回映给你。"
+            "可以再玩一次、或把上面的排序和理解拿去和家人朋友聊聊。）")
+
 def user_report(profile, final_order) -> str:
     """End-of-game reflective report from the 画像: present current state + competing
-    objectives, never prescribe pitfalls. Best-effort; '' on failure."""
-    try:
-        elic = "\n".join("- 「%s」问:%s / 答:%s" % (e.get("scene",""), e.get("q",""), e.get("a",""))
-                          for e in (getattr(profile, "elicited", []) or [])) or "(无)"
-        prompt = prompts.render("user_report", narrative=(profile.narrative or "(暂无)"),
-            elicited=elic, order=" > ".join(final_order or []))
-        rr = _llm_json(prompt, max_tokens=2200, temperature=0.5,
-                       model=os.environ.get("GAOKAO_PROFILE_MODEL", "deepseek/deepseek-v4-pro"))
-        return ((rr or {}).get("report") or "").strip()
-    except Exception:
-        return ""
+    objectives, never prescribe pitfalls. Retries once, then a deterministic fallback
+    so the report is never empty."""
+    for _attempt in range(2):
+        try:
+            elic = "\n".join("- 「%s」问:%s / 答:%s" % (e.get("scene",""), e.get("q",""), e.get("a",""))
+                              for e in (getattr(profile, "elicited", []) or [])) or "(无)"
+            prompt = prompts.render("user_report", narrative=(profile.narrative or "(暂无)"),
+                elicited=elic, order=" > ".join(final_order or []))
+            rr = _llm_json(prompt, max_tokens=2200, temperature=0.5,
+                           model=os.environ.get("GAOKAO_PROFILE_MODEL", "deepseek/deepseek-v4-pro"))
+            rep = ((rr or {}).get("report") or "").strip()
+            if rep:
+                return rep
+        except Exception:
+            pass
+    return _fallback_report(profile, final_order)
 
 def _opt_label(o) -> str:
     return (o or {}).get("label", "") if isinstance(o, dict) else str(o)
@@ -360,6 +375,22 @@ def unified_turn(top, rest, profile_text, seen_keys, rerank_log, examined_dims=N
         if k in r:
             r[k] = _strip_unverified_numbers(_clean(r[k]), _gctx)
     r["sources"] = _auth_sources(r.get("sources"))
+    if not r.get("contender"):                       # the contender label is the #2 option, not LLM-optional
+        r["contender"] = rest[0] if rest else ""
+    if not r.get("top"):
+        r["top"] = top
+    if not (r.get("prose") and r.get("contender_take")):   # rare LLM field-drop -> one re-gen, keep if better
+        try:
+            r2 = _llm_json(prompt, online=_WEBSEARCH, max_tokens=2000)
+            for _k in ("prose", "top_take", "contender_take", "question"):
+                if _k in r2: r2[_k] = _strip_unverified_numbers(_clean(r2[_k]), _gctx)
+            if r2.get("prose") and r2.get("contender_take"):
+                r2["sources"] = _auth_sources(r2.get("sources"))
+                r2["contender"] = r2.get("contender") or (rest[0] if rest else "")
+                r2["top"] = r2.get("top") or top
+                r = r2
+        except Exception:
+            pass
     sk = r.get("scene")
     scene = next((s for s in pool if s["key"] == sk), None) or pool[0]
     r["_factor"] = {"key": scene["key"], "label": scene["label"]}
