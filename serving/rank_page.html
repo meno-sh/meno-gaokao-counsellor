@@ -1154,9 +1154,12 @@ async function loadReport(){
   const dots=startDots(box,EN?'writing your report':'正在为你生成报告');
   try{const r=await fetch('/rank_report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID})});
     const d=await r.json(); stopDots(dots);
+    window._REPORT_MD = d.report || '';
     box.innerHTML = d.report ? mdLite(d.report) : (EN?'<p class=muted>(report unavailable)</p>':'<p class=muted>(报告暂不可用)</p>');
   }catch(e){stopDots(dots);box.innerHTML=EN?'<p class=muted>failed to load</p>':'<p class=muted>报告加载失败</p>';}
 }
+function copyReport(){const t=window._REPORT_MD||'';if(!t)return;try{navigator.clipboard.writeText(t);}catch(e){}}
+function downloadReport(){const t=window._REPORT_MD||'';if(!t)return;const blob=new Blob([t],{type:'text/markdown;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(LANG==='en'?'reflection_report.md':'反思报告.md');document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},100);}
 function mdLite(t){
   const esc=function(x){return x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
   let html='',inUl=false;
@@ -1279,7 +1282,7 @@ function renderEnd(e){
     <p class=story style="max-width:42em">${summary}</p>
     ${portraitBlock(portrait,EN)}
     <p class=story style="max-width:42em">${decision}</p>
-    <div id=reportbox class=reportbox><div class=factor>📄 ${EN?'Your reflection report':'你的反思报告'}</div><div id=reportbody class=reportbody></div></div>
+    <div id=reportbox class=reportbox><div class=factor>📄 ${EN?'Your reflection report':'你的反思报告'} <button type=button class=ghost style="font-size:.78rem;font-weight:400;padding:2px 10px" onclick="copyReport()">${EN?'copy':'复制'}</button> <button type=button class=ghost style="font-size:.78rem;font-weight:400;padding:2px 10px" onclick="downloadReport()">${EN?'download':'下载'}</button></div><div id=reportbody class=reportbody></div></div>
     <div class=elicitbox style="margin:14px 0"><div class=factor style="font-size:.95rem">💬 ${EN?'One more thing':'临走前'}</div>
       <div id=endchatlog><div class="cmsg cmsg-a">${EN?'I feel I understand you fairly well now. Anything you want to talk through before you go?':'AI 对你已经有了相当深的了解,临走前,还有什么想聊聊的吗?'}</div></div>
       <div class=elicitrow id=endchatrow><input type=text id=endcin class=elicitin placeholder="${EN?'Type or use 🎙…':'说点什么…(可语音)'}"><button type=button class="ghost elmic" title="${tr('micTitle')}" onclick="recVoice(document.getElementById('endvst'),document.getElementById('endcin'),true)">🎙</button><button type=button class=elsend onclick="sendChat('endcin','endchatlog','end','endchatrow')">${EN?'Send':'发送'}</button></div><span id=endvst class=prog></span></div>
@@ -1298,6 +1301,7 @@ function renderEnd(e){
       <p style="margin-top:8px"><button onclick=sendFeedback()>${EN?'Submit':'提交反馈'}</button> <span id=fbstat class=prog></span></p>
     </div>
   </div>`;
+  try{ loadReport(); }catch(e){}
 }
 function toggleFeedback(){const b=document.getElementById('fbbox');b.style.display=b.style.display==='none'?'':'none';}
 async function sendFeedback(){const t=(document.getElementById('fbtext').value||'').trim();const EN=LANG==='en';
