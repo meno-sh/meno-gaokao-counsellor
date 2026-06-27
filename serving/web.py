@@ -192,6 +192,7 @@ def _spawn_prefetch(sess):
 
 _LOG_PATH = os.path.join(os.environ.get("GAOKAO_DATA_DIR", "/data/reflection-game/gaokao-data"), "session_log.jsonl")
 _LOG_SINK = os.environ.get("GAOKAO_LOG_SINK", "")
+_API_KEYS = set(k.strip() for k in os.environ.get("GAOKAO_API_KEYS", "").split(",") if k.strip())  # non-empty => API requires Bearer key (yulai/雨来 deployment); empty (main/public) => open
 import time as _time, collections as _collections
 _RL = _collections.defaultdict(list)                       # ip -> [rank_start timestamps], last hour
 _RL_MAX = int(os.environ.get("GAOKAO_RL_PER_HOUR", "100")) # per-IP game cap (tunable via env)  # off-box durable collector: POST one json line per session event
@@ -694,6 +695,10 @@ class H(BaseHTTPRequestHandler):
         _cap = 16 * 1024 * 1024 if self.path.split("?")[0] == "/voice_profile" else 2 * 1024 * 1024
         if _clen > _cap:
             return self._send(413, json.dumps({"error": "payload too large"}))
+        if _API_KEYS:                                  # yulai/雨来 deployment: require a Bearer API key
+            _a = self.headers.get("Authorization", "")
+            if (_a[7:] if _a.startswith("Bearer ") else "") not in _API_KEYS:
+                return self._send(401, json.dumps({"error": "unauthorized"}, ensure_ascii=False))
         if self.path in ("/prompts_save", "/prompts_reset") and not self._admin_ok():
             return self._send(403, json.dumps({"error": "forbidden"}))
         if self.path == "/resolve_options":
