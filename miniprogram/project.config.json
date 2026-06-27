@@ -1,0 +1,9 @@
+{
+  "description": "高考志愿·反思填报 小程序",
+  "compileType": "miniprogram",
+  "libVersion": "latest",
+  "appid": "touristappid",
+  "projectname": "gaokao-reflection",
+  "miniprogramRoot": "./",
+  "setting": { "es6": true, "minified": true, "urlCheck": true, "postcss": true }
+}

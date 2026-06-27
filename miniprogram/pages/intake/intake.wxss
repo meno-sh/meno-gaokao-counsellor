@@ -1,0 +1,11 @@
+
+
+/* 3-step intake + per-step chat */
+.iprog { display:flex; gap:12rpx; justify-content:center; margin: 8rpx 0 28rpx; }
+.iprog .ipd { width:56rpx; height:8rpx; border-radius:4rpx; background:#e7ddcb; }
+.iprog .ipd.on { background:#C96442; }
+.ichat { margin:24rpx 0; border-top:1rpx dashed #e7ddcb; padding-top:20rpx; display:flex; flex-direction:column; gap:12rpx; }
+.ic-h { align-self:flex-end; background:#3a342e; color:#fff; padding:12rpx 20rpx; border-radius:18rpx 18rpx 4rpx 18rpx; max-width:80%; font-size:27rpx; line-height:1.5; }
+.ic-a { align-self:flex-start; background:#f6efe2; color:#3a342e; padding:12rpx 20rpx; border-radius:18rpx 18rpx 18rpx 4rpx; max-width:80%; font-size:27rpx; line-height:1.55; }
+
+.ichat-ttl { font-size:29rpx; font-weight:600; color:#3a342e; margin-bottom:4rpx; }

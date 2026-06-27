@@ -1,0 +1,16 @@
+{
+  "pages": [
+    "pages/intake/intake",
+    "pages/game/game",
+    "pages/ending/ending",
+    "pages/report/report"
+  ],
+  "window": {
+    "navigationBarTitleText": "高考志愿·反思填报",
+    "navigationBarBackgroundColor": "#FBF7EF",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FBF7EF"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

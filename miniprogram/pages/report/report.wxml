@@ -1,0 +1,10 @@
+<view class="wrap">
+  <view class="h1">你的反思报告</view>
+  <block wx:for="{{blocks}}" wx:key="idx">
+    <view wx:if="{{item.t==='h'}}" class="h2">{{item.x}}</view>
+    <view wx:elif="{{item.t==='li'}}" class="prose" style="padding-left:18rpx">· {{item.x}}</view>
+    <view wx:else class="prose" style="margin:10rpx 0">{{item.x}}</view>
+  </block>
+  <view class="btn ghost" bindtap="copy">复制全文</view>
+  <view class="btn" bindtap="restart">再来一局</view>
+</view>

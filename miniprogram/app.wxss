@@ -1,0 +1,16 @@
+/* 雨来/Yusoong design token: 暖纸 + 赤陶 */
+page { background: #FBF7EF; color: #2b2622; font-family: -apple-system, "PingFang SC", "Noto Serif SC", serif; }
+.wrap { padding: 32rpx 36rpx 120rpx; }
+.h1 { font-size: 44rpx; font-weight: 700; line-height: 1.35; margin: 8rpx 0 18rpx; }
+.h2 { font-size: 34rpx; font-weight: 700; margin: 24rpx 0 12rpx; }
+.muted { color: #8a8178; font-size: 26rpx; }
+.card { background: #fff; border: 1rpx solid #ece3d4; border-radius: 20rpx; padding: 26rpx; margin: 16rpx 0; box-shadow: 0 2rpx 10rpx rgba(0,0,0,.03); }
+.btn { background: #C96442; color: #fff; border-radius: 999rpx; padding: 22rpx 0; text-align: center; font-size: 32rpx; font-weight: 600; margin: 18rpx 0; }
+.btn[disabled] { opacity: .5; }
+.btn.ghost { background: transparent; color: #C96442; border: 1rpx solid #D97757; }
+.prose { font-size: 30rpx; line-height: 1.7; color: #3a342e; }
+.accent { color: #C96442; font-weight: 600; }
+.row { display: flex; align-items: center; gap: 16rpx; }
+.input { background:#fff; border:1rpx solid #ece3d4; border-radius:14rpx; padding:18rpx 20rpx; font-size:30rpx; }
+.tag { display:inline-block; background:#F3E9DC; color:#8a6d4b; border-radius:999rpx; padding:6rpx 18rpx; font-size:24rpx; margin:6rpx 8rpx 0 0; }
+.slider-val { color:#C96442; font-weight:700; }

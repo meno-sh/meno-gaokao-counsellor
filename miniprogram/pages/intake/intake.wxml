@@ -1,0 +1,86 @@
+<view class="wrap">
+  <view class="iprog">
+    <view class="ipd {{step>=1?'on':''}}"></view>
+    <view class="ipd {{step>=2?'on':''}}"></view>
+    <view class="ipd {{step>=3?'on':''}}"></view>
+    <view class="ipd {{step>=4?'on':''}}"></view>
+  </view>
+
+  <!-- STEP 1: 专业选择 -->
+  <block wx:if="{{step===1}}">
+    <view class="h1">先选你在<text class="accent">纠结</text>的 专业 @ 学校</view>
+    <view class="muted">点麦克风说一段也行——我帮你把候选填好,你再确认。</view>
+    <view class="card" style="text-align:center;padding:34rpx">
+      <view class="btn" style="display:inline-block;width:60%" bindtap="toggleRec">{{recording?'● 停止录音':'🎙 开始说'}}</view>
+      <view class="muted" style="margin-top:14rpx">{{vstat}}</view>
+      <view wx:if="{{transcript}}" class="prose" style="margin-top:14rpx;text-align:left">「{{transcript}}」</view>
+    </view>
+    <view class="muted" style="text-align:center;margin:6rpx 0">—— 或手动填 ——</view>
+    <view class="h2">候选(2–6 个)· 专业 @ 学校</view>
+    <block wx:for="{{options}}" wx:key="idx">
+      <view class="card">
+        <view class="row">
+          <input class="input" style="flex:1" placeholder="如 计算机科学与技术@浙江大学" value="{{item.label}}" data-i="{{index}}" bindinput="onLabel"/>
+          <text class="accent" style="padding:0 8rpx" data-i="{{index}}" bindtap="removeOpt">删</text>
+        </view>
+        <input class="input" style="margin-top:12rpx" placeholder="(可选) 我对它的看法" value="{{item.note}}" data-i="{{index}}" bindinput="onNote"/>
+      </view>
+    </block>
+    <view class="btn ghost" bindtap="addOpt" wx:if="{{options.length < 6}}">+ 再加一个</view>
+    <view class="ichat">
+      <view class="ichat-ttl">和 AI 聊一聊你的想法</view>
+      <block wx:for="{{chat1}}" wx:key="idx"><view class="{{item.role==='h'?'ic-h':'ic-a'}}">{{item.text}}</view></block>
+      <view class="row"><input class="input" style="flex:1" placeholder="跟 AI 聊聊这一步…(可选)" value="{{draft1}}" data-n="1" bindinput="onChatInput" bindconfirm="sendChat"/><view class="btn ghost" data-n="1" bindtap="sendChat">问</view></view>
+    </view>
+    <view class="btn" bindtap="next">下一步 →</view>
+  </block>
+
+  <!-- STEP 2: 你的纠结 + 对未来的宏观思考 -->
+  <block wx:if="{{step===2}}">
+    <view class="h1">你的<text class="accent">纠结</text>,和对未来的想法</view>
+    <view class="h2">你在纠结什么?(可选)</view>
+    <textarea class="input" style="width:100%;height:140rpx" placeholder="比如:家里希望我学医,但我自己更想做设计…" value="{{freeText}}" bindinput="onFree"/>
+    <view class="h2">你对未来有什么宏观的思考?(可选)</view>
+    <textarea class="input" style="width:100%;height:140rpx" placeholder="比如:我希望生活稳定,但也想做点有意义的事;我不想一辈子困在一个地方…" value="{{macroText}}" bindinput="onMacro"/>
+    <view class="ichat">
+      <view class="ichat-ttl">和 AI 聊一聊你的想法</view>
+      <block wx:for="{{chat2}}" wx:key="idx"><view class="{{item.role==='h'?'ic-h':'ic-a'}}">{{item.text}}</view></block>
+      <view class="row"><input class="input" style="flex:1" placeholder="跟 AI 聊聊这一步…(可选)" value="{{draft2}}" data-n="2" bindinput="onChatInput" bindconfirm="sendChat"/><view class="btn ghost" data-n="2" bindtap="sendChat">问</view></view>
+    </view>
+    <view class="row" style="gap:16rpx"><view class="btn ghost" style="flex:1" bindtap="prev">← 上一步</view><view class="btn" style="flex:1" bindtap="next">下一步 →</view></view>
+  </block>
+
+  <!-- STEP 3: 你看重什么 -->
+  <block wx:if="{{step===3}}">
+    <view class="h1">你更<text class="accent">看重</text>什么</view>
+    <view class="h2">拖动分配(共 100)</view>
+    <view class="muted">钱 {{w.money}} · 兴趣 {{w.interest}} · 影响力 {{w.influence}}</view>
+    <view class="row"><text style="width:90rpx">钱</text><slider style="flex:1" min="0" max="100" value="{{w.money}}" activeColor="#C96442" data-k="money" bindchanging="onW" bindchange="onW"/></view>
+    <view class="row"><text style="width:90rpx">兴趣</text><slider style="flex:1" min="0" max="100" value="{{w.interest}}" activeColor="#C96442" data-k="interest" bindchanging="onW" bindchange="onW"/></view>
+    <view class="row"><text style="width:90rpx">影响力</text><slider style="flex:1" min="0" max="100" value="{{w.influence}}" activeColor="#C96442" data-k="influence" bindchanging="onW" bindchange="onW"/></view>
+    <view class="h2">毕业后更倾向</view>
+    <view class="row" style="flex-wrap:wrap;gap:12rpx">
+      <text wx:for="{{destOpts}}" wx:key="*this" class="tag" style="{{dest===item?'background:#C96442;color:#fff':''}}" data-d="{{item}}" bindtap="pickDest">{{item}}</text>
+    </view>
+    <view class="ichat">
+      <view class="ichat-ttl">和 AI 聊一聊你的想法</view>
+      <block wx:for="{{chat3}}" wx:key="idx"><view class="{{item.role==='h'?'ic-h':'ic-a'}}">{{item.text}}</view></block>
+      <view class="row"><input class="input" style="flex:1" placeholder="跟 AI 聊聊这一步…(可选)" value="{{draft3}}" data-n="3" bindinput="onChatInput" bindconfirm="sendChat"/><view class="btn ghost" data-n="3" bindtap="sendChat">问</view></view>
+    </view>
+    <view class="row" style="gap:16rpx"><view class="btn ghost" style="flex:1" bindtap="prev">← 上一步</view><view class="btn" style="flex:1" bindtap="next">下一步 →</view></view>
+  </block>
+
+  <!-- STEP 4: 更懂你一点 -->
+  <block wx:if="{{step===4}}">
+    <view class="h1">最后,<text class="accent">更懂你</text>一点</view>
+    <view class="h2">你现在对第 1 名有多确定?<text class="slider-val">{{conf}}</text>/100</view>
+    <slider min="0" max="100" value="{{conf}}" activeColor="#C96442" block-size="22" bindchanging="onConf" bindchange="onConf"/>
+    <view class="ichat">
+      <view class="ichat-ttl">和 AI 聊一聊你的想法</view>
+      <block wx:for="{{chat4}}" wx:key="idx"><view class="{{item.role==='h'?'ic-h':'ic-a'}}">{{item.text}}</view></block>
+      <view class="row"><input class="input" style="flex:1" placeholder="跟 AI 聊聊这一步…(可选)" value="{{draft4}}" data-n="4" bindinput="onChatInput" bindconfirm="sendChat"/><view class="btn ghost" data-n="4" bindtap="sendChat">问</view></view>
+    </view>
+    <view class="row" style="gap:16rpx"><view class="btn ghost" style="flex:1" bindtap="prev">← 上一步</view><view class="btn" style="flex:1" bindtap="start" disabled="{{busy}}">{{busy?'生成中…':'开始 →'}}</view></view>
+    <view class="muted" wx:if="{{err}}" style="color:#c0392b">{{err}}</view>
+  </block>
+</view>

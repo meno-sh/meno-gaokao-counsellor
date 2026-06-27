@@ -1,0 +1,23 @@
+<view class="wrap">
+  <view class="h1">这局结束了——<text class="accent">这是你照出来的自己</text></view>
+
+  <view class="card">
+    <view class="muted">价值画像</view>
+    <view class="prose">{{e.portrait}}</view>
+  </view>
+
+  <view class="h2">排序怎么变的</view>
+  <view class="card">
+    <view class="muted">开始</view>
+    <view wx:for="{{e.initial_order}}" wx:key="*this" class="prose">{{index+1}}. {{item}}</view>
+    <view class="muted" style="margin-top:12rpx">最后</view>
+    <view wx:for="{{e.final_order}}" wx:key="*this" class="prose"><text class="accent">{{index+1}}. {{item}}</text></view>
+  </view>
+
+  <view class="h2">走完之后,你对第 1 名有多确定？<text class="slider-val">{{conf}}</text>/100</view>
+  <view class="muted">开始时:{{e.confidence_initial}}</view>
+  <slider min="0" max="100" value="{{conf}}" activeColor="#C96442" block-size="22" bindchanging="onConf" bindchange="onConf"/>
+
+  <view class="btn" bindtap="finish" disabled="{{busy}}">{{busy?'生成反思报告…':'生成我的反思报告 →'}}</view>
+  <view class="muted" wx:if="{{err}}" style="color:#c0392b">{{err}}</view>
+</view>

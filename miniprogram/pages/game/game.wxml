@@ -1,0 +1,58 @@
+<view class="wrap">
+  <view class="muted">第 {{stage.stage}} / 7 站 · 张力：<text class="accent">{{stage.factor.label}}</text></view>
+
+  <!-- 场景 -->
+  <view class="card">
+    <view class="prose">{{stage.prose}}</view>
+  </view>
+
+  <!-- top vs contender -->
+  <view class="card">
+    <view class="h2" style="margin-top:0">🅰 {{stage.top}}</view>
+    <view class="prose">{{stage.top_take}}</view>
+    <view class="h2">🅱 {{stage.contender}}</view>
+    <view class="prose">{{stage.contender_take}}</view>
+  </view>
+
+  <!-- 来源 -->
+  <view wx:if="{{stage.sources && stage.sources.length}}" class="muted" style="margin:8rpx 0">
+    <text bindtap="toggleSrc" class="accent">{{showSrc?'收起来源':'查看来源'}}</text>
+    <view wx:if="{{showSrc}}">
+      <view wx:for="{{stage.sources}}" wx:key="idx" class="muted">· {{item}}</view>
+    </view>
+  </view>
+
+  <!-- 当前排序 + 重排 -->
+  <view class="h2">你现在的排序(点 ↑ 调整;换第 1 会改后面的推演)</view>
+  <block wx:for="{{order}}" wx:key="*this">
+    <view class="card row" style="justify-content:space-between;padding:18rpx 22rpx">
+      <text>{{index+1}}. {{item}}</text>
+      <view class="row">
+        <text class="accent" style="padding:0 12rpx" data-i="{{index}}" bindtap="moveUp" wx:if="{{index>0}}">↑</text>
+        <text class="accent" style="padding:0 12rpx" data-i="{{index}}" bindtap="moveDown" wx:if="{{index < order.length-1}}">↓</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 每轮确定度 -->
+  <view class="h2">你现在对第 1 名「<text class="accent">{{order[0]}}</text>」有多确定？<text class="slider-val">{{conf}}</text>/100</view>
+  <slider min="0" max="100" value="{{conf}}" activeColor="#C96442" block-size="22" bindchanging="onConf" bindchange="onConf"/>
+
+  <!-- elicit + chat -->
+  <view wx:if="{{stage.elicit}}" class="card">
+    <view class="muted">最想听你说：</view>
+    <view class="prose">{{stage.elicit}}</view>
+  </view>
+  <block wx:for="{{chat}}" wx:key="idx">
+    <view wx:if="{{item.role==='sys'}}" class="muted" style="margin:8rpx 0">{{item.text}}</view>
+  <view wx:else class="prose" style="margin:8rpx 0"><text class="accent">{{item.role==='me'?'你':'AI'}}：</text>{{item.text}}</view>
+  </block>
+  <view class="row" wx:if="{{turnsLeft>0}}">
+    <input class="input" style="flex:1" placeholder="回应这一站(还可 {{turnsLeft}} 轮)" value="{{draft}}" bindinput="onDraft"/>
+    <text class="accent" style="padding:0 12rpx" bindtap="send">发送</text>
+  </view>
+
+  <view class="btn" bindtap="next" disabled="{{busy}}">{{busy?'生成下一站…':(isLast?'看看结论 →':'下一站 →')}}</view>
+  <view class="btn ghost" bindtap="endNow" wx:if="{{!isLast}}" disabled="{{busy}}">直接看结论</view>
+  <view class="muted" wx:if="{{err}}" style="color:#c0392b">{{err}}</view>
+</view>
