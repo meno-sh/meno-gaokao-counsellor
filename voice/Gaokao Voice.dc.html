@@ -583,7 +583,9 @@ class Component extends DCLogic {
   }
   addMore = () => {
     if (this._tw) clearInterval(this._tw);
-    this._appendBase = (this.state.transcript || '').trim();
+    const cur = (this.state.transcript || '').trim();
+    // a "(没听清…)" / "(网络…)" placeholder must be REPLACED on re-supplement, never appended
+    this._appendBase = /^[\(（]/.test(cur) ? '' : cur;
     this._appending = true;
     this.setState({ transcriptDone: false });
     this._startListening();
