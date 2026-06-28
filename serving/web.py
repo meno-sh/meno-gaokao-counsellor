@@ -509,6 +509,7 @@ class H(BaseHTTPRequestHandler):
         _spawn_prefetch(sess)
         if st is None:
             return self._send(200, json.dumps({"phase": "ending", "ending": sess.ending()}, ensure_ascii=False))
+        _log_session({"event": "stage", "sid": body.get("sid"), "stage": st.get("stage"), "dwell_ms": body.get("dwell_ms"), "factor": (st.get("factor") or {}).get("label")})  # drop-off funnel
         return self._send(200, json.dumps({"stage": st}, ensure_ascii=False))
 
     def _handle_rank_reorder(self, body):
