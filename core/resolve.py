@@ -76,7 +76,7 @@ def _resolve_llm(items):
             "【专业清单(专业只能从这里选)】\n" + "、".join(_majors()) + "\n\n"
             "【学校】从输入里**识别出其中的大学并给规范全称**(常见简称必须展开:北大→北京大学、清华→清华大学、浙大→浙江大学、复旦→复旦大学、上交→上海交通大学、人大→中国人民大学、华科→华中科技大学、武大→武汉大学 等);只有输入里**确实没有任何学校信息**才 notfound。下面候选池仅供参考、可能不全,不必拘泥:" + (sl or "(无)") + "。类别占位符(某985/某211/双一流/某大学)原样保留。\n\n"
             f'待解析(原始输入,可能是 专业@学校、学校与专业连写如「北大哲学系」、或任意写法):"{it["raw"]}"  (其中专业部分≈"{it["major_raw"]}",学校部分≈"{it["school_raw"] or "（未分出,自行从原始输入识别）"}")\n\n'
-            "专业→最匹配的1个规范名(高置信 status=ok)或2-3候选(ambiguous)或 notfound;学校同理;常见缩写(cs→计算机科学与技术、软工→软件工程、ai→人工智能)直接 ok。\n"
+            "专业→**具体专业**(计算机/法律/软工…)给最匹配的1个规范名 status=ok;**宽泛门类**(医学/工程/教育/管理/经济 等能对应多个具体专业的)→ status=ambiguous + **4-6 个最常见的具体专业、最常见排最前**(例:医学→[临床医学,口腔医学,基础医学,预防医学,医学影像学,中医学];工程→[机械工程,电子信息工程,土木工程,…]);拿不准给 2-3 候选;实在没有才 notfound。学校同理;常见缩写(cs→计算机科学与技术、软工→软件工程、ai→人工智能)直接 ok。\n"
             '只输出 JSON: {"major":{"canonical":"<或空>","candidates":["..."],"status":"ok|ambiguous|notfound"},'
             '"school":{"canonical":"<或空>","candidates":["..."],"status":"ok|ambiguous|notfound"}}')
         out = _llm(prompt)
@@ -86,11 +86,18 @@ def _resolve_llm(items):
 def _validate(field, pool):
     if not isinstance(field, dict): return {"status": "notfound", "candidates": []}
     seq = ([field.get("canonical")] if field.get("canonical") else []) + (field.get("candidates") or [])
-    cands = list(dict.fromkeys([c for c in seq if c in pool]))
-    if field.get("canonical") in pool and field.get("status") == "ok":
-        return {"canonical": field["canonical"], "status": "ok", "kind": "llm", "candidates": cands or [field["canonical"]]}
-    if cands: return {"status": "ambiguous", "candidates": cands[:3]}
-    return {"status": "notfound", "candidates": []}
+    cands = []                                   # keep LLM order (= commonness when prompted); fuzzy-canonicalize non-exact
+    for c in seq:
+        if not c: continue
+        if c in pool: cands.append(c)
+        else:
+            mm = difflib.get_close_matches(c, pool, n=1, cutoff=0.6)
+            if mm: cands.append(mm[0])
+    cands = list(dict.fromkeys(cands))
+    if not cands: return {"status": "notfound", "candidates": []}
+    if field.get("status") == "ok" and len(cands) == 1:
+        return {"canonical": cands[0], "status": "ok", "kind": "llm", "candidates": cands}
+    return {"status": "ambiguous", "candidates": cands[:6]}   # broad/uncertain -> user picks
 
 def _passthrough(major_raw, school_raw, em=None):
     mj = em or major_raw
