@@ -502,9 +502,16 @@ class RankedSession:
         self.options = [by[l] for l in new_order if l in by] + [o for o in self.options if _opt_label(o) not in set(new_order)]
         new = self.current_order()
         if old != new:
+            _p = self._pending or {}
             self.rerank_log.append({"stage": self.stage, "from": old, "to": new,
                                     "top_changed": old[0] != new[0],
-                                    "factor": (self._sp().get(self.stage) or {}).get("label")})  # triggering tension
+                                    "factor": (self._sp().get(self.stage) or {}).get("label"),  # triggering tension
+                                    "saw": {              # what the user was looking at when they changed their mind (the "why")
+                                        "dim": (_p.get("factor") or {}).get("label"),
+                                        "question": _p.get("question"),
+                                        "top": _p.get("top"), "contender": _p.get("contender"),
+                                        "top_take": _p.get("top_take"), "contender_take": _p.get("contender_take"),
+                                    }})
             # NB: do NOT clear the prefetch cache — it's keyed per-option (stage, label),
             # so the new #1's next stage is already cached → re-rank stays instant.
 
