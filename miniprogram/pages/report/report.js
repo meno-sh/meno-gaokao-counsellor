@@ -15,6 +15,9 @@ Page({
     });
     return out;
   },
+  openYusoong() {
+    wx.setClipboardData({ data: "https://gaokao.yusoong.com/", success: () => wx.showToast({ title: "链接已复制,去浏览器打开", icon: "none" }) });
+  },
   copy(){ wx.setClipboardData({ data: this.data.raw }); },
   restart(){ wx.reLaunch({ url:"/pages/intake/intake" }); }
 });

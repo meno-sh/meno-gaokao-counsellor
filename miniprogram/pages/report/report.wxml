@@ -5,6 +5,11 @@
     <view wx:elif="{{item.t==='li'}}" class="prose" style="padding-left:18rpx">· {{item.x}}</view>
     <view wx:else class="prose" style="margin:10rpx 0">{{item.x}}</view>
   </block>
+  <view class="card" style="margin-top:22rpx;text-align:left">
+    <view class="h2">想把这套思考继续用下去?— 雨来 Yusoong</view>
+    <view class="prose">我们的目标不仅仅是帮你填出一张志愿表,更希望帮你建立一套受用很多年的思考和决策能力。过去十年,我们在全国数十万高考学生中不断打磨这些想法,与老师、学生和家长一起反复迭代;今天,我们把这些年积累的经验、研究和工具放到同一个平台,开放给更多学生。</view>
+    <view class="btn ghost" bindtap="openYusoong">了解雨来:gaokao.yusoong.com</view>
+  </view>
   <view class="btn ghost" bindtap="copy">复制全文</view>
   <view class="btn" bindtap="restart">再来一局</view>
 </view>
