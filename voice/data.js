@@ -1,5 +1,5 @@
-// data.js — bilingual UI strings + mock dataset for the Gaokao voice refactor.
-// Loaded as a global so the DC logic + template can read it. window.GK = { STR, ... }.
+// data.js — bilingual UI strings + intake question structure for the Gaokao voice refactor.
+// Loaded as a global so the DC logic + template can read it. window.GK = { STR, INTAKE }.
 (function () {
   // ---- UI chrome strings (cn / en) ----
   const STR = {
@@ -91,6 +91,7 @@
       rerankWhatSame: '你没有改顺序。假想一下，什么样的信息或情况,才可能让你改变排法?',
       rerankSkip: '跳过,直接继续',
       loading: '正在展开下一站……',
+      backendUnavailable: '后端暂时连不上,请稍后再试。',
     },
     en: {
       brand: 'Reflect',
@@ -173,34 +174,17 @@
       rerankWhatSame: 'You kept the same order. What would have made you change your ranking?',
       rerankSkip: 'Skip and continue',
       loading: 'Opening the next stop…',
+      backendUnavailable: 'The backend is unavailable right now. Please try again later.',
     },
   };
 
   const pair = (cn, en) => ({ cn, en });
 
-  // ---- mock pairs (major @ university) ----
-  const PAIRS = [
-    { id: 'p1', label: pair('临床医学 @ 中山大学', 'Clinical Medicine @ Sun Yat-sen U.'), color: '#BC6242',
-      know: pair('听说很苦,要读很多年,但工作稳定,家里也希望我学医。',
-                 "I hear it's brutal and takes many years, but it's stable, and my family wants me in medicine.") },
-    { id: 'p2', label: pair('计算机科学与技术 @ 华南理工大学', 'Computer Science @ SCUT'), color: '#3873A8',
-      know: pair('工资高,机会多,但好像很卷,也怕被 AI 取代。',
-                 'Pays well and has lots of openings, but it looks cut-throat, and I worry about being replaced by AI.') },
-    { id: 'p3', label: pair('金融学 @ 上海财经大学', 'Finance @ SUFE'), color: '#53984F',
-      know: pair('在上海,听起来很体面,但不确定自己是不是真的喜欢。',
-                 "It's in Shanghai and sounds prestigious, but I'm not sure I actually like it.") },
-    { id: 'p4', label: pair('法学 @ 中国政法大学', 'Law @ CUPL'), color: '#7E55A4',
-      know: pair('想做点和公平有关的事,但听说法考很难,前几年很熬。',
-                 'I want to do something about fairness, but I hear the bar exam is hard and the first years are rough.') },
-  ];
-
   // ---- intake voice questions (besides the per-pair "what do you know" ones) ----
   const INTAKE = {
     pairs: { id: 'pairs',
       prompt: pair('先说说,你在纠结哪几个「专业@学校」?', 'First, which major@university pairs are you torn between?'),
-      hint: pair('说 2 到 6 个就好,不用想得太全。', 'Two to six of them is plenty. No need to be exhaustive.'),
-      mock: pair('我在临床医学中山大学、计算机华南理工、金融上海财经,还有法学中国政法之间纠结。',
-                 "I'm torn between clinical medicine at Sun Yat-sen, CS at SCUT, finance at SUFE, and law at CUPL.") },
+      hint: pair('说 2 到 6 个就好,不用想得太全。', 'Two to six of them is plenty. No need to be exhaustive.') },
     perPair: {
       promptCn: (l) => `关于「${l}」,你已经知道些什么?`,
       promptEn: (l) => `What do you already know about "${l}"?`,
@@ -208,103 +192,21 @@
     tail: [
       { id: 'struggle',
         prompt: pair('你最纠结的,到底是什么?', 'What are you most torn about?'),
-        hint: pair('', ''),
-        mock: pair('家里特别希望我学医,觉得稳定。可我心里更想做点自由、有创造的事。',
-                   "My family really wants me in medicine because it's stable. But honestly I'd rather do something freer and more creative.") },
+        hint: pair('', '') },
       { id: 'macro',
         prompt: pair('对以后的人生,你有什么大方向上的想法?', 'For your life ahead, what do you want in the big picture?'),
-        hint: pair('不用具体,说说你想要怎样的生活。', "It doesn't have to be concrete. Just the kind of life you want."),
-        mock: pair('我想要生活能稳一点,但又不想一眼望到头,最好还能做点自己觉得有意义的事。',
-                   'I want some stability, though I would hate a life I can already see to the end of. Ideally something that feels meaningful too.') },
+        hint: pair('不用具体,说说你想要怎样的生活。', "It doesn't have to be concrete. Just the kind of life you want.") },
       { id: 'values',
         prompt: pair('钱、兴趣、影响力,你最看重哪个?', 'Money, interest, impact. Which matters most to you?'),
-        hint: pair('排个序,或者说说它们之间怎么权衡。', 'Rank them, or talk through how you weigh them.'),
-        mock: pair('兴趣最重要,其次是影响力,钱够用就行,但也不能太少。',
-                   'Interest matters most, then impact. Money just needs to be enough, though not too little.') },
+        hint: pair('排个序,或者说说它们之间怎么权衡。', 'Rank them, or talk through how you weigh them.') },
       { id: 'dest',
         prompt: pair('毕业以后,你更想走哪条路?国内升学、出国留学、私企就业、国企就业、考公考编、创业,还是其他?', 'After graduating, which way do you lean? Grad school in China, study abroad, a private-sector job, a state-owned job, civil service exams, starting something, or other?'),
-        hint: pair('还没想好也没关系,说说倾向就行。', "It's fine to be unsure. Just your leaning."),
-        mock: pair('大概率会想读研,先把专业学扎实,出国也不排斥。',
-                   "Probably grad school, to get a solid footing first. I'm open to going abroad too.") },
+        hint: pair('还没想好也没关系,说说倾向就行。', "It's fine to be unsure. Just your leaning.") },
       { id: 'conf',
         prompt: pair('现在,你对排在第一的那个有多确定?', 'Right now, how sure are you about your number one?'),
-        hint: pair('用「不太确定」到「非常确定」之间的话说说。', 'Anywhere from "not really" to "very sure".'),
-        mock: pair('说实话不太确定,大概一半一半吧,所以才来走这一趟。',
-                   "Honestly not very. Maybe fifty-fifty. That's why I'm here.") },
+        hint: pair('用「不太确定」到「非常确定」之间的话说说。', 'Anywhere from "not really" to "very sure".') },
     ],
   };
 
-  // ---- mock rethink stops ----
-  const STOPS = [
-    { factorKey: 'course_and_academic', factor: pair('课程与学业', 'Coursework & study'),
-      high: pair('你选的专业,大一大二真正要学的课、强度和方向,你扛得住、也喜欢吗?',
-                 'The courses you will actually take in years one and two, the workload, the direction. Can you carry it, and do you like it?'),
-      futureA: { color: '#BC6242', pose: 'think', mood: 'sad',
-        q: pair('如果有一天,你连着五年泡在解剖楼和病理切片里,同龄人早已上班,你还在背不完的考点里熬夜,你受得了吗?',
-                "What if one day you spend five straight years among cadaver labs and pathology slides, your peers already working while you're still up at night on endless exam points. Could you bear that?") },
-      futureB: { color: '#3873A8', pose: 'shrug', mood: 'confused',
-        q: pair('如果有一天,你刚啃完的技术框架半年就过时,得不停自学才追得上,没人给你标准答案,你受得了吗?',
-                'What if one day the stack you just mastered goes obsolete in half a year, you have to keep teaching yourself to stay current, and no one hands you the answer. Could you bear that?') },
-      mic: pair('哪一种更让你怕?说说看,也可以改主意。', 'Which one scares you more? Talk it through, and feel free to change your mind.') },
-
-    { factorKey: 'economic_and_return', factor: pair('经济与回报', 'Money & return'),
-      high: pair('这条路的经济回报,和你、和家里需要的,对得上吗?',
-                 'Does the money this road pays line up with what you and your family need?'),
-      futureA: { color: '#BC6242', pose: 'think', mood: 'sad',
-        q: pair('如果有一天,你规培几年只拿微薄补贴,同学早就年薪可观,你三十岁才算真正开始挣钱,你受得了吗?',
-                'What if one day you spend years in residency on a tiny stipend while classmates already earn real money, and you only start truly earning at thirty. Could you bear that?') },
-      futureB: { color: '#53984F', pose: 'shrug', mood: 'confused',
-        q: pair('如果有一天,你拿着漂亮的起薪,却被业绩和行情拴着,行业一冷大家都人人自危,你受得了吗?',
-                'What if one day you draw a great starting salary but stay chained to targets and the market, and one downturn has everyone fearing for their job. Could you bear that?') },
-      mic: pair('钱对你到底有多重要?诚实一点。', 'How much does money really matter to you? Be honest.') },
-
-    { factorKey: 'career_prospect', factor: pair('职业前景', 'Career prospects'),
-      high: pair('把时间拉长到十年,这条路通向的地方,是你想去的吗?',
-                 'Stretch it out ten years. Is where this road leads somewhere you want to be?'),
-      futureA: { color: '#BC6242', pose: 'think', mood: 'neutral',
-        q: pair('如果有一天,你终于熬成主治,日子被夜班和医患关系填满,想抽身去过别的人生却很难,你受得了吗?',
-                'What if one day you finally make attending physician, but your days fill with night shifts and patient tensions, and stepping away for another kind of life gets very hard. Could you bear that?') },
-      futureB: { color: '#7E55A4', pose: 'point', mood: 'neutral',
-        q: pair('如果有一天,你考过了最难的法考,头几年却薪水微薄、案子琐碎,熬出头遥遥无期,你受得了吗?',
-                'What if one day you pass the hardest bar exam, but the first years pay little on small cases, and breaking through still feels far off. Could you bear that?') },
-      mic: pair('十年后的你,会感谢现在的选择吗?', 'Would the you of ten years from now thank you for this choice?') },
-
-    { factorKey: 'city_and_opportunity', factor: pair('城市与机会', 'City & opportunity'),
-      high: pair('你要待的城市,给得了你想要的机会和生活吗?',
-                 'Can the city you will live in give you the opportunities and the life you want?'),
-      futureA: { color: '#BC6242', pose: 'think', mood: 'sad',
-        q: pair('如果有一天,你被分到一座小城的医院,稳定却安静,大城市的热闹和机会都跟你没关系,你受得了吗?',
-                'What if one day you are posted to a hospital in a small city, stable but quiet, and the buzz and opportunity of big cities have nothing to do with you. Could you bear that?') },
-      futureB: { color: '#3873A8', pose: 'shrug', mood: 'confused',
-        q: pair('如果有一天,你挤在一线城市的格子间,机会很多,房租和通勤也很多,想落脚都难,你受得了吗?',
-                'What if one day you are squeezed into a cubicle in a first-tier city, with plenty of opportunity but plenty of rent and commute too, and even getting a foothold is hard. Could you bear that?') },
-      mic: pair('你想要的,是稳,还是闯?', 'What do you want more, to settle or to strive?') },
-
-    { factorKey: 'cost_and_sacrifice', factor: pair('代价与放弃', 'Cost & sacrifice'),
-      high: pair('选了这条路,你其实放弃了什么?那个代价,你认吗?',
-                 'Take this road and what are you really giving up? That cost, do you own it?'),
-      futureA: { color: '#BC6242', pose: 'think', mood: 'neutral',
-        q: pair('如果有一天,你成了别人眼里的好医生,却很少有时间画画、旅行、陪想陪的人,你受得了吗?',
-                "What if one day you become everyone's idea of a good doctor, but rarely have time to paint, to travel, or to be with the people you want. Could you bear that?") },
-      futureB: { color: '#53984F', pose: 'shrug', mood: 'confused',
-        q: pair('如果有一天,你做着自由又喜欢的事,却得一个人扛起所有不确定,没人替你兜底,你受得了吗?',
-                'What if one day you do the free thing you love, but carry all the uncertainty alone, with no one to catch you. Could you bear that?') },
-      mic: pair('为了想要的,你愿意放下什么?', 'For what you want, what are you willing to put down?') },
-  ];
-
-  // ---- mock ending ----
-  const ENDING = {
-    portrait: pair(
-      '你嘴上说想稳,但每一站真正让你停下来的,都是「会不会被框住」「还做不做得了自己喜欢的事」。辛苦你扛得住,你更在意的是别把选择的余地弄丢。你想走的,是一条以后还能改写的路。',
-      "You say you want stability, but at every stop the thing that actually stopped you was whether you'd be boxed in, and whether you'd still get to do what you love. You can handle hard work. What you really mind is losing room to choose. The road you want is one you can still rewrite later."),
-    report: pair(
-      ['你这一路一直绕回同一个张力,稳定和自由。你想要稳定带来的安全感,又舍不得自由留下的余地。',
-       '它们未必只能二选一。接下来值得你去查证的是,每条路能不能各占一点。医学里有没有相对自由的方向?走自由那条路,能不能给自己搭一张安全网?',
-       '这份小结不会替你下结论。它只是把你这一路已经露出来的倾向说给你听,你可以拿去和家人、朋友再聊聊。'],
-      ['You kept circling back to one tension, stability and freedom. You want the security stability brings, and you cannot quite give up the room freedom leaves you.',
-       'They may not have to be a choice between two. Worth checking next is whether each road can hold a little of both. Is there a freer direction inside medicine? On the freer road, can you build yourself a safety net?',
-       "This summary won't conclude anything for you. It just says back to you the leanings you've already shown, so you can take them to family and friends."]),
-  };
-
-  window.GK = { STR, PAIRS, INTAKE, STOPS, ENDING };
+  window.GK = { STR, INTAKE };
 })();

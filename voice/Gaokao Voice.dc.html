@@ -366,6 +366,15 @@
     </div>
   </sc-if>
 
+  <!-- ============ ERROR (backend unavailable) ============ -->
+  <sc-if value="{{ isError }}">
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 24px;text-align:center">
+      <div style="font-size:13px;letter-spacing:3px;color:#B0A48E;text-transform:uppercase">{{ t.brand }}</div>
+      <h2 style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:34px;max-width:18em;margin:14px 0 10px;line-height:1.2;color:#BC6242">{{ errMsg }}</h2>
+      <button onClick="{{ onStart }}" style="margin-top:16px;font-size:18px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:15px;padding:11px 28px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">↻ {{ t.micRetry }}</button>
+    </div>
+  </sc-if>
+
   <!-- ============ LOADING overlay ============ -->
   <sc-if value="{{ isLoading }}">
     <div style="position:fixed;inset:0;background:rgba(251,246,234,.92);z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
@@ -376,14 +385,15 @@
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;forceMock&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Backend&quot;},&quot;apiBase&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;https://gaokao.meno.sh&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Backend&quot;},&quot;startLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cn&quot;,&quot;en&quot;],&quot;default&quot;:&quot;cn&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Language&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;apiBase&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;https://gaokao.meno.sh&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Backend&quot;},&quot;startLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cn&quot;,&quot;en&quot;],&quot;default&quot;:&quot;cn&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Language&quot;}}">
 class Component extends DCLogic {
   state = {
-    lang: 'cn', mode: 'mock', phase: 'launch',
+    lang: 'cn', mode: 'live', phase: 'launch',
     qIndex: 0, micState: 'idle', transcript: '', transcriptDone: false,
     typing: false, typedVal: '',
     stopIndex: 0, figReveal: 0,   // 0 none, 1 A, 2 A+B, 3 +mic
     showCornerEnd: false, confFinal: 0, tick: 0,
+    errMsg: '',
   };
 
   // ---- lifecycle ----
@@ -519,18 +529,27 @@ class Component extends DCLogic {
 
   onStart = async () => {
     const mode = await this._detectMode();
-    this.mode = mode;
-    const lo = (this.props.live && false);
-    if (mode === 'mock') { this.minStops = 3; this.minNoChange = 0; this.pairs = (window.GK.PAIRS || []).slice(); }
-    else { this.minStops = 8; this.minNoChange = 5; this.pairs = []; }
+    if (mode !== 'live') {
+      // backend unreachable: surface an error state (live-only, no fallback)
+      this._showError();
+      return;
+    }
+    this.mode = 'live';
+    this.minStops = 8; this.minNoChange = 5; this.pairs = [];
     this.intakeQs = [{ kind: 'pairs' }];
     this.expanded = false;
-    this.setState({ mode, phase: 'intake', qIndex: 0 });
+    this.setState({ mode: 'live', errMsg: '', phase: 'intake', qIndex: 0 });
     this._resetMic(); this._scrollTop();
   };
 
+  _showError(msg) {
+    const t = this.T();
+    this.setState({ phase: 'error', errMsg: msg || t.backendUnavailable || 'backend unavailable' });
+    this._scrollTop();
+  }
+
+  // Reachability check only. The only non-error mode is 'live'.
   async _detectMode() {
-    if (this.props.forceMock) return 'mock';
     const base = this.props.apiBase || '';
     try {
       const ctrl = new AbortController();
@@ -539,7 +558,7 @@ class Component extends DCLogic {
       clearTimeout(to);
       if (r.ok) return 'live';
     } catch (e) {}
-    return 'mock';
+    return 'error';
   }
 
   // ---- mic interaction (shared) ----
@@ -562,54 +581,32 @@ class Component extends DCLogic {
   async _startListening() {
     this._listenStart = this.now;
     this.setState({ micState: 'listening', transcriptDone: false });
-    if (this.mode === 'live') {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this._stream = stream; this._liveRec = true; this._chunks = [];
-        const AC = window.AudioContext || window.webkitAudioContext;
-        this._actx = new AC(); const src = this._actx.createMediaStreamSource(stream);
-        this._analyser = this._actx.createAnalyser(); this._analyser.fftSize = 512; src.connect(this._analyser);
-        this._rec = new MediaRecorder(stream);
-        this._rec.ondataavailable = e => this._chunks.push(e.data);
-        this._rec.onstop = () => { stream.getTracks().forEach(t => t.stop()); this._sendVoice(new Blob(this._chunks, { type: 'audio/webm' })); };
-        this._rec.start();
-      } catch (e) { this._liveRec = false; this._analyser = null; /* fall through to mock auto-stop */ }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this._stream = stream; this._liveRec = true; this._chunks = [];
+      const AC = window.AudioContext || window.webkitAudioContext;
+      this._actx = new AC(); const src = this._actx.createMediaStreamSource(stream);
+      this._analyser = this._actx.createAnalyser(); this._analyser.fftSize = 512; src.connect(this._analyser);
+      this._rec = new MediaRecorder(stream);
+      this._rec.ondataavailable = e => this._chunks.push(e.data);
+      this._rec.onstop = () => { stream.getTracks().forEach(t => t.stop()); this._sendVoice(new Blob(this._chunks, { type: 'audio/webm' })); };
+      this._rec.start();
+    } catch (e) {
+      // mic unavailable: drop to keyboard input, never fabricate a transcript
+      this._liveRec = false; this._analyser = null;
+      this.setState({ typing: true, micState: 'typing', transcript: '', transcriptDone: false });
     }
   }
   _stopListening() {
-    if (this.mode === 'live' && this._liveRec && this._rec) {
+    if (this._liveRec && this._rec) {
       this._liveRec = false; this.setState({ micState: 'thinking' });
       try { this._rec.stop(); } catch (e) {}
       if (this._actx) { try { this._actx.close(); } catch (e) {} this._actx = null; }
       this._analyser = null;
       return;
     }
-    // mock
-    this.setState({ micState: 'thinking' });
-    setTimeout(() => this._typeTranscript(this._mockTranscript()), 520);
-  }
-  _mockTranscript() {
-    const GK = window.GK, lang = this.state.lang;
-    if (this._appending) {
-      const more = this.state.phase === 'stop'
-        ? (lang === 'cn' ? '再补一句,我其实最怕的是以后改不了主意。' : "And one more thing, what I dread most is not being able to change my mind later.")
-        : (lang === 'cn' ? '对了,补充一下,我也挺看重以后还能不能一直学到新东西。' : "Oh, to add to that, I also care about whether I'll keep learning new things.");
-      return more;
-    }
-    if (this.state.phase === 'stop') {
-      return lang === 'cn' ? '我说不太清……但好像我更怕那种一眼望到头、改不了的人生。' : "I can't say exactly… but I think I fear more the life I can see to the end of, the one I can't change.";
-    }
-    if (this.state.phase === 'rerank') {
-      const changed = !this._arrEq(this.order, this.orderBeforeStop);
-      return changed
-        ? (lang === 'cn' ? '如果有人能让我相信那条路的就业其实更稳,我大概就不会换了。' : "If someone could convince me the other road is actually more secure for work, I probably wouldn't have switched.")
-        : (lang === 'cn' ? '除非我亲眼看到学长学姐过得很好,否则我还是不太敢换。' : "Unless I saw seniors who took the other road doing really well, I wouldn't dare change.");
-    }
-    const q = this.intakeQs[this.state.qIndex] || {};
-    if (q.kind === 'pairs') return this.L(GK.INTAKE.pairs.mock);
-    if (q.kind === 'perpair') return this.L((q.pair || {}).know);
-    if (q.kind === 'tail') return this.L(q.mock);
-    return '';
+    // no active recording (e.g. mic denied): drop to keyboard input
+    this.setState({ typing: true, micState: 'typing', transcript: '', transcriptDone: false });
   }
   async _sendVoice(blob) {
     const base = this.props.apiBase || '';
@@ -651,11 +648,6 @@ class Component extends DCLogic {
   onType = (e) => { this.setState({ typedVal: e.target.value }); };
   onSubmitType = () => {
     const v = (this.state.typedVal || '').trim(); if (!v) return;
-    const GK = window.GK;
-    if (this.state.phase === 'intake') {
-      const q = this.intakeQs[this.state.qIndex] || {};
-      if (q.kind === 'pairs' && this.mode === 'mock') { /* keep mock pairs */ }
-    }
     this.setState({ typing: false, transcript: v, micState: 'done', transcriptDone: true });
   };
 
@@ -682,20 +674,19 @@ class Component extends DCLogic {
   }
   async _finishIntake() {
     this.order = (this.pairs || []).map(p => p.id);
-    if (this.mode === 'live') {
-      this.setState({ phase: 'loading' });
-      try {
-        const base = this.props.apiBase || '';
-        const body = {
-          options: this.pairs.map(p => ({ label: this.L(p.label), note: this.L(p.know) })),
-          free_text: '', quiz: {}, destination_pref: [], confidence_initial: this.confInitial,
-          value_weights: { money: 33, interest: 34, influence: 33 }, lang: this.state.lang,
-        };
-        const r = await fetch(base + '/rank_start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        const d = await r.json();
-        if (d.sid) { this.sid = d.sid; this.liveStage = d.stage; if (d.stage && d.stage.order) this.order = this._matchOrder(d.stage.order); }
-      } catch (e) { this.mode = 'mock'; this.minStops = 3; this.minNoChange = 0; }
-    }
+    this.setState({ phase: 'loading' });
+    try {
+      const base = this.props.apiBase || '';
+      const body = {
+        options: this.pairs.map(p => ({ label: this.L(p.label), note: this.L(p.know) })),
+        free_text: '', quiz: {}, destination_pref: [], confidence_initial: this.confInitial,
+        value_weights: { money: 33, interest: 34, influence: 33 }, lang: this.state.lang,
+      };
+      const r = await fetch(base + '/rank_start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await r.json();
+      if (d.sid) { this.sid = d.sid; this.liveStage = d.stage; if (d.stage && d.stage.order) this.order = this._matchOrder(d.stage.order); }
+      else { this._showError(); return; }
+    } catch (e) { this._showError(); return; }
     this._enterRerank('initial'); this._scrollTop();
   }
   _matchOrder(labels) {
@@ -716,7 +707,7 @@ class Component extends DCLogic {
     const i = this.order.indexOf(id); if (i < 0) return;
     const j = i + dir; if (j < 0 || j >= this.order.length) return;
     const o = this.order.slice(); const tmp = o[i]; o[i] = o[j]; o[j] = tmp; this.order = o;
-    if (this.mode === 'live' && this.sid) {
+    if (this.sid) {
       const base = this.props.apiBase || '';
       fetch(base + '/rank_reorder', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, order: this.order.map(id2 => this.L(this._pairById(id2).label)) }) }).catch(() => {});
     }
@@ -752,7 +743,7 @@ class Component extends DCLogic {
     const ans = (this.state.transcript || '').trim();
     this.stopLog[i] = Object.assign(this.stopLog[i] || {}, { factor: d.factor, answer: ans, answerLen: ans.length, dwellMs: Date.now() - (this._stopEnterWall || Date.now()) });
     this.stopsCompleted += 1;
-    if (this.mode === 'live' && this.sid) {
+    if (this.sid) {
       const base = this.props.apiBase || '';
       fetch(base + '/rank_elicit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, stage: d.n, scene: d.factor, q: d.mic, answer: ans }) }).catch(() => {});
     }
@@ -766,21 +757,16 @@ class Component extends DCLogic {
     }
   }
   async _goNextStopOrEnd() {
-    if (this.mode === 'live' && this.sid) {
-      this.setState({ phase: 'loading' });
-      try {
-        const base = this.props.apiBase || '';
-        const r = await fetch(base + '/rank_next', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, order: this.order.map(id => this.L(this._pairById(id).label)) }) });
-        const d = await r.json();
-        if (d.phase === 'ending' || d.ending) { this.liveEnding = d.ending; this._enterEnding(); return; }
-        if (d.stage) { this.liveStage = d.stage; this._enterStop((this.state.stopIndex || 0) + 1); return; }
-      } catch (e) {}
-      this._enterEnding(); return;
-    }
-    const next = this.state.stopIndex + 1;
-    const GK = window.GK;
-    if (next < (GK.STOPS || []).length) this._enterStop(next);
-    else this._enterEnding();
+    this.setState({ phase: 'loading' });
+    try {
+      const base = this.props.apiBase || '';
+      const r = await fetch(base + '/rank_next', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, order: this.order.map(id => this.L(this._pairById(id).label)) }) });
+      const d = await r.json();
+      if (d.phase === 'ending' || d.ending) { this.liveEnding = d.ending; this._enterEnding(); return; }
+      if (d.stage) { this.liveStage = d.stage; this._enterStop((this.state.stopIndex || 0) + 1); return; }
+    } catch (e) {}
+    // no further stage from backend: wrap up with whatever live ending we have
+    this._enterEnding();
   }
 
   // ---- end choice ----
@@ -792,6 +778,12 @@ class Component extends DCLogic {
   _enterEnding() {
     this.confInitialPctVal = this.confInitial;
     this.setState({ phase: 'ending', confFinal: 0 });
+    // the reflection report comes from a separate endpoint — the ending payload doesn't carry it
+    if (this.sid) {
+      const base = this.props.apiBase || '';
+      fetch(base + '/rank_report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid }) })
+        .then(r => r.json()).then(d => { this.liveReport = d.report || ''; this.setState({}); }).catch(() => {});
+    }
   }
   onReplay = () => {
     this.stopsCompleted = 0; this.consecNoChange = 0; this.endChoiceShown = false;
@@ -804,11 +796,11 @@ class Component extends DCLogic {
 
   _scrollTop() { try { window.scrollTo(0, 0); } catch (e) {} }
 
-  // ---- stop display (mock or live) ----
+  // ---- stop display (live) ----
   getStopDisp() {
-    const GK = window.GK, t = this.T();
-    if (this.mode === 'live' && this.liveStage) {
-      const s = this.liveStage;
+    const t = this.T();
+    const s = this.liveStage || {};
+    {
       const frame = (tk) => {
         tk = (tk || '').replace(/[。.!！?？\s]+$/, '');
         return this.state.lang === 'cn' ? `如果有一天,${tk},你受得了吗?` : `What if one day ${tk}. Could you bear that?`;
@@ -822,13 +814,6 @@ class Component extends DCLogic {
         mic: s.elicit || s.question || t.stopMicLead,
       };
     }
-    const st = (GK.STOPS || [])[this.state.stopIndex] || (GK.STOPS || [])[0] || {};
-    return {
-      n: this.state.stopIndex + 1, factor: this.L(st.factor), high: this.L(st.high),
-      figA: { color: (st.futureA || {}).color, pose: (st.futureA || {}).pose, mood: (st.futureA || {}).mood, label: t.stopFutureA, q: this.L((st.futureA || {}).q) },
-      figB: { color: (st.futureB || {}).color, pose: (st.futureB || {}).pose, mood: (st.futureB || {}).mood, label: t.stopFutureB, q: this.L((st.futureB || {}).q) },
-      mic: this.L(st.mic),
-    };
   }
 
   // ============ RENDER VALUES ============
@@ -885,14 +870,11 @@ class Component extends DCLogic {
     const initialList = (this.initialOrder || []).map((id, i) => ({ rank: i + 1, label: labelOf(id) }));
     const finalList = (this.order || []).map((id, i) => ({ rank: i + 1, label: labelOf(id) }));
     let portrait = '', reportParas = [];
-    if (this.mode === 'live' && this.liveEnding) {
-      portrait = this.liveEnding.portrait || '';
-      reportParas = [{ text: this.liveReport || '' }];
-    } else {
-      portrait = this.L(GK.ENDING ? GK.ENDING.portrait : '');
-      const r = (GK.ENDING && GK.ENDING.report) ? (GK.ENDING.report[s.lang] || GK.ENDING.report.cn) : [];
-      reportParas = (r || []).map(x => ({ text: String(x).replace(/\*\*/g, '') }));
-    }
+    const le = this.liveEnding || {};
+    portrait = le.portrait || '';
+    const lr = le.report;
+    if (Array.isArray(lr)) reportParas = lr.map(x => ({ text: String(x).replace(/\*\*/g, '') }));
+    else reportParas = [{ text: String(lr || this.liveReport || '').replace(/\*\*/g, '') }];
     const confFinal = s.confFinal || 0;
     const confDots = [1, 2, 3, 4, 5].map(v => ({ bg: v <= confFinal ? '#BC6242' : '#FFFDF4', onClick: () => this._setConf(v) }));
     const confLabel = confFinal ? (confFinal * 20) + '%' : (s.lang === 'cn' ? '点一下表示' : 'tap to set');
@@ -941,8 +923,9 @@ class Component extends DCLogic {
       t,
       isLaunch: phase === 'launch', isIntake: phase === 'intake', isRerank: phase === 'rerank',
       isStop: phase === 'stop', isEndChoice: phase === 'endchoice', isEnding: phase === 'ending', isLoading: phase === 'loading',
-      badgeText: this.mode === 'live' ? t.liveBadge : t.demoBadge,
-      badgeColor: this.mode === 'live' ? '#53984F' : '#B0A48E',
+      isError: phase === 'error', errMsg: s.errMsg,
+      badgeText: t.liveBadge,
+      badgeColor: '#53984F',
       onLang: this.onLang, onStart: this.onStart,
       expectItems,
       progDots, qPrompt, qHint,
