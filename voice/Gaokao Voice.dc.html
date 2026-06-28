@@ -670,6 +670,7 @@ class Component extends DCLogic {
   _advanceIntake() {
     const cur = this.intakeQs[this.state.qIndex] || {};
     if (cur.kind === 'tail' && cur.id) this.intakeAnswers[cur.id] = (this.state.transcript || '').trim();
+    if (cur.kind === 'perpair' && cur.pair) this.intakeAnswers['pair_' + cur.pair.id] = (this.state.transcript || '').trim();
     if (cur.kind === 'pairs' && !this.expanded) { this._expandIntake(); this.expanded = true; }
     const next = this.state.qIndex + 1;
     if (next >= this.intakeQs.length) { this._finishIntake(); return; }
@@ -687,9 +688,18 @@ class Component extends DCLogic {
     this.setState({ phase: 'loading' });
     try {
       const base = this.props.apiBase || '';
+      const A = this.intakeAnswers || {};
+      const ok = v => v && !/^[\(（]/.test(v.trim());   // skip "(没听清)"/"(网络…)" placeholders + empties
+      const parts = [];
+      if (ok(A.macro)) parts.push('对人生大方向的想法:' + A.macro.trim());
+      if (ok(A.values)) parts.push('价值排序(钱/兴趣/影响力):' + A.values.trim());
+      if (ok(A.dest)) parts.push('毕业去向倾向:' + A.dest.trim());
+      (this.pairs || []).forEach(p => { const v = A['pair_' + p.id]; if (ok(v)) parts.push('关于「' + this.L(p.label) + '」的想法:' + v.trim()); });
+      const free_text = parts.join('。 ').slice(0, 600);
+      const dest_pref = ok(A.dest) ? [A.dest.trim().slice(0, 80)] : [];
       const body = {
         options: this.pairs.map(p => ({ label: this.L(p.label), note: this.L(p.know) })),
-        free_text: '', quiz: {}, destination_pref: [], confidence_initial: this.confInitial,
+        free_text, quiz: {}, destination_pref: dest_pref, confidence_initial: this.confInitial,
         value_weights: { money: 33, interest: 34, influence: 33 }, lang: this.state.lang,
       };
       const r = await fetch(base + '/rank_start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
