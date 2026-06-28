@@ -889,7 +889,7 @@ async function recVoice(statusEl, ta, fast){
     MR.ondataavailable=e=>CHUNKS.push(e.data);
     MR.onstop=async()=>{
       stream.getTracks().forEach(t=>t.stop());
-      const blob=new Blob(CHUNKS,{type:'audio/webm'});
+      const blob=new Blob(CHUNKS,{type:(MR&&MR.mimeType)||'audio/webm'});
       const b64=await new Promise(function(res){var fr=new FileReader();fr.onloadend=function(){res(((fr.result||'')+'').split(',')[1]||'');};fr.readAsDataURL(blob);});
       let dots=null;
       if(fast){ statusEl.textContent='转写中…'; } else { dots=startDots(statusEl,'画像生成中,请稍候'); }

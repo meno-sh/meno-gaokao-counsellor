@@ -26,11 +26,12 @@ def transcribe(audio_bytes: bytes, filename: str = "rec.webm", language: str = "
         if a[:4] == b"RIFF": return "wav"
         if a[:4] == b"OggS": return "ogg"
         if a[:3] == b"ID3" or a[:2] == b"\xff\xfb": return "mp3"
-        if a[:4] == b"\x1aE\xdf\xa3": return "webm"   # EBML (webm/mkv) — browser MediaRecorder default
+        if a[:4] == b"\x1aE\xdf\xa3": return "webm"   # EBML (webm/mkv) — Chrome/Firefox MediaRecorder
+        if a[4:8] == b"ftyp": return "mp4"   # Safari MediaRecorder → mp4/m4a (was mislabeled webm → STT failed)
         return "webm"
     ext = _sniff_ext(audio_bytes)
     filename = f"rec.{ext}"
-    _ctype = {"wav": "audio/wav", "ogg": "audio/ogg", "mp3": "audio/mpeg", "webm": "audio/webm"}.get(ext, "application/octet-stream")
+    _ctype = {"wav": "audio/wav", "ogg": "audio/ogg", "mp3": "audio/mpeg", "webm": "audio/webm", "mp4": "audio/mp4"}.get(ext, "application/octet-stream")
     model = model or os.environ.get("VOICE_STT_MODEL", "gpt-4o-mini-transcribe")  # faster than whisper-1
     body = part("model", model) + part("language", language) + part("response_format", "json")
     body += (f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{filename}"\r\n'
