@@ -267,9 +267,15 @@ def _run_job(jid, payload):
             JOBS[jid]["error"] = f"{type(e).__name__}: {e}"
 
 class H(BaseHTTPRequestHandler):
+    def _cors(self):
+        self.send_header("Access-Control-Allow-Origin", "*")  # cross-origin frontends (voice app, open-source) — rate-limiter guards abuse
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+    def do_OPTIONS(self):
+        self.send_response(204); self._cors(); self.send_header("Content-Length", "0"); self.end_headers()
     def _send(self, code, body, ctype="application/json"):
         b = body if isinstance(body, bytes) else body.encode("utf-8")
-        self.send_response(code); self.send_header("Content-Type", ctype)
+        self.send_response(code); self.send_header("Content-Type", ctype); self._cors()
         if ctype.startswith("text/html"):
             self.send_header("Cache-Control", "no-cache, must-revalidate")  # always re-fetch HTML so updates show
         self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b)
