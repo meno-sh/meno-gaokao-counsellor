@@ -161,6 +161,11 @@
   <sc-if value="{{ isStop }}">
     <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:84px 24px 60px;text-align:center;position:relative">
       <div style="font-size:13px;letter-spacing:3px;color:#B0A48E;text-transform:uppercase">{{ stopKicker }}</div>
+      <div style="display:flex;gap:5px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:320px;margin:12px 0 2px">
+        <sc-for list="{{ stopDots }}" as="d" hint-placeholder-count="8">
+          <span style="width:{{ d.size }};height:{{ d.size }};border-radius:50%;background:{{ d.color }};transition:background .3s"></span>
+        </sc-for>
+      </div>
       <p style="font-size:13px;color:#B0A48E;margin:14px 0 2px">{{ t.stopThisStop }}</p>
       <h2 style="font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:26px;max-width:20em;margin:0 0 22px;line-height:1.4;color:#2A2218">{{ stopHigh }}</h2>
 
@@ -545,7 +550,7 @@ class Component extends DCLogic {
       return;
     }
     this.mode = 'live';
-    this.minStops = 8; this.minNoChange = 5; this.pairs = [];
+    this.minStops = 6; this.minNoChange = 3; this.pairs = [];
     this.intakeQs = [{ kind: 'pairs' }];
     this.expanded = false;
     this.setState({ mode: 'live', errMsg: '', phase: 'intake', qIndex: 0 });
@@ -866,6 +871,12 @@ class Component extends DCLogic {
       } else if (q.kind === 'tail') { qPrompt = this.L(q.prompt); qHint = this.L(q.hint); }
     }
     const progDots = (this.intakeQs || []).map((q, i) => ({ color: i <= s.qIndex ? '#BC6242' : '#E2D8C5' }));
+    // stop progress bar: first 8 nodes big (the effective scenes), last 9 small (optional); current highlighted
+    const _curN = (d && d.n) || (this.state.stopIndex + 1);
+    const stopDots = Array.from({ length: 17 }, (_, k) => {
+      const n = k + 1;
+      return { size: (k < 8 ? '11px' : '6px'), color: (n < _curN ? '#D9A88E' : (n === _curN ? '#BC6242' : '#E2D8C5')) };
+    });
 
     // rerank
     const rankItems = (this.order || []).map((id, i) => {
@@ -961,8 +972,8 @@ class Component extends DCLogic {
       showKbToggle, toggleKeyboard: this.toggleKeyboard,
       rankItems, onRerankContinue: this.onRerankContinue,
       isPostStopRerank, rerankWhatPrompt,
-      ...stopVals,
-      showCornerEnd: s.showCornerEnd && phase === 'stop', onCornerEnd: this.onCornerEnd,
+      ...stopVals, stopDots,
+      showCornerEnd: (_curN >= 6 || s.showCornerEnd) && phase === 'stop', onCornerEnd: this.onCornerEnd,
       onFinish: this.onFinish, onNext: this.onNext,
       portrait, initialList, finalList, reportParas,
       statScenes, statSwitches, lingerLabel, dwellLabel, bumpEmpty,
