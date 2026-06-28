@@ -181,6 +181,16 @@
         </sc-if>
       </div>
 
+      <sc-if value="{{ showInvestigator }}">
+      <div style="margin-top:20px;width:100%;max-width:580px;background:#FBF3E2;border:2px dashed #8A7B5C;border-radius:14px;padding:14px 18px;display:flex;gap:14px;align-items:flex-start;text-align:left">
+        <div style="flex:0 0 auto;font-size:32px;line-height:1" aria-label="investigator placeholder">&#128373;&#65039;</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#8A7B5C;font-family:'Noto Sans SC';letter-spacing:1px">{{ t.investigatorTitle }}</div>
+          <div style="font-size:15px;line-height:1.55;color:#2A2218;margin-top:4px">{{ investigatorText }}</div>
+        </div>
+      </div>
+      </sc-if>
+
       <sc-if value="{{ showStopMic }}">
       <div style="margin-top:30px;display:flex;flex-direction:column;align-items:center">
         <p style="font-size:18px;color:#2A2218;font-weight:500;font-family:'Noto Sans SC';max-width:24em;margin:0">{{ stopMicPrompt }}</p>
@@ -801,17 +811,20 @@ class Component extends DCLogic {
     const t = this.T();
     const s = this.liveStage || {};
     {
-      const frame = (tk) => {
-        tk = (tk || '').replace(/[。.!！?？\s]+$/, '');
-        return this.state.lang === 'cn' ? `如果有一天,${tk},你受得了吗?` : `What if one day ${tk}. Could you bear that?`;
-      };
+      const clean = (tk) => (tk || '').trim();
       const fl = s.factor && s.factor.label || '';
+      const cn = this.state.lang === 'cn';
+      // investigator = the OBJECTIVE trade-off (the two paths pull different ways; you cannot have both) — NOT "can you bear it"
+      const investigator = cn
+        ? `分歧点在「${fl}」。这两条路各有侧重、很难兼得 —— 选一个,就意味着在这件事上更偏向它、而让渡另一个。问题不是"哪个更好",而是:在「${fl}」上,你更想要 ${s.top} 那一面,还是 ${s.contender} 那一面?`
+        : `The split here is "${fl}". These two paths pull different ways — you can't fully have both, so picking one means leaning toward it and giving up some of the other. The question isn't "which is better" but: on "${fl}", do you want what ${s.top} offers, or what ${s.contender} offers?`;
       return {
         n: s.stage || (this.state.stopIndex + 1), factor: fl,
-        high: this.state.lang === 'cn' ? `这一站,看看「${fl}」对你究竟意味着什么。` : `This stop: what "${fl}" really means for you.`,
-        figA: { color: '#BC6242', pose: 'think', mood: 'sad', label: (this.state.lang === 'cn' ? `选了「${s.top}」的你` : `The you who chose ${s.top}`), q: frame(s.top_take) },
-        figB: { color: '#3873A8', pose: 'shrug', mood: 'confused', label: (this.state.lang === 'cn' ? `选了「${s.contender}」的你` : `The you who chose ${s.contender}`), q: frame(s.contender_take) },
-        mic: s.elicit || s.question || t.stopMicLead,
+        high: cn ? `这一站,看看「${fl}」对你究竟意味着什么。` : `This stop: what "${fl}" really means for you.`,
+        figA: { color: '#BC6242', pose: 'think', mood: 'sad', label: (cn ? `选了「${s.top}」的你` : `The you who chose ${s.top}`), q: clean(s.top_take) },
+        figB: { color: '#3873A8', pose: 'shrug', mood: 'confused', label: (cn ? `选了「${s.contender}」的你` : `The you who chose ${s.contender}`), q: clean(s.contender_take) },
+        investigator,
+        mic: s.question || s.elicit || t.stopMicLead,   // the backend value/trade-off question (the deep one) — not the old endure-it template
       };
     }
   }
@@ -861,8 +874,8 @@ class Component extends DCLogic {
       stopKicker: (t.stopKicker || 'Stop {n}').replace('{n}', d.n),
       stopHigh: d.high, figAColor: d.figA.color, figBColor: d.figB.color,
       figALabel: d.figA.label, figBLabel: d.figB.label, figAQ: d.figA.q, figBQ: d.figB.q,
-      stopMicPrompt: d.mic,
-      showFigA: fr >= 1, showFigB: fr >= 2, showStopMic: fr >= 3,
+      stopMicPrompt: d.mic, investigatorText: d.investigator,
+      showFigA: fr >= 1, showFigB: fr >= 2, showInvestigator: fr >= 2, showStopMic: fr >= 3,
     } : {};
 
     // ending

@@ -44,6 +44,7 @@
       stopFutureA: '选了这条路的你',
       stopFutureB: '选了另一条路的你',
       stopMicLead: '你怎么看?改主意了吗?',
+      investigatorTitle: '调查者视角',
       // end choice
       endChoiceKicker: '要继续吗?',
       endChoiceTitle: '你已经走过了最该想清楚的几站',
@@ -130,6 +131,7 @@
       stopFutureA: 'The you who took this road',
       stopFutureB: 'The you who took the other road',
       stopMicLead: 'What do you think? Changed your mind?',
+      investigatorTitle: "Investigator's view",
       endChoiceKicker: 'Keep going?',
       endChoiceTitle: "You've walked through the stops that matter most",
       endChoiceLead: 'The remaining stops get finer-grained. You can wrap up now and see the you this walk has surfaced, or take a few more.',
