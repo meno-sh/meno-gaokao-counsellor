@@ -804,9 +804,22 @@ class Component extends DCLogic {
   }
 
   // ---- end choice ----
-  onFinish = () => { this._enterEnding(); this._scrollTop(); };
+  _endViaBackend = async () => {
+    // early-end MUST fetch the ending from the backend — otherwise liveEnding stays null -> empty portrait (same class as the intake bug)
+    this.setState({ phase: 'loading' });
+    if (this.sid) {
+      try {
+        const base = this.props.apiBase || '';
+        const r = await fetch(base + '/rank_end', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, confidence_final: this.state.confFinal || 0, order: this.order.map(id => this.L(this._pairById(id).label)) }) });
+        const d = await r.json();
+        if (d && d.ending) this.liveEnding = d.ending;
+      } catch (e) {}
+    }
+    this._enterEnding(); this._scrollTop();
+  };
+  onFinish = () => { this._endViaBackend(); };
   onNext = () => { this.setState({ showCornerEnd: true }); this._goNextStopOrEnd(); this._scrollTop(); };
-  onCornerEnd = () => { this._enterEnding(); this._scrollTop(); };
+  onCornerEnd = () => { this._endViaBackend(); };
 
   // ---- ending ----
   _enterEnding() {
