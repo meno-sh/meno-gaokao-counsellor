@@ -8,6 +8,7 @@
       tagline: '不替你做决定,帮你想清楚自己到底想要什么',
       demoBadge: '演示模式',
       liveBadge: '已连接',
+      endChatTitle: '继续和 AI 聊聊', endChatHint: '它了解你这一路说过的一切 —— 想聊多久就聊多久。', endChatPlaceholder: '随便聊点什么…', endChatThinking: 'AI 在想…', send: '发送',
       langBtn: 'EN',
       // launch
       launchKicker: '高考志愿 · 反思均衡',
@@ -100,6 +101,7 @@
       tagline: "It won't decide for you. It helps you figure out what you actually want.",
       demoBadge: 'DEMO',
       liveBadge: 'LIVE',
+      endChatTitle: 'Keep chatting with the AI', endChatHint: 'It knows everything you said along the way — chat as long as you like.', endChatPlaceholder: 'Say anything…', endChatThinking: 'thinking…', send: 'Send',
       langBtn: '中文',
       launchKicker: 'College choice · Reflective equilibrium',
       launchTitle: 'Walk it through. See yourself.',

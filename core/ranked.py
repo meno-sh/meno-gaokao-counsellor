@@ -117,6 +117,33 @@ def update_narrative(profile, stage_no, scene_label, q, a) -> str:
         pass
     return profile.narrative
 
+def end_chat_reply(profile, final_order, history, message) -> str:
+    """End-of-session free chat — a context-aware companion (full 画像 + final ranking +
+    the things he said), DeepSeek, UNLIMITED turns, conversational. Best-effort '' on fail."""
+    try:
+        import urllib.request, json as _json
+        key = os.environ.get("OPENROUTER_API_KEY", "")
+        narr = (getattr(profile, "narrative", "") or "").strip() or "(暂无画像)"
+        try:
+            elic = "; ".join((str(e.get("q", "")) + "→" + str(e.get("a", ""))) for e in (getattr(profile, "elicited", None) or [])[-10:] if e.get("a"))[:1200] or "(无)"
+        except Exception:
+            elic = "(无)"
+        order = " > ".join(final_order or []) or "(无)"
+        sysmsg = ("你是一个温和、真正懂这位高考考生的 AI 顾问 —— 他刚走完一场关于专业/学校选择的反思推演,你掌握他的完整背景。"
+                  "原则:帮他想清楚、陪他聊,**绝不替他下结论、不说哪个更好**;具体、口语、贴着他的处境。"
+                  "\n【他的画像】" + narr + "\n【他最终的志愿排序(第1=最想)】" + order + "\n【过程中他亲口说过的话】" + elic)
+        msgs = [{"role": "system", "content": sysmsg}]
+        for h in (history or [])[-24:]:
+            msgs.append({"role": ("user" if h[0] == "h" else "assistant"), "content": str(h[1])})
+        msgs.append({"role": "user", "content": str(message)})
+        body = _json.dumps({"model": "deepseek/deepseek-chat", "messages": msgs, "temperature": 0.7, "max_tokens": 900}).encode("utf-8")
+        req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=body,
+            headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
+        d = _json.load(urllib.request.urlopen(req, timeout=45))
+        return (d["choices"][0]["message"]["content"] or "").strip()
+    except Exception:
+        return ""
+
 def chat_reply(profile, top, contender, history, message) -> str:
     """Brief (1-2 sentence) multi-turn reply weighing top vs contender for THIS student. Best-effort."""
     try:

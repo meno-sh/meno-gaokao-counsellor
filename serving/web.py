@@ -598,11 +598,19 @@ class H(BaseHTTPRequestHandler):
         msg = str(body.get("message", "")).strip()[:1000]
         if not msg:
             return self._send(400, json.dumps({"error": "empty"}, ensure_ascii=False))
-        from core.ranked import chat_reply, update_narrative
+        from core.ranked import chat_reply, update_narrative, end_chat_reply
         pend = getattr(sess, "_pending", {}) or {}
         top = pend.get("top") or (sess.current_order()[0] if sess.current_order() else "")
         contender = pend.get("contender", ""); scene = (pend.get("factor") or {}).get("label", "")
         ctx = body.get("ctx", "scene")
+        if ctx == "end":          # end-of-session free chat: UNLIMITED turns, full context, DeepSeek (Yuhe)
+            if not hasattr(sess, "endchat") or sess.endchat is None: sess.endchat = []
+            sess.endchat.append(("h", msg))
+            reply = end_chat_reply(sess.profile, sess.current_order(), sess.endchat, msg)
+            if reply: sess.endchat.append(("a", reply))
+            _rank_save(body.get("sid"), sess)
+            _log_session({"event": "endchat", "sid": body.get("sid"), "msg": msg, "reply": reply})
+            return self._send(200, json.dumps({"reply": reply}, ensure_ascii=False))
         cap = 5 if ctx == "end" else 3
         ckey = "end" if ctx == "end" else ("scene:" + str(pend.get("stage")))
         if not hasattr(sess, "chat_counts") or sess.chat_counts is None: sess.chat_counts = {}

@@ -359,6 +359,19 @@
         <p style="font-size:17px;line-height:1.65;color:#3a342e;margin:0 0 14px">{{ p.text }}</p>
       </sc-for>
 
+      <div style="width:100%;max-width:34em;margin:28px auto 4px;text-align:left">
+        <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:24px;margin:0 0 2px">{{ t.endChatTitle }}</div>
+        <p style="font-size:13px;color:#B0A48E;margin:0 0 10px">{{ t.endChatHint }}</p>
+        <sc-for list="{{ endChatMsgs }}" as="m" hint-placeholder-count="2">
+          <div style="margin:8px 0;display:flex;{{ m.align }}"><div style="max-width:88%;padding:9px 13px;border-radius:14px;font-size:15px;line-height:1.55;white-space:pre-wrap;{{ m.bubble }}">{{ m.text }}</div></div>
+        </sc-for>
+        <sc-if value="{{ endChatBusy }}"><div style="font-size:13px;color:#B0A48E;margin:6px 2px">{{ t.endChatThinking }}</div></sc-if>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:flex-end">
+          <textarea value="{{ endChatInput }}" onInput="{{ onEndChatInput }}" placeholder="{{ t.endChatPlaceholder }}" rows="2" style="flex:1 1 auto;box-sizing:border-box;font-family:'Noto Sans SC',inherit;font-size:15px;color:#2A2218;background:#FFFDF4;border:1.5px solid #D8CFBE;border-radius:12px;padding:9px 12px;resize:vertical;outline:none"></textarea>
+          <button onClick="{{ sendEndChat }}" style="flex:0 0 auto;font-size:15px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:12px;padding:9px 18px;box-shadow:2px 2px 0 #2A2218;font-family:'Noto Sans SC',inherit">{{ t.send }}</button>
+        </div>
+      </div>
+
       <div style="background:#FFFDF4;border:1.6px solid #D8CFBE;border-radius:14px;padding:16px 18px;margin-top:8px">
         <div style="font-size:15px;color:#2A2218;margin-bottom:8px">[非语音] {{ t.endingConf }}</div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -403,7 +416,7 @@ class Component extends DCLogic {
     typing: false, typedVal: '',
     stopIndex: 0, figReveal: 0,   // 0 none, 1 A, 2 A+B, 3 +mic
     showCornerEnd: false, confFinal: 0, tick: 0,
-    errMsg: '',
+    errMsg: '', endChatInput: '', endChatBusy: false,
   };
 
   // ---- lifecycle ----
@@ -411,7 +424,7 @@ class Component extends DCLogic {
     const lang = (this.props.startLang === 'en') ? 'en' : 'cn';
     this.now = 0; this.boil = 0; this.level = 0; this.t0 = performance.now();
     this.pairs = []; this.order = []; this.initialOrder = [];
-    this.stopsCompleted = 0; this.consecNoChange = 0; this.endChoiceShown = false;
+    this.stopsCompleted = 0; this.consecNoChange = 0; this.endChoiceShown = false; this.endChat = [];
     this.orderHistory = []; this.stopLog = {}; this.orderChanges = 0;
     this.intakeAnswers = {}; this._stopEnterWall = 0;
     this.orderBeforeStop = []; this.orderAtRerankStart = []; this.rerankCtx = 'initial';
@@ -561,6 +574,21 @@ class Component extends DCLogic {
       .trim();
   }
   onEditTranscript = (e) => { this.setState({ transcript: e.target.value }); };   // do NOT also set transcriptDone — re-toggling an sc-if-controlling field re-mounts the textarea + jumps the cursor
+  onEndChatInput = (e) => { this.setState({ endChatInput: e.target.value }); };
+  sendEndChat = async () => {
+    const m = (this.state.endChatInput || '').trim();
+    if (!m || this.state.endChatBusy) return;
+    if (!this.endChat) this.endChat = [];
+    this.endChat.push({ who: 'h', text: m });
+    this.setState({ endChatInput: '', endChatBusy: true });
+    try {
+      const base = this.props.apiBase || '';
+      const r = await fetch(base + '/rank_chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, message: m, ctx: 'end' }) });
+      const d = await r.json();
+      if (d && d.reply) this.endChat.push({ who: 'a', text: d.reply });
+    } catch (e) {}
+    this.setState({ endChatBusy: false });
+  };
   _drawFig(S, canvas, opts) {
     const { ctx, rc, W, H } = S.fit(canvas); S.clear(ctx, W, H);
     const scale = Math.min(W, H) / 112;
@@ -880,7 +908,7 @@ class Component extends DCLogic {
     }
   }
   onReplay = () => {
-    this.stopsCompleted = 0; this.consecNoChange = 0; this.endChoiceShown = false;
+    this.stopsCompleted = 0; this.consecNoChange = 0; this.endChoiceShown = false; this.endChat = [];
     this.orderChanges = 0; this.stopLog = {}; this.orderHistory = [this.order.slice()];
     this.initialOrder = this.order.slice();
     this.setState({ phase: 'stop', showCornerEnd: false });
@@ -1070,6 +1098,8 @@ class Component extends DCLogic {
       showCornerEnd: (_curN >= 6 || s.showCornerEnd) && phase === 'stop', onCornerEnd: this.onCornerEnd,
       onFinish: this.onFinish, onNext: this.onNext,
       portrait, initialList, finalList, reportParas,
+      endChatMsgs: (this.endChat || []).map(x => ({ text: x.text, align: x.who === 'h' ? 'justify-content:flex-end' : 'justify-content:flex-start', bubble: x.who === 'h' ? 'background:#BC6242;color:#fff' : 'background:#FFFDF4;border:1.5px solid #E6DBC4;color:#2A2218' })),
+      endChatInput: s.endChatInput, endChatBusy: s.endChatBusy, onEndChatInput: this.onEndChatInput, sendEndChat: this.sendEndChat,
       statScenes, statSwitches, lingerLabel, dwellLabel, bumpEmpty,
       changesList, hasChanges: changesList.length > 0,
       changeMindList, hasChangeMind: changeMindList.length > 0, noChangeMind: changeMindList.length === 0,
