@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.min.js"></script>
-<script src="sketch.js"></script>
-<script src="data.js"></script>
+<script src="sketch.js?v=3"></script>
+<script src="data.js?v=3"></script>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: #FBF6EA; -webkit-font-smoothing: antialiased; }
@@ -1044,7 +1044,7 @@ class Component extends DCLogic {
     // initial high-level views
     const ia = this.intakeAnswers || {};
     const shiftLabels = s.lang === 'cn'
-      ? { struggle: '你最纠结的', macro: '对未来的想法', values: '你最看重的' }
+      ? { struggle: '你的纠结', macro: '对未来的想法', values: '你最看重的' }
       : { struggle: 'What tore you', macro: 'Your big-picture hope', values: 'What you valued' };
     const initialViews = ['struggle', 'macro', 'values'].filter(id => (ia[id] || '').trim().length >= 4)
       .map(id => ({ label: shiftLabels[id], text: (ia[id] || '').trim() }));
