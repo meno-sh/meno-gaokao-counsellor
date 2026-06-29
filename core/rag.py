@@ -7,7 +7,11 @@ Pure-python (the engine runs on a numpy-less interpreter); corpus lives in /data
 """
 import json, os, math, urllib.request
 
-_DIR = os.environ.get("RAG_CORPUS_DIR", "/data/reflection-game/gaokao-data/rag-corpus")
+_DIR = os.environ.get("RAG_CORPUS_DIR") or next(
+    (d for d in (os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "rag-corpus"),
+                 "/data/reflection-game/gaokao-data/rag-corpus")
+     if os.path.exists(os.path.join(d, "pieces.jsonl"))),
+    "/data/reflection-game/gaokao-data/rag-corpus")
 _EMBED_MODEL = os.environ.get("RAG_EMBED_MODEL", "google/gemini-embedding-2")
 _PIECES = None      # id -> piece dict
 _EMB = None         # id -> [floats]
