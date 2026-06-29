@@ -871,12 +871,6 @@ class Component extends DCLogic {
       } else if (q.kind === 'tail') { qPrompt = this.L(q.prompt); qHint = this.L(q.hint); }
     }
     const progDots = (this.intakeQs || []).map((q, i) => ({ color: i <= s.qIndex ? '#BC6242' : '#E2D8C5' }));
-    // stop progress bar: first 8 nodes big (the effective scenes), last 9 small (optional); current highlighted
-    const _curN = (d && d.n) || (this.state.stopIndex + 1);
-    const stopDots = Array.from({ length: 17 }, (_, k) => {
-      const n = k + 1;
-      return { size: (k < 8 ? '11px' : '6px'), color: (n < _curN ? '#D9A88E' : (n === _curN ? '#BC6242' : '#E2D8C5')) };
-    });
 
     // rerank
     const rankItems = (this.order || []).map((id, i) => {
@@ -892,6 +886,12 @@ class Component extends DCLogic {
 
     // stop
     const d = (phase === 'stop') ? this.getStopDisp() : null;
+    // stop progress bar: first 8 nodes big (the effective scenes), last 9 small (optional); current highlighted
+    const _curN = (d && d.n) || (this.state.stopIndex + 1);
+    const stopDots = Array.from({ length: 17 }, (_, k) => {
+      const n = k + 1;
+      return { size: (k < 8 ? '11px' : '6px'), color: (n < _curN ? '#D9A88E' : (n === _curN ? '#BC6242' : '#E2D8C5')) };
+    });
     const fr = s.figReveal;
     const stopVals = d ? {
       stopKicker: (t.stopKicker || 'Stop {n}').replace('{n}', d.n),
