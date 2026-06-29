@@ -188,7 +188,7 @@
 
       <sc-if value="{{ showInvestigator }}">
       <div style="margin-top:20px;width:100%;max-width:580px;background:#FBF3E2;border:2px dashed #8A7B5C;border-radius:14px;padding:14px 18px;display:flex;gap:14px;align-items:flex-start;text-align:left">
-        <div style="flex:0 0 auto;font-size:32px;line-height:1" aria-label="investigator placeholder">&#128373;&#65039;</div>
+        <canvas id="sk-detective" style="width:66px;height:74px;flex:0 0 auto" aria-label="investigator"></canvas>
         <div>
           <div style="font-size:13px;font-weight:700;color:#8A7B5C;font-family:'Noto Sans SC';letter-spacing:1px">{{ t.investigatorTitle }}</div>
           <div style="font-size:15px;line-height:1.55;color:#2A2218;margin-top:4px"><sc-for list="{{ investFrags }}" as="f"><sc-if value="{{ f.text }}"><span>{{ f.text }}</span></sc-if><sc-if value="{{ f.cite }}"><sup onClick="{{ f.onClick }}" style="color:#BC6242;cursor:pointer;font-weight:700;font-size:.72em;vertical-align:super;padding:0 1px">{{ f.num }}</sup></sc-if></sc-for></div>
@@ -487,6 +487,7 @@ class Component extends DCLogic {
       const d = this.getStopDisp();
       draw('sk-figA', el => this._drawFig(S, el, { color: d.figA.color, pose: d.figA.pose, mood: d.figA.mood, seed: 21, look: [1, 0] }));
       draw('sk-figB', el => this._drawFig(S, el, { color: d.figB.color, pose: d.figB.pose, mood: d.figB.mood, seed: 37, look: [-1, 0] }));
+      draw('sk-detective', el => this._drawDetective(S, el, { color: S.C.PURPLE, mood: 'neutral', hat: true, seed: 8, look: [1, -0.2] }));
     }
     if (this.state.phase === 'ending') {
       draw('sk-bump', el => this._drawBump(S, el));
@@ -530,6 +531,36 @@ class Component extends DCLogic {
     let s = at > 0 ? full.slice(0, at).trim() : full;
     if (s.length > 9) s = s.slice(0, 8) + '…';
     return s;
+  }
+  _drawDetective(S, canvas, opts) {
+    opts = opts || {};
+    const { ctx, rc, W, H } = S.fit(canvas); S.clear(ctx, W, H);
+    const s = (H - 20) / 135, y = H - 10 - 50 * s, now = this.now || 0;
+    const x = W * (opts.xFrac || 0.43), seed = opts.seed || 5, color = opts.color || S.C.INK, rop = S.rop;
+    S.stick(rc, ctx, x, y, s, seed, { color, pose: 'point', mood: opts.mood || 'neutral', look: opts.look || [1, -0.25] });
+    const bob = Math.sin(now * 1.7 + seed * 0.9) * 1.6 * s;
+    const hx = x, hy = y - 45 * s + bob;
+    if (opts.hat !== false) {
+      const brimY = hy - 9 * s, domeTop = hy - 32 * s, dl = hx - 17 * s, dr = hx + 17 * s;
+      rc.path(`M ${dl} ${brimY} C ${hx - 21 * s} ${domeTop} ${hx + 21 * s} ${domeTop} ${dr} ${brimY} Z`, rop(seed + 50, color, S.C.PAPER, { fillStyle: 'solid', strokeWidth: 2.4, roughness: 1.1 }));
+      rc.ellipse(hx, brimY, 53 * s, 9 * s, rop(seed + 51, color, S.C.PAPER, { fillStyle: 'solid', strokeWidth: 2.4, roughness: 1.0 }));
+      rc.circle(hx - 4.5 * s, domeTop + 2.5 * s, 7.5 * s, rop(seed + 52, color, S.C.PAPER, { fillStyle: 'solid', strokeWidth: 2.0, roughness: 1.0 }));
+      rc.circle(hx + 4.5 * s, domeTop + 2.5 * s, 7.5 * s, rop(seed + 53, color, S.C.PAPER, { fillStyle: 'solid', strokeWidth: 2.0, roughness: 1.0 }));
+      rc.line(hx, domeTop + 4 * s, hx, brimY - 1.5 * s, rop(seed + 54, color, null, { strokeWidth: 1.5, single: true, roughness: 0.8 }));
+    }
+    const shY = y - 18 * s + bob * 0.6;
+    const hand = [x + 36 * s, shY - 8 * s], ang = -0.42, dir = [Math.cos(ang), Math.sin(ang)];
+    const handleLen = 13 * s, lensR = 14 * s;
+    const nearRim = [hand[0] + dir[0] * handleLen, hand[1] + dir[1] * handleLen];
+    const lensC = [hand[0] + dir[0] * (handleLen + lensR), hand[1] + dir[1] * (handleLen + lensR)];
+    rc.line(hand[0], hand[1], nearRim[0], nearRim[1], rop(seed + 60, color, null, { strokeWidth: 3.6, single: true, roughness: 0.7 }));
+    rc.circle(hand[0], hand[1], 5 * s, rop(seed + 63, color, S.C.PAPER, { fillStyle: 'solid', strokeWidth: 2.0, roughness: 0.9 }));
+    rc.circle(lensC[0], lensC[1], lensR * 2, rop(seed + 61, color, S.TINT.BLUE, { fillStyle: 'solid', strokeWidth: 3.2, roughness: 1.0 }));
+    rc.circle(lensC[0], lensC[1], lensR * 2 - 5 * s, rop(seed + 62, color, null, { strokeWidth: 1.3, single: true, roughness: 0.8 }));
+    ctx.save(); ctx.strokeStyle = '#FFFFFF'; ctx.globalAlpha = 0.85; ctx.lineWidth = Math.max(1.6, 2 * s); ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(lensC[0] - lensR * 0.5, lensC[1] - lensR * 0.42); ctx.lineTo(lensC[0] - lensR * 0.02, lensC[1] - lensR * 0.62); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(lensC[0] - lensR * 0.62, lensC[1] - lensR * 0.08); ctx.lineTo(lensC[0] - lensR * 0.36, lensC[1] - lensR * 0.28); ctx.stroke();
+    ctx.restore();
   }
   _drawFig(S, canvas, opts) {
     const { ctx, rc, W, H } = S.fit(canvas); S.clear(ctx, W, H);
