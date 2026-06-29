@@ -337,10 +337,10 @@ _CITE_RULE = ("【务必·引用】上面【参考资料】是真实的「专业
               "**优先改用其中的具体事实**(具体课程、出路去向、真实就读体验等)把两条路写得具体可信,不要泛泛而谈。"
               "并在输出的 JSON 里**额外加一个字段 `cites`**,形如 "
               "{\"top_take\":[\"R1\"],\"contender_take\":[\"R3\"],\"prose\":[],\"investigator\":[]} —— "
-              "列出每个正文字段**实际采信了哪些参考资料编号**(只列真用到的;没用到就留空数组 [];不要编造编号)。"
+              "列出每个正文字段**实际采信了哪些参考资料编号**(只列真用到的;没用到就留空数组 [];不要编造编号)。**若多条参考资料都支持同一点,鼓励交叉印证、可同时引用多条**(如 [R1][R3]);文内对应处也可留 [Rn]。"
               "记住要输出 cites 字段 —— 现在按前面的 schema 输出 JSON。")
 
-def _rag_refs(top, rest, considerations, cap=8, per_pick=3):
+def _rag_refs(top, rest, considerations, cap=12, per_pick=5):
     """Build the 【参考资料】 block + a tag->piece map for the candidates. Fail-safe:
     returns ('', {}) if the RAG module / corpus / embedding is unavailable (so generation
     proceeds exactly as before when the corpus isn't deployed)."""
