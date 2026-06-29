@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.min.js"></script>
+<script src="sketch.js"></script>
+<script src="data.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #FBF6EA; -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+  textarea { font-family: inherit; }
+  @keyframes gk-bob { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(5px) } }
+  @keyframes gk-spin { to { transform: rotate(360deg) } }
+  @keyframes gk-in { from { opacity:0; transform: translateY(10px) } to { opacity:1; transform:none } }
+  ::-webkit-scrollbar{ width:9px } ::-webkit-scrollbar-thumb{ background:#D8CFBE; border-radius:9px }
+</style>
+</helmet>
+<div style="min-height:100vh;background:#FBF6EA;color:#2A2218;font-family:'Patrick Hand','Noto Sans SC',system-ui,sans-serif;font-size:18px;line-height:1.55;position:relative;overflow-x:hidden">
+
+  <!-- top bar -->
+  <div style="position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;z-index:30;pointer-events:none">
+    <div style="pointer-events:auto"></div>
+    <div style="display:flex;align-items:center;gap:12px;pointer-events:auto">
+      <span style="font-size:11px;letter-spacing:1.5px;color:{{ badgeColor }};border:1.4px solid {{ badgeColor }};border-radius:20px;padding:2px 9px">{{ badgeText }}</span>
+      <button onClick="{{ onLang }}" style="font-size:14px;color:#6B6151;border:1.6px solid #D8CFBE;border-radius:18px;padding:4px 12px;background:#FFFDF4" style-hover="border-color:#6B6151;color:#2A2218">{{ t.langBtn }}</button>
+    </div>
+  </div>
+
+  <!-- ============ LAUNCH ============ -->
+  <sc-if value="{{ isLaunch }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width:680px;margin:0 auto;padding:96px 24px 80px;display:flex;flex-direction:column;align-items:center;text-align:center">
+      <div style="font-size:13px;letter-spacing:3px;color:#B0A48E;text-transform:uppercase">{{ t.launchKicker }}</div>
+      <canvas id="sk-launch" style="width:150px;height:185px;margin:8px 0 -6px"></canvas>
+      <h1 style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:46px;margin:6px 0 26px;line-height:1.1">{{ t.launchTitle }}</h1>
+
+      <div style="width:100%;max-width:480px;text-align:left;background:#FFFDF4;border:2px solid #2A2218;border-radius:18px;box-shadow:4px 5px 0 rgba(42,34,24,.10);padding:20px 22px 22px;transform:rotate(-.4deg)">
+        <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:22px;color:#2A2218;margin-bottom:10px">{{ t.expectTitle }}</div>
+        <sc-for list="{{ expectItems }}" as="line" hint-placeholder-count="5">
+          <div style="display:flex;gap:11px;align-items:flex-start;margin:9px 0">
+            <span style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:2px solid #BC6242;color:#BC6242;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:2px">{{ line.n }}</span>
+            <span style="font-size:16px;color:#3a342e">{{ line.text }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <p style="font-size:13px;color:#B0A48E;max-width:32em;margin:18px 0 4px">{{ t.voiceNote }}</p>
+      <button onClick="{{ onStart }}" style="margin-top:14px;font-size:20px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:16px;padding:13px 30px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218" style-active="transform:translate(1px,1px);box-shadow:1px 1px 0 #2A2218">{{ t.startBtn }} ▷</button>
+    </div>
+  </sc-if>
+
+  <!-- ============ INTAKE (voice) ============ -->
+  <sc-if value="{{ isIntake }}">
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 24px 60px;text-align:center">
+      <div style="display:flex;gap:7px;margin-bottom:30px">
+        <sc-for list="{{ progDots }}" as="d" hint-placeholder-count="6">
+          <span style="width:9px;height:9px;border-radius:50%;background:{{ d.color }};transition:background .3s"></span>
+        </sc-for>
+      </div>
+      <h2 style="font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:30px;max-width:18em;margin:0 0 8px;line-height:1.35">{{ qPrompt }}</h2>
+      <p style="font-size:15px;color:#8a8275;max-width:26em;margin:0 0 4px;min-height:1.2em">{{ qHint }}</p>
+
+      <sc-if value="{{ showMic }}">
+        <button onClick="{{ tapMic }}" style="background:none;margin:18px 0 6px" aria-label="microphone">
+          <canvas id="sk-mic" style="width:230px;height:230px;display:block;animation:gk-bob 3s ease-in-out infinite"></canvas>
+        </button>
+        <p style="font-size:15px;color:#BC6242;min-height:1.3em;margin:0">{{ micStatus }}</p>
+      </sc-if>
+
+      <sc-if value="{{ typing }}">
+        <div style="width:100%;max-width:440px;margin:18px 0 6px">
+          <textarea value="{{ typedVal }}" onInput="{{ onType }}" placeholder="{{ t.typePlaceholder }}" rows="3" style="width:100%;padding:12px 14px;border:2px solid #BC6242;border-radius:14px;background:#FFFDF4;color:#2A2218;font-size:17px;resize:vertical"></textarea>
+          <button onClick="{{ onSubmitType }}" style="margin-top:10px;font-size:16px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:13px;padding:8px 22px;box-shadow:2px 2px 0 #2A2218;font-family:'Noto Sans SC',inherit">{{ t.submitBtn }}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showTranscript }}">
+        <div style="max-width:30em;margin:14px 0 4px">
+          <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;margin-bottom:4px">{{ t.youSaid }}</div>
+          <div style="font-size:19px;color:#2A2218;font-style:italic">「{{ transcript }}」</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showAdvance }}">
+        <div style="display:flex;gap:12px;align-items:center;margin-top:18px;animation:gk-in .4s">
+          <button onClick="{{ addMore }}" style="font-size:16px;color:#6B6151;background:#FFFDF4;border:2px solid #D8CFBE;border-radius:14px;padding:9px 20px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#6B6151;color:#2A2218">＋ {{ t.addMore }}</button>
+          <button onClick="{{ advance }}" style="font-size:18px;color:#fff;background:#53984F;border:2px solid #2A2218;border-radius:14px;padding:10px 26px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">{{ advanceLabel }} →</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showKbToggle }}">
+        <button onClick="{{ toggleKeyboard }}" style="margin-top:22px;font-size:13px;color:#B0A48E;text-decoration:underline;text-underline-offset:3px">[非语音] {{ t.micKeyboard }}</button>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ RERANK (non-voice) ============ -->
+  <sc-if value="{{ isRerank }}">
+    <div style="max-width:560px;margin:0 auto;padding:96px 24px 80px;display:flex;flex-direction:column;align-items:center;text-align:center">
+      <div style="font-size:12px;letter-spacing:2px;color:#B0A48E;text-transform:uppercase">[非语音] · drag-free</div>
+      <h2 style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:38px;margin:6px 0 6px">{{ t.rerankTitle }}</h2>
+      <p style="font-size:16px;color:#6B6151;max-width:26em;margin:0 0 26px">{{ t.rerankLead }}</p>
+
+      <div style="width:100%;display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{ rankItems }}" as="item" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:14px;background:#FFFDF4;border:2px solid #2A2218;border-left:7px solid {{ item.color }};border-radius:14px;box-shadow:3px 3px 0 rgba(42,34,24,.09);padding:14px 16px;transform:rotate({{ item.tilt }}deg)">
+            <span style="flex:0 0 auto;font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:30px;color:{{ item.color }};width:34px">{{ item.rank }}</span>
+            <span style="flex:1;text-align:left;font-size:18px;font-family:'Noto Sans SC',sans-serif;font-weight:500">{{ item.label }}</span>
+            <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:3px">
+              <button onClick="{{ item.onUp }}" style="width:34px;height:26px;border:1.8px solid {{ item.upColor }};border-radius:8px;color:{{ item.upColor }};font-size:15px;background:#FFFDF4">▲</button>
+              <button onClick="{{ item.onDown }}" style="width:34px;height:26px;border:1.8px solid {{ item.downColor }};border-radius:8px;color:{{ item.downColor }};font-size:15px;background:#FFFDF4">▼</button>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ isPostStopRerank }}">
+        <div style="width:100%;max-width:480px;margin-top:28px;border-top:1.5px dashed #E2D8C5;padding-top:22px;display:flex;flex-direction:column;align-items:center">
+          <p style="font-size:17px;color:#2A2218;font-weight:500;font-family:'Noto Sans SC';max-width:24em;margin:0">{{ rerankWhatPrompt }}</p>
+          <sc-if value="{{ showMic }}">
+            <button onClick="{{ tapMic }}" style="background:none;margin:2px 0" aria-label="microphone">
+              <canvas id="sk-mic" style="width:148px;height:148px;display:block"></canvas>
+            </button>
+            <p style="font-size:13px;color:#BC6242;min-height:1.1em;margin:0">{{ micStatus }}</p>
+          </sc-if>
+          <sc-if value="{{ typing }}">
+            <div style="width:100%;max-width:420px;margin:8px 0 4px">
+              <textarea value="{{ typedVal }}" onInput="{{ onType }}" placeholder="{{ t.typePlaceholder }}" rows="2" style="width:100%;padding:11px 13px;border:2px solid #BC6242;border-radius:14px;background:#FFFDF4;color:#2A2218;font-size:16px;resize:vertical"></textarea>
+              <button onClick="{{ onSubmitType }}" style="margin-top:8px;font-size:15px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:12px;padding:7px 20px;box-shadow:2px 2px 0 #2A2218;font-family:'Noto Sans SC',inherit">{{ t.submitBtn }}</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showTranscript }}">
+            <div style="max-width:26em;margin:8px 0 2px">
+              <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;margin-bottom:3px">{{ t.youSaid }}</div>
+              <div style="font-size:16px;color:#2A2218;font-style:italic">「{{ transcript }}」</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ showAdvance }}">
+            <button onClick="{{ addMore }}" style="margin-top:8px;font-size:14px;color:#6B6151;background:#FFFDF4;border:2px solid #D8CFBE;border-radius:13px;padding:7px 16px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#6B6151;color:#2A2218">＋ {{ t.addMore }}</button>
+          </sc-if>
+          <sc-if value="{{ showKbToggle }}">
+            <button onClick="{{ toggleKeyboard }}" style="margin-top:10px;font-size:13px;color:#B0A48E;text-decoration:underline;text-underline-offset:3px">[非语音] {{ t.micKeyboard }}</button>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <button onClick="{{ onRerankContinue }}" style="margin-top:26px;font-size:19px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:15px;padding:12px 30px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">{{ t.rerankContinue }} →</button>
+    </div>
+  </sc-if>
+
+  <!-- ============ STOP ============ -->
+  <sc-if value="{{ isStop }}">
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:84px 24px 60px;text-align:center;position:relative">
+      <div style="font-size:13px;letter-spacing:3px;color:#B0A48E;text-transform:uppercase">{{ stopKicker }}</div>
+      <div style="display:flex;gap:5px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:320px;margin:12px 0 2px">
+        <sc-for list="{{ stopDots }}" as="d" hint-placeholder-count="8">
+          <span style="width:{{ d.size }};height:{{ d.size }};border-radius:50%;background:{{ d.color }};transition:background .3s"></span>
+        </sc-for>
+      </div>
+      <p style="font-size:13px;color:#B0A48E;margin:14px 0 2px">{{ t.stopThisStop }}</p>
+      <h2 style="font-family:'Noto Sans SC',sans-serif;font-weight:700;font-size:26px;max-width:20em;margin:0 0 22px;line-height:1.4;color:#2A2218">{{ stopHigh }}</h2>
+
+      <div style="display:flex;gap:18px;justify-content:center;align-items:flex-start;width:100%;max-width:720px;flex-wrap:wrap">
+        <sc-if value="{{ showFigA }}">
+        <div style="flex:1 1 280px;min-width:240px;max-width:330px;display:flex;flex-direction:column;align-items:center;gap:8px">
+          <canvas id="sk-figA" style="width:130px;height:165px"></canvas>
+          <div style="font-size:13px;font-weight:600;color:{{ figAColor }};font-family:'Noto Sans SC'">{{ figALabel }}</div>
+          <div style="background:#FFFDF4;border:2px solid {{ figAColor }};border-radius:16px 16px 16px 4px;box-shadow:3px 3px 0 rgba(42,34,24,.08);padding:14px 16px;font-size:16px;line-height:1.5;color:#2A2218;text-align:left"><sc-for list="{{ figAFrags }}" as="f"><sc-if value="{{ f.text }}"><span>{{ f.text }}</span></sc-if><sc-if value="{{ f.cite }}"><sup onClick="{{ f.onClick }}" style="color:#BC6242;cursor:pointer;font-weight:700;font-size:.72em;vertical-align:super;padding:0 1px">{{ f.num }}</sup></sc-if></sc-for></div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ showFigB }}">
+        <div style="flex:1 1 280px;min-width:240px;max-width:330px;display:flex;flex-direction:column;align-items:center;gap:8px">
+          <canvas id="sk-figB" style="width:130px;height:165px"></canvas>
+          <div style="font-size:13px;font-weight:600;color:{{ figBColor }};font-family:'Noto Sans SC'">{{ figBLabel }}</div>
+          <div style="background:#FFFDF4;border:2px solid {{ figBColor }};border-radius:16px 16px 4px 16px;box-shadow:3px 3px 0 rgba(42,34,24,.08);padding:14px 16px;font-size:16px;line-height:1.5;color:#2A2218;text-align:left"><sc-for list="{{ figBFrags }}" as="f"><sc-if value="{{ f.text }}"><span>{{ f.text }}</span></sc-if><sc-if value="{{ f.cite }}"><sup onClick="{{ f.onClick }}" style="color:#BC6242;cursor:pointer;font-weight:700;font-size:.72em;vertical-align:super;padding:0 1px">{{ f.num }}</sup></sc-if></sc-for></div>
+        </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ showInvestigator }}">
+      <div style="margin-top:20px;width:100%;max-width:580px;background:#FBF3E2;border:2px dashed #8A7B5C;border-radius:14px;padding:14px 18px;display:flex;gap:14px;align-items:flex-start;text-align:left">
+        <div style="flex:0 0 auto;font-size:32px;line-height:1" aria-label="investigator placeholder">&#128373;&#65039;</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#8A7B5C;font-family:'Noto Sans SC';letter-spacing:1px">{{ t.investigatorTitle }}</div>
+          <div style="font-size:15px;line-height:1.55;color:#2A2218;margin-top:4px"><sc-for list="{{ investFrags }}" as="f"><sc-if value="{{ f.text }}"><span>{{ f.text }}</span></sc-if><sc-if value="{{ f.cite }}"><sup onClick="{{ f.onClick }}" style="color:#BC6242;cursor:pointer;font-weight:700;font-size:.72em;vertical-align:super;padding:0 1px">{{ f.num }}</sup></sc-if></sc-for></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showRefs }}">
+      <div style="margin-top:14px;width:100%;max-width:580px;padding:8px 12px;background:#FBF3E2;border:1px solid #E6DBC4;border-radius:10px;font-size:.85em;text-align:left">
+        <div style="color:#8A7B5C;font-weight:700;margin-bottom:4px">参考资料 / References</div>
+        <sc-for list="{{ refItems }}" as="r"><div onClick="{{ r.onClick }}" style="cursor:pointer;padding:2px 0;color:#5a5246"><b style="color:#BC6242">{{ r.num }}.</b> {{ r.label }}</div></sc-for>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showStopMic }}">
+      <div style="margin-top:30px;display:flex;flex-direction:column;align-items:center">
+        <p style="font-size:18px;color:#2A2218;font-weight:500;font-family:'Noto Sans SC';max-width:24em;margin:0">{{ stopMicPrompt }}</p>
+
+        <sc-if value="{{ showMic }}">
+          <button onClick="{{ tapMic }}" style="background:none;margin:6px 0 2px" aria-label="microphone">
+            <canvas id="sk-mic" style="width:180px;height:180px;display:block"></canvas>
+          </button>
+          <p style="font-size:14px;color:#BC6242;min-height:1.2em;margin:0">{{ micStatus }}</p>
+        </sc-if>
+
+        <sc-if value="{{ typing }}">
+          <div style="width:100%;max-width:420px;margin:10px 0 4px">
+            <textarea value="{{ typedVal }}" onInput="{{ onType }}" placeholder="{{ t.typePlaceholder }}" rows="2" style="width:100%;padding:11px 13px;border:2px solid #BC6242;border-radius:14px;background:#FFFDF4;color:#2A2218;font-size:16px;resize:vertical"></textarea>
+            <button onClick="{{ onSubmitType }}" style="margin-top:8px;font-size:15px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:12px;padding:7px 20px;box-shadow:2px 2px 0 #2A2218;font-family:'Noto Sans SC',inherit">{{ t.submitBtn }}</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showTranscript }}">
+          <div style="max-width:28em;margin:10px 0 2px">
+            <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;margin-bottom:3px">{{ t.youSaid }}</div>
+            <div style="font-size:17px;color:#2A2218;font-style:italic">「{{ transcript }}」</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showAdvance }}">
+          <div style="display:flex;gap:12px;align-items:center;margin-top:14px;animation:gk-in .4s">
+            <button onClick="{{ addMore }}" style="font-size:15px;color:#6B6151;background:#FFFDF4;border:2px solid #D8CFBE;border-radius:13px;padding:8px 18px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#6B6151;color:#2A2218">＋ {{ t.addMore }}</button>
+            <button onClick="{{ advance }}" style="font-size:18px;color:#fff;background:#53984F;border:2px solid #2A2218;border-radius:14px;padding:10px 26px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">{{ advanceLabel }} →</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showKbToggle }}">
+          <button onClick="{{ toggleKeyboard }}" style="margin-top:16px;font-size:13px;color:#B0A48E;text-decoration:underline;text-underline-offset:3px">[非语音] {{ t.micKeyboard }}</button>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showCornerEnd }}">
+        <button onClick="{{ onCornerEnd }}" style="position:fixed;right:18px;bottom:18px;z-index:25;font-size:13px;color:#B0A48E;border:1.4px solid #D8CFBE;border-radius:16px;padding:7px 14px;background:rgba(255,253,244,.85)" style-hover="color:#BC6242;border-color:#BC6242">{{ t.cornerEnd }}</button>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ END CHOICE ============ -->
+  <sc-if value="{{ isEndChoice }}">
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 24px;text-align:center">
+      <div style="font-size:13px;letter-spacing:3px;color:#B0A48E;text-transform:uppercase">{{ t.endChoiceKicker }}</div>
+      <h2 style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:40px;max-width:16em;margin:10px 0 8px;line-height:1.15">{{ t.endChoiceTitle }}</h2>
+      <p style="font-size:17px;color:#6B6151;max-width:28em;margin:0 0 34px">{{ t.endChoiceLead }}</p>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center">
+        <button onClick="{{ onFinish }}" style="font-size:21px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:16px;padding:15px 34px;box-shadow:4px 4px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:5px 5px 0 #2A2218">{{ t.endFinish }} ✓</button>
+        <button onClick="{{ onNext }}" style="font-size:18px;color:#6B6151;background:#FFFDF4;border:2px solid #D8CFBE;border-radius:16px;padding:15px 28px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#6B6151;color:#2A2218">{{ t.endNext }} →</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ ENDING ============ -->
+  <sc-if value="{{ isEnding }}">
+    <div style="max-width:640px;margin:0 auto;padding:96px 24px 90px">
+      <div style="text-align:center">
+        <div style="font-size:13px;letter-spacing:3px;color:#B0A48E;text-transform:uppercase">{{ t.endingKicker }}</div>
+        <h2 style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:42px;margin:8px 0 26px;line-height:1.1">{{ t.endingTitle }}</h2>
+      </div>
+
+      <div style="background:#FCF7E8;border:2px solid #2A2218;border-radius:18px;box-shadow:4px 5px 0 rgba(42,34,24,.10);padding:20px 22px;transform:rotate(.3deg)">
+        <div style="font-size:12px;letter-spacing:2px;color:#B0A48E;text-transform:uppercase;margin-bottom:4px">{{ t.reKicker }}</div>
+        <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:24px;margin-bottom:8px">{{ t.reTitle }}</div>
+        <sc-for list="{{ reBody }}" as="p" hint-placeholder-count="2">
+          <p style="font-size:16px;line-height:1.6;color:#3a342e;margin:0 0 10px">{{ p.text }}</p>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:18px">
+        <div style="flex:1 1 150px;background:#FFFDF4;border:1.6px solid #D8CFBE;border-radius:14px;padding:14px 16px;text-align:center">
+          <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:38px;color:#BC6242;line-height:1">{{ statScenes }}</div>
+          <div style="font-size:13px;color:#6B6151;margin-top:4px">{{ t.statScenesLabel }}</div>
+        </div>
+        <div style="flex:1 1 150px;background:#FFFDF4;border:1.6px solid #D8CFBE;border-radius:14px;padding:14px 16px;text-align:center">
+          <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:38px;color:#3873A8;line-height:1">{{ statSwitches }}</div>
+          <div style="font-size:13px;color:#6B6151;margin-top:4px">{{ t.statSwitchLabel }}</div>
+        </div>
+        <div style="flex:1 1 240px;background:#FFFDF4;border:1.6px solid #D8CFBE;border-radius:14px;padding:14px 16px;text-align:center">
+          <div style="font-size:13px;color:#B0A48E;margin-bottom:2px">{{ t.statLingerLabel }}</div>
+          <div style="font-size:19px;font-weight:600;color:#2A2218;font-family:'Noto Sans SC'">{{ lingerLabel }}</div>
+        </div>
+        <div style="flex:1 1 240px;background:#FFFDF4;border:1.6px solid #D8CFBE;border-radius:14px;padding:14px 16px;text-align:center">
+          <div style="font-size:13px;color:#B0A48E;margin-bottom:2px">{{ t.statDwellLabel }}</div>
+          <div style="font-size:19px;font-weight:600;color:#2A2218;font-family:'Noto Sans SC'">{{ dwellLabel }}</div>
+        </div>
+      </div>
+
+      <div style="background:#FFFDF4;border:2px solid #2A2218;border-radius:18px;box-shadow:4px 5px 0 rgba(42,34,24,.10);padding:20px 22px;margin-top:24px;transform:rotate(-.3deg)">
+        <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;text-transform:uppercase;margin-bottom:8px">{{ t.endingPortrait }}</div>
+        <div style="font-size:18px;line-height:1.6;color:#2A2218">{{ portrait }}</div>
+      </div>
+
+      <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:26px;margin:30px 0 12px">{{ t.endingShift }}</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="flex:1 1 220px;background:#F6EFE2;border:1.6px solid #D8CFBE;border-radius:14px;padding:14px 16px">
+          <div style="font-size:12px;color:#B0A48E;margin-bottom:6px">{{ t.endingStart }}</div>
+          <sc-for list="{{ initialList }}" as="it" hint-placeholder-count="4">
+            <div style="font-size:15px;color:#6B6151;margin:3px 0">{{ it.rank }}. {{ it.label }}</div>
+          </sc-for>
+        </div>
+        <div style="flex:1 1 220px;background:#FFFDF4;border:2px solid #BC6242;border-radius:14px;padding:14px 16px">
+          <div style="font-size:12px;color:#BC6242;margin-bottom:6px">{{ t.endingFinal }}</div>
+          <sc-for list="{{ finalList }}" as="it" hint-placeholder-count="4">
+            <div style="font-size:15px;color:#2A2218;font-weight:500;margin:3px 0">{{ it.rank }}. {{ it.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:26px;margin:32px 0 8px">{{ t.bumpTitle }}</div>
+      <div style="background:#FFFDF4;border:1.6px solid #D8CFBE;border-radius:14px;padding:14px 8px 4px">
+        <canvas id="sk-bump" style="width:100%;height:240px;display:block"></canvas>
+      </div>
+      <sc-if value="{{ hasChanges }}">
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+          <sc-for list="{{ changesList }}" as="c" hint-placeholder-count="2">
+            <div style="background:#FFFDF4;border:1.6px solid #D8CFBE;border-left:6px solid {{ c.color }};border-radius:12px;padding:12px 14px">
+              <div style="font-size:15px;font-weight:600;color:#2A2218;font-family:'Noto Sans SC'">{{ c.factor }} · {{ c.desc }}</div>
+              <sc-if value="{{ c.hasReason }}">
+                <div style="font-size:14px;color:#6B6151;margin-top:5px"><span style="color:#B0A48E">{{ c.saidLabel }}</span> 「{{ c.reason }}」</div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ bumpEmpty }}">
+        <div style="font-size:14px;color:#B0A48E;margin-top:10px">{{ t.bumpEmpty }}</div>
+      </sc-if>
+
+      <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:26px;margin:32px 0 6px">{{ t.changeMindTitle }}</div>
+      <p style="font-size:14px;color:#B0A48E;margin:0 0 12px">{{ t.changeMindLead }}</p>
+      <sc-if value="{{ hasChangeMind }}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ changeMindList }}" as="m" hint-placeholder-count="2">
+            <div style="display:flex;gap:10px;align-items:flex-start;background:#FCF7E8;border:1.6px solid #E2D8C5;border-radius:12px;padding:12px 14px">
+              <span style="flex:0 0 auto;color:#BC6242;font-size:20px;line-height:1.2">›</span>
+              <div><div style="font-size:13px;color:#B0A48E">{{ m.factor }}</div><div style="font-size:16px;color:#2A2218;line-height:1.5">{{ m.text }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noChangeMind }}">
+        <div style="font-size:14px;color:#B0A48E">{{ t.changeMindEmpty }}</div>
+      </sc-if>
+
+      <sc-if value="{{ hasInitialViews }}">
+        <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:26px;margin:32px 0 4px">{{ t.shiftsTitle }}</div>
+        <p style="font-size:14px;color:#B0A48E;margin:0 0 12px">{{ t.shiftsLead }}</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ initialViews }}" as="v" hint-placeholder-count="3">
+            <div style="background:#FFFDF4;border:1.6px solid #D8CFBE;border-radius:12px;padding:12px 14px">
+              <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;text-transform:uppercase;margin-bottom:3px">{{ v.label }}</div>
+              <div style="font-size:16px;color:#2A2218;line-height:1.5">「{{ v.text }}」</div>
+            </div>
+          </sc-for>
+        </div>
+        <p style="font-size:12px;color:#B0A48E;margin:10px 0 0;font-style:italic">{{ t.shiftsNote }}</p>
+      </sc-if>
+
+      <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:26px;margin:32px 0 10px">{{ t.endingReportTitle }}</div>
+      <sc-for list="{{ reportParas }}" as="p" hint-placeholder-count="3">
+        <p style="font-size:17px;line-height:1.65;color:#3a342e;margin:0 0 14px">{{ p.text }}</p>
+      </sc-for>
+
+      <div style="background:#FFFDF4;border:1.6px solid #D8CFBE;border-radius:14px;padding:16px 18px;margin-top:8px">
+        <div style="font-size:15px;color:#2A2218;margin-bottom:8px">[非语音] {{ t.endingConf }}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <sc-for list="{{ confDots }}" as="d" hint-placeholder-count="5">
+            <button onClick="{{ d.onClick }}" style="width:30px;height:30px;border-radius:50%;border:2px solid #BC6242;background:{{ d.bg }}" aria-label="confidence"></button>
+          </sc-for>
+          <span style="font-size:14px;color:#6B6151;margin-left:8px">{{ confLabel }}</span>
+        </div>
+        <div style="font-size:12px;color:#B0A48E;margin-top:6px">{{ t.endingConfWas }}: {{ confInitialPct }}</div>
+      </div>
+
+      <div style="text-align:center;margin-top:32px">
+        <button onClick="{{ onReplay }}" style="font-size:18px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:15px;padding:12px 30px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">↻ {{ t.endingReplay }}</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ ERROR (backend unavailable) ============ -->
+  <sc-if value="{{ isError }}">
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 24px;text-align:center">
+      <div style="font-size:13px;letter-spacing:3px;color:#B0A48E;text-transform:uppercase">{{ t.brand }}</div>
+      <h2 style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:34px;max-width:18em;margin:14px 0 10px;line-height:1.2;color:#BC6242">{{ errMsg }}</h2>
+      <button onClick="{{ onStart }}" style="margin-top:16px;font-size:18px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:15px;padding:11px 28px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">↻ {{ t.micRetry }}</button>
+    </div>
+  </sc-if>
+
+  <!-- ============ LOADING overlay ============ -->
+  <sc-if value="{{ isLoading }}">
+    <div style="position:fixed;inset:0;background:rgba(251,246,234,.92);z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+      <div style="width:46px;height:46px;border:4px solid #E5DCCB;border-top-color:#BC6242;border-radius:50%;animation:gk-spin 1s linear infinite"></div>
+      <div style="font-size:17px;color:#6B6151;font-family:'Noto Sans SC'">{{ t.loading }}</div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;apiBase&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;https://gaokao.meno.sh&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Backend&quot;},&quot;startLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cn&quot;,&quot;en&quot;],&quot;default&quot;:&quot;cn&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Language&quot;}}">
+class Component extends DCLogic {
+  state = {
+    lang: 'cn', mode: 'live', phase: 'launch',
+    qIndex: 0, micState: 'idle', transcript: '', transcriptDone: false,
+    typing: false, typedVal: '',
+    stopIndex: 0, figReveal: 0,   // 0 none, 1 A, 2 A+B, 3 +mic
+    showCornerEnd: false, confFinal: 0, tick: 0,
+    errMsg: '',
+  };
+
+  // ---- lifecycle ----
+  componentDidMount() {
+    const lang = (this.props.startLang === 'en') ? 'en' : 'cn';
+    this.now = 0; this.boil = 0; this.level = 0; this.t0 = performance.now();
+    this.pairs = []; this.order = []; this.initialOrder = [];
+    this.stopsCompleted = 0; this.consecNoChange = 0; this.endChoiceShown = false;
+    this.orderHistory = []; this.stopLog = {}; this.orderChanges = 0;
+    this.intakeAnswers = {}; this._stopEnterWall = 0;
+    this.orderBeforeStop = []; this.orderAtRerankStart = []; this.rerankCtx = 'initial';
+    this.intakeQs = []; this.expanded = false; this.liveStage = null; this.sid = null;
+    this.confInitial = 50;
+    this.setState({ lang });
+    const loop = () => {
+      this.now = (performance.now() - this.t0) / 1000;
+      this.boil = Math.floor(this.now * 1000 / 145);
+      const S = window.Sketch;
+      if (S) { S.setTime(this.now, this.boil); this._updateLevel(); this._drawAll(S); }
+      if (this.state.micState === 'listening' && !this._liveRec && (this.now - (this._listenStart || 0)) > 2.6) {
+        this._stopListening();
+      }
+      if (this.state.phase === 'stop') {
+        const el = this.now - (this._stopEnterT || 0);
+        const want = el > 2.4 ? 3 : el > 1.5 ? 2 : el > 0.6 ? 1 : 0;
+        if (want > this.state.figReveal) this.setState({ figReveal: want });
+      }
+      this._raf = requestAnimationFrame(loop);
+    };
+    this._raf = requestAnimationFrame(loop);
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this._raf);
+    if (this._tw) clearInterval(this._tw);
+    this._revealTimers && this._revealTimers.forEach(clearTimeout);
+  }
+
+  // ---- helpers ----
+  L(o) { if (!o) return ''; return o[this.state.lang] !== undefined ? o[this.state.lang] : (o.cn || ''); }
+  T() { const GK = window.GK || { STR: {} }; return (GK.STR && GK.STR[this.state.lang]) || (GK.STR && GK.STR.cn) || {}; }
+  _arrEq(a, b) { return a.length === b.length && a.every((x, i) => x === b[i]); }
+  _pairById(id) { return this.pairs.find(p => p.id === id) || {}; }
+
+  // ---- audio level ----
+  _updateLevel() {
+    let target = 0;
+    if (this.state.micState === 'listening') {
+      if (this._analyser) {
+        const buf = this._lvlBuf || (this._lvlBuf = new Uint8Array(this._analyser.fftSize));
+        this._analyser.getByteTimeDomainData(buf);
+        let sum = 0; for (let i = 0; i < buf.length; i++) { const v = (buf[i] - 128) / 128; sum += v * v; }
+        target = Math.min(1, Math.sqrt(sum / buf.length) * 3.5);
+      } else {
+        const n = this.now;
+        target = 0.32 + 0.5 * Math.abs(Math.sin(n * 4.7)) * (0.55 + 0.45 * Math.sin(n * 1.9 + 1));
+      }
+    } else if (this.state.micState === 'thinking') {
+      target = 0.18 + 0.1 * Math.sin(this.now * 6);
+    }
+    this.level += (target - this.level) * (target > this.level ? 0.35 : 0.12);
+  }
+
+  // ---- canvas drawing ----
+  _drawAll(S) {
+    const draw = (id, fn) => { const el = document.getElementById(id); if (el) fn(el); };
+    draw('sk-launch', el => this._drawFig(S, el, { color: S.C.TERRA, pose: 'wave', mood: 'happy', seed: 9, look: [0, -0.2] }));
+    draw('sk-mic', el => this._drawMic(S, el));
+    if (this.state.phase === 'stop') {
+      const d = this.getStopDisp();
+      draw('sk-figA', el => this._drawFig(S, el, { color: d.figA.color, pose: d.figA.pose, mood: d.figA.mood, seed: 21, look: [1, 0] }));
+      draw('sk-figB', el => this._drawFig(S, el, { color: d.figB.color, pose: d.figB.pose, mood: d.figB.mood, seed: 37, look: [-1, 0] }));
+    }
+    if (this.state.phase === 'ending') {
+      draw('sk-bump', el => this._drawBump(S, el));
+    }
+  }
+  _drawBump(S, canvas) {
+    const { ctx, rc, W, H } = S.fit(canvas); S.clear(ctx, W, H);
+    const hist = this.orderHistory || [];
+    if (hist.length < 1 || !hist[0] || !hist[0].length) return;
+    const k = hist[0].length, M = hist.length;
+    const t = this.T();
+    const mL = 16, mR = Math.min(190, W * 0.4), mT = 30, mB = 26;
+    const innerW = Math.max(10, W - mL - mR), innerH = Math.max(10, H - mT - mB);
+    const colX = c => mL + (M <= 1 ? innerW * 0.18 : innerW * (c / (M - 1)));
+    const rowY = r => mT + (k <= 1 ? innerH * 0.5 : innerH * (r / (k - 1)));
+    // column tick labels
+    ctx.save(); ctx.font = "12px 'Noto Sans SC',sans-serif"; ctx.fillStyle = S.C.FAINT; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    for (let c = 0; c < M; c++) {
+      const lbl = c === 0 ? t.bumpStart : (this.state.lang === 'cn' ? ('第' + c + '站') : ('S' + c));
+      ctx.fillText(lbl, colX(c), H - 8);
+    }
+    ctx.restore();
+    // one line per option
+    hist[0].forEach((id, idx0) => {
+      const p = this._pairById(id); const col = p.color || S.C.TERRA;
+      const pts = hist.map((ord, c) => { const r = ord.indexOf(id); return [colX(c), rowY(r < 0 ? idx0 : r)]; });
+      if (pts.length >= 2) rc.curve(pts, S.rop(40 + idx0 * 5, col, null, { strokeWidth: 3, roughness: 1.1 }));
+      else if (pts.length === 1) { /* single point */ }
+      pts.forEach((pt, c) => { ctx.save(); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(pt[0], pt[1], c === M - 1 ? 6 : 4.5, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+      // right-edge label at final rank
+      const fr = hist[M - 1].indexOf(id); const ly = rowY(fr < 0 ? idx0 : fr);
+      const lab = this._shortLabel(p);
+      ctx.save(); ctx.font = "600 13px 'Noto Sans SC',sans-serif"; ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(lab, colX(M - 1) + 12, ly);
+      ctx.restore();
+    });
+  }
+  _shortLabel(p) {
+    const full = this.L(p && p.label) || '';
+    const at = full.indexOf('@');
+    let s = at > 0 ? full.slice(0, at).trim() : full;
+    if (s.length > 9) s = s.slice(0, 8) + '…';
+    return s;
+  }
+  _drawFig(S, canvas, opts) {
+    const { ctx, rc, W, H } = S.fit(canvas); S.clear(ctx, W, H);
+    const scale = Math.min(W, H) / 112;
+    S.stick(rc, ctx, W / 2, H - 14, scale, opts.seed || 7, opts);
+  }
+  _drawMic(S, canvas) {
+    const { ctx, rc, W, H } = S.fit(canvas); S.clear(ctx, W, H);
+    const cx = W / 2, cy = H * 0.5, baseR = Math.min(W, H) * 0.16;
+    const ms = this.state.micState;
+    const active = ms === 'listening';
+    const col = active ? S.C.TERRA : (ms === 'thinking' ? S.C.ORANGE : S.C.SOFT);
+    S.visualizer(rc, ctx, cx, cy, baseR, this.level, 11, col);
+    S.mic(rc, ctx, cx, cy, baseR, 3, { color: active ? S.C.TERRA : S.C.INK, fill: S.C.PAPER });
+  }
+
+  // ============ FLOW ============
+  onLang = () => { this.setState(s => ({ lang: s.lang === 'cn' ? 'en' : 'cn' })); };
+
+  onStart = async () => {
+    const mode = await this._detectMode();
+    if (mode !== 'live') {
+      // backend unreachable: surface an error state (live-only, no fallback)
+      this._showError();
+      return;
+    }
+    this.mode = 'live';
+    this.minStops = 6; this.minNoChange = 3; this.pairs = [];
+    this.intakeQs = [{ kind: 'pairs' }];
+    this.expanded = false;
+    this.setState({ mode: 'live', errMsg: '', phase: 'intake', qIndex: 0 });
+    this._resetMic(); this._scrollTop();
+  };
+
+  _showError(msg) {
+    const t = this.T();
+    this.setState({ phase: 'error', errMsg: msg || t.backendUnavailable || 'backend unavailable' });
+    this._scrollTop();
+  }
+
+  // Reachability check only. The only non-error mode is 'live'.
+  async _detectMode() {
+    const base = this.props.apiBase || '';
+    try {
+      const ctrl = new AbortController();
+      const to = setTimeout(() => ctrl.abort(), 2500);
+      const r = await fetch(base + '/rank_quiz', { signal: ctrl.signal });
+      clearTimeout(to);
+      if (r.ok) return 'live';
+    } catch (e) {}
+    return 'error';
+  }
+
+  // ---- mic interaction (shared) ----
+  tapMic = () => {
+    const ms = this.state.micState;
+    if (ms === 'idle') this._startListening();
+    else if (ms === 'listening') this._stopListening();
+  };
+  _resetMic() {
+    if (this._tw) clearInterval(this._tw);
+    this.setState({ micState: 'idle', transcript: '', transcriptDone: false, typing: false, typedVal: '' });
+  }
+  addMore = () => {
+    if (this._tw) clearInterval(this._tw);
+    const cur = (this.state.transcript || '').trim();
+    // a "(没听清…)" / "(网络…)" placeholder must be REPLACED on re-supplement, never appended
+    this._appendBase = /^[\(（]/.test(cur) ? '' : cur;
+    this._appending = true;
+    this.setState({ transcriptDone: false });
+    this._startListening();
+  };
+  async _startListening() {
+    this._listenStart = this.now;
+    this.setState({ micState: 'listening', transcriptDone: false });
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this._stream = stream; this._liveRec = true; this._chunks = [];
+      const AC = window.AudioContext || window.webkitAudioContext;
+      this._actx = new AC(); const src = this._actx.createMediaStreamSource(stream);
+      this._analyser = this._actx.createAnalyser(); this._analyser.fftSize = 512; src.connect(this._analyser);
+      this._rec = new MediaRecorder(stream);
+      this._rec.ondataavailable = e => this._chunks.push(e.data);
+      this._rec.onstop = () => { stream.getTracks().forEach(t => t.stop()); this._sendVoice(new Blob(this._chunks, { type: 'audio/webm' })); };
+      this._rec.start();
+    } catch (e) {
+      // mic unavailable: drop to keyboard input, never fabricate a transcript
+      this._liveRec = false; this._analyser = null;
+      this.setState({ typing: true, micState: 'typing', transcript: '', transcriptDone: false });
+    }
+  }
+  _stopListening() {
+    if (this._liveRec && this._rec) {
+      this._liveRec = false; this.setState({ micState: 'thinking' });
+      try { this._rec.stop(); } catch (e) {}
+      if (this._actx) { try { this._actx.close(); } catch (e) {} this._actx = null; }
+      this._analyser = null;
+      return;
+    }
+    // no active recording (e.g. mic denied): drop to keyboard input
+    this.setState({ typing: true, micState: 'typing', transcript: '', transcriptDone: false });
+  }
+  async _sendVoice(blob) {
+    const base = this.props.apiBase || '';
+    const q = this.intakeQs[this.state.qIndex] || {};
+    const isPairsQ = this.state.phase === 'intake' && q.kind === 'pairs';
+    try {
+      const url = base + '/voice_profile?' + (isPairsQ ? 'intake=1' : 'fast=1');
+      const b64 = await this._blobB64(blob);
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio_b64: b64 }) });
+      const d = await r.json();
+      if (d.error && !d.transcript) { this._typeTranscript(this.state.lang === 'cn' ? '(没听清,再说一次)' : "(didn't catch that, try again)"); return; }
+      if (isPairsQ && d.intake && Array.isArray(d.intake.candidates)) {
+        this.pairs = d.intake.candidates.slice(0, 6).map((c, i) => ({
+          id: 'p' + i, label: { cn: c.label || c.raw || '', en: c.label || c.raw || '' },
+          know: { cn: '', en: '' }, color: ['#BC6242', '#3873A8', '#53984F', '#7E55A4', '#E2882F', '#C44536'][i % 6],
+        }));
+        if (d.intake.confidence_initial != null) this.confInitial = d.intake.confidence_initial;
+      }
+      this._typeTranscript(d.transcript || '');
+    } catch (e) { this._typeTranscript(this.state.lang === 'cn' ? '(网络不太好,可改用键盘)' : '(network hiccup, try the keyboard)'); }
+  }
+  _blobB64(blob) { return new Promise(res => { const r = new FileReader(); r.onloadend = () => res((r.result || '').toString().split(',')[1] || ''); r.readAsDataURL(blob); }); }
+
+  _typeTranscript(text) {
+    text = text || '';
+    if (this._tw) clearInterval(this._tw);
+    const base = this._appendBase ? (this._appendBase + (this.state.lang === 'cn' ? '' : ' ')) : '';
+    this._appendBase = null; this._appending = false;
+    const full = base + text;
+    this.setState({ micState: 'typing', transcript: base, transcriptDone: false });
+    let i = base.length;
+    this._tw = setInterval(() => {
+      i += 2;
+      this.setState({ transcript: full.slice(0, i) });
+      if (i >= full.length) { clearInterval(this._tw); this.setState({ transcript: full, micState: 'done', transcriptDone: true }); }
+    }, 26);
+  }
+  toggleKeyboard = () => { if (this._tw) clearInterval(this._tw); this.setState({ typing: true, micState: 'typing', transcript: '', transcriptDone: false }); };
+  onType = (e) => { this.setState({ typedVal: e.target.value }); };
+  onSubmitType = () => {
+    const v = (this.state.typedVal || '').trim(); if (!v) return;
+    const cur = this.intakeQs[this.state.qIndex] || {};
+    // keyboard path for the candidates question: parse typed "A@X, B@Y" into pairs (voice path gets these from /voice_profile)
+    if (this.state.phase === 'intake' && cur.kind === 'pairs' && !(this.pairs || []).length) {
+      const cols = ['#BC6242', '#3873A8', '#53984F', '#7E55A4', '#E2882F', '#C44536'];
+      const labels = v.split(/[,，;；、\n]+/).map(x => x.trim()).filter(Boolean).slice(0, 6);
+      if (labels.length) this.pairs = labels.map((lb, i) => ({ id: 'p' + i, label: { cn: lb, en: lb }, know: { cn: '', en: '' }, color: cols[i % 6] }));
+    }
+    this.setState({ typing: false, transcript: v, micState: 'done', transcriptDone: true });
+  };
+
+  // ---- advance (shared button) ----
+  advance = () => {
+    if (this.state.phase === 'intake') this._advanceIntake();
+    else if (this.state.phase === 'stop') this._onStopAnswer();
+  };
+
+  _advanceIntake() {
+    const cur = this.intakeQs[this.state.qIndex] || {};
+    if (cur.kind === 'tail' && cur.id) this.intakeAnswers[cur.id] = (this.state.transcript || '').trim();
+    if (cur.kind === 'perpair' && cur.pair) this.intakeAnswers['pair_' + cur.pair.id] = (this.state.transcript || '').trim();
+    if (cur.kind === 'pairs' && !this.expanded) { this._expandIntake(); this.expanded = true; }
+    const next = this.state.qIndex + 1;
+    if (next >= this.intakeQs.length) { this._finishIntake(); return; }
+    this.setState({ qIndex: next }); this._resetMic(); this._scrollTop();
+  }
+  _expandIntake() {
+    const GK = window.GK;
+    const perpair = (this.pairs || []).map(p => ({ kind: 'perpair', pair: p }));
+    const tail = (GK.INTAKE.tail || []).map(t => ({ kind: 'tail', ...t }));
+    const head = this.intakeQs.slice(0, this.state.qIndex + 1);
+    this.intakeQs = head.concat(perpair, tail);
+  }
+  async _finishIntake() {
+    this.order = (this.pairs || []).map(p => p.id);
+    this.setState({ phase: 'loading' });
+    try {
+      const base = this.props.apiBase || '';
+      const A = this.intakeAnswers || {};
+      const ok = v => v && !/^[\(（]/.test(v.trim());   // skip "(没听清)"/"(网络…)" placeholders + empties
+      const parts = [];
+      if (ok(A.macro)) parts.push('对人生大方向的想法:' + A.macro.trim());
+      if (ok(A.values)) parts.push('价值排序(钱/兴趣/影响力):' + A.values.trim());
+      if (ok(A.dest)) parts.push('毕业去向倾向:' + A.dest.trim());
+      (this.pairs || []).forEach(p => { const v = A['pair_' + p.id]; if (ok(v)) parts.push('关于「' + this.L(p.label) + '」的想法:' + v.trim()); });
+      const free_text = parts.join('。 ').slice(0, 600);
+      const dest_pref = ok(A.dest) ? [A.dest.trim().slice(0, 80)] : [];
+      const body = {
+        options: this.pairs.map(p => ({ label: this.L(p.label), note: this.L(p.know) })),
+        free_text, quiz: {}, destination_pref: dest_pref, confidence_initial: this.confInitial,
+        value_weights: { money: 33, interest: 34, influence: 33 }, lang: this.state.lang,
+      };
+      const r = await fetch(base + '/rank_start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await r.json();
+      if (d.sid) { this.sid = d.sid; this.liveStage = d.stage; if (d.stage && d.stage.order) this.order = this._matchOrder(d.stage.order); }
+      else { this._showError(); return; }
+    } catch (e) { this._showError(); return; }
+    this._enterRerank('initial'); this._scrollTop();
+  }
+  _matchOrder(labels) {
+    // map returned label order back to pair ids
+    const ids = [];
+    labels.forEach(lb => { const p = this.pairs.find(x => this.L(x.label) === lb); if (p) ids.push(p.id); });
+    this.pairs.forEach(p => { if (!ids.includes(p.id)) ids.push(p.id); });
+    return ids;
+  }
+
+  // ---- rerank ----
+  _enterRerank(ctx) {
+    this.rerankCtx = ctx; this.orderAtRerankStart = this.order.slice();
+    this._resetMic();
+    this.setState({ phase: 'rerank', tick: this.state.tick + 1 });
+  }
+  _move(id, dir) {
+    const i = this.order.indexOf(id); if (i < 0) return;
+    const j = i + dir; if (j < 0 || j >= this.order.length) return;
+    const o = this.order.slice(); const tmp = o[i]; o[i] = o[j]; o[j] = tmp; this.order = o;
+    if (this.sid) {
+      const base = this.props.apiBase || '';
+      fetch(base + '/rank_reorder', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, order: this.order.map(id2 => this.L(this._pairById(id2).label)) }) }).catch(() => {});
+    }
+    this.setState({ tick: this.state.tick + 1 });
+  }
+  onRerankContinue = () => {
+    if (this.rerankCtx === 'initial') {
+      this.initialOrder = this.order.slice();
+      this.orderHistory = [this.order.slice()];
+      this._enterStop(0);
+    } else {
+      const changed = !this._arrEq(this.order, this.orderBeforeStop);
+      this.consecNoChange = changed ? 0 : this.consecNoChange + 1;
+      if (changed) this.orderChanges += 1;
+      const i = this.state.stopIndex;
+      this.stopLog[i] = Object.assign(this.stopLog[i] || {}, { whatWould: (this.state.transcript || '').trim(), whatWouldChanged: changed });
+      this.orderHistory.push(this.order.slice());
+      this._decideAfterStop();
+    }
+    this._scrollTop();
+  };
+
+  // ---- stop ----
+  _enterStop(i) {
+    this.orderBeforeStop = this.order.slice();
+    this._resetMic();
+    this._stopEnterT = this.now;
+    this._stopEnterWall = Date.now();
+    this.setState({ phase: 'stop', stopIndex: i, figReveal: 0, tick: this.state.tick + 1 });
+  }
+  _onStopAnswer() {
+    const i = this.state.stopIndex; const d = this.getStopDisp();
+    const ans = (this.state.transcript || '').trim();
+    this.stopLog[i] = Object.assign(this.stopLog[i] || {}, { factor: d.factor, answer: ans, answerLen: ans.length, dwellMs: Date.now() - (this._stopEnterWall || Date.now()) });
+    this.stopsCompleted += 1;
+    if (this.sid) {
+      const base = this.props.apiBase || '';
+      fetch(base + '/rank_elicit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, stage: d.n, scene: d.factor, q: d.mic, answer: ans }) }).catch(() => {});
+    }
+    this._enterRerank('stop'); this._scrollTop();
+  }
+  _decideAfterStop() {
+    if (!this.endChoiceShown && this.stopsCompleted >= this.minStops && this.consecNoChange >= this.minNoChange) {
+      this.endChoiceShown = true; this.setState({ phase: 'endchoice' });
+    } else {
+      this._goNextStopOrEnd();
+    }
+  }
+  async _goNextStopOrEnd() {
+    this.setState({ phase: 'loading' });
+    try {
+      const base = this.props.apiBase || '';
+      const r = await fetch(base + '/rank_next', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, order: this.order.map(id => this.L(this._pairById(id).label)) }) });
+      const d = await r.json();
+      if (d.phase === 'ending' || d.ending) { this.liveEnding = d.ending; this._enterEnding(); return; }
+      if (d.stage) { this.liveStage = d.stage; this._enterStop((this.state.stopIndex || 0) + 1); return; }
+    } catch (e) {}
+    // no further stage from backend: wrap up with whatever live ending we have
+    this._enterEnding();
+  }
+
+  // ---- end choice ----
+  _endViaBackend = async () => {
+    // early-end MUST fetch the ending from the backend — otherwise liveEnding stays null -> empty portrait (same class as the intake bug)
+    this.setState({ phase: 'loading' });
+    if (this.sid) {
+      try {
+        const base = this.props.apiBase || '';
+        const r = await fetch(base + '/rank_end', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, confidence_final: this.state.confFinal || 0, order: this.order.map(id => this.L(this._pairById(id).label)) }) });
+        const d = await r.json();
+        if (d && d.ending) this.liveEnding = d.ending;
+      } catch (e) {}
+    }
+    this._enterEnding(); this._scrollTop();
+  };
+  onFinish = () => { this._endViaBackend(); };
+  onNext = () => { this.setState({ showCornerEnd: true }); this._goNextStopOrEnd(); this._scrollTop(); };
+  onCornerEnd = () => { this._endViaBackend(); };
+
+  // ---- ending ----
+  _enterEnding() {
+    this.confInitialPctVal = this.confInitial;
+    this.setState({ phase: 'ending', confFinal: 0 });
+    // the reflection report comes from a separate endpoint — the ending payload doesn't carry it
+    if (this.sid) {
+      const base = this.props.apiBase || '';
+      fetch(base + '/rank_report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid }) })
+        .then(r => r.json()).then(d => { this.liveReport = d.report || ''; this.setState({}); }).catch(() => {});
+    }
+  }
+  onReplay = () => {
+    this.stopsCompleted = 0; this.consecNoChange = 0; this.endChoiceShown = false;
+    this.orderChanges = 0; this.stopLog = {}; this.orderHistory = [this.order.slice()];
+    this.initialOrder = this.order.slice();
+    this.setState({ phase: 'stop', showCornerEnd: false });
+    this._enterStop(0); this._scrollTop();
+  };
+  _setConf = (v) => { this.setState({ confFinal: v }); };
+
+  _scrollTop() { try { window.scrollTo(0, 0); } catch (e) {} }
+
+  // ---- stop display (live) ----
+  _fragify(text, citeNum){
+    const out=[], re=/\[(R\d+)\]/g; let last=0, m; text=text||'';
+    while((m=re.exec(text))){
+      if(m.index>last) out.push({text:text.slice(last,m.index), cite:''});
+      if(citeNum[m[1]]){ const tag=m[1]; out.push({text:'', cite:tag, num:citeNum[tag], onClick:()=>this._showCite(tag)}); }
+      last=re.lastIndex;
+    }
+    if(last<text.length) out.push({text:text.slice(last), cite:''});
+    if(!out.length) out.push({text:text, cite:''});
+    return out;
+  }
+  _showCite(tag){
+    const c=((this.liveStage&&this.liveStage.citations)||{})[tag]; if(!c) return;
+    const esc=(x)=>(x||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const ov=document.createElement('div'); ov.className='vcite-ov';
+    ov.setAttribute('style','position:fixed;inset:0;background:rgba(43,36,25,.5);display:flex;align-items:center;justify-content:center;z-index:10001;padding:20px');
+    ov.onclick=(e)=>{ if(e.target===ov) ov.remove(); };
+    ov.innerHTML='<div style="background:#FCF7EC;border:2px solid #2B2419;border-radius:14px;max-width:640px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:4px 4px 0 rgba(43,36,25,.2)"><div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #E6DBC4;font-weight:700">'+esc(c.university)+' · '+esc(c.major)+'<button onclick="this.closest(\'.vcite-ov\').remove()" style="border:none;background:none;font-size:1.4em;cursor:pointer">×</button></div><div style="padding:14px 16px;overflow-y:auto;line-height:1.6">'+esc(c.full_text).replace(/\n/g,"<br>")+'</div></div>';
+    document.body.appendChild(ov);
+  }
+  getStopDisp() {
+    const t = this.T();
+    const s = this.liveStage || {};
+    {
+      const clean = (tk) => (tk || '').trim();
+      const fl = s.factor && s.factor.label || '';
+      const cn = this.state.lang === 'cn';
+      // investigator = the OBJECTIVE trade-off (the two paths pull different ways; you cannot have both) — NOT "can you bear it"
+      const investigator = cn
+        ? `分歧点在「${fl}」。这两条路各有侧重、很难兼得 —— 选一个,就意味着在这件事上更偏向它、而让渡另一个。问题不是"哪个更好",而是:在「${fl}」上,你更想要 ${s.top} 那一面,还是 ${s.contender} 那一面?`
+        : `The split here is "${fl}". These two paths pull different ways — you can't fully have both, so picking one means leaning toward it and giving up some of the other. The question isn't "which is better" but: on "${fl}", do you want what ${s.top} offers, or what ${s.contender} offers?`;
+      return {
+        n: s.stage || (this.state.stopIndex + 1), factor: fl,
+        high: cn ? `这一站,看看「${fl}」对你究竟意味着什么。` : `This stop: what "${fl}" really means for you.`,
+        figA: { color: '#BC6242', pose: 'think', mood: 'sad', label: (cn ? `选了「${s.top}」的你` : `The you who chose ${s.top}`), q: clean(s.top_take) },
+        figB: { color: '#3873A8', pose: 'shrug', mood: 'confused', label: (cn ? `选了「${s.contender}」的你` : `The you who chose ${s.contender}`), q: clean(s.contender_take) },
+        investigator,
+        citations: s.citations || {},
+        mic: s.question || s.elicit || t.stopMicLead,   // the backend value/trade-off question (the deep one) — not the old endure-it template
+      };
+    }
+  }
+
+  // ============ RENDER VALUES ============
+  renderVals() {
+    const t = this.T(); const s = this.state; const GK = window.GK || { STR: {} };
+    const phase = s.phase;
+    const micStatusMap = { idle: t.micIdle, listening: t.micListening, thinking: t.micThinking, typing: '', done: '' };
+    const showMic = !s.typing;
+    const showTranscript = !!s.transcript;
+    const showAdvance = s.micState === 'done' && s.transcriptDone;
+    const showKbToggle = (s.micState === 'idle' || s.micState === 'listening');
+
+    // launch
+    const expectItems = (t.expect || []).map((line, i) => ({ n: i + 1, text: line }));
+
+    // intake
+    let qPrompt = '', qHint = '';
+    if (phase === 'intake') {
+      const q = this.intakeQs[s.qIndex] || {};
+      if (q.kind === 'pairs') { qPrompt = this.L(GK.INTAKE.pairs.prompt); qHint = this.L(GK.INTAKE.pairs.hint); }
+      else if (q.kind === 'perpair') {
+        const lbl = this.L((q.pair || {}).label);
+        qPrompt = s.lang === 'cn' ? GK.INTAKE.perPair.promptCn(lbl) : GK.INTAKE.perPair.promptEn(lbl);
+        qHint = this.L(GK.INTAKE.perPair.hint);
+      } else if (q.kind === 'tail') { qPrompt = this.L(q.prompt); qHint = this.L(q.hint); }
+    }
+    const progDots = (this.intakeQs || []).map((q, i) => ({ color: i <= s.qIndex ? '#BC6242' : '#E2D8C5' }));
+
+    // rerank
+    const rankItems = (this.order || []).map((id, i) => {
+      const p = this._pairById(id);
+      const canUp = i > 0, canDown = i < this.order.length - 1;
+      return {
+        rank: i + 1, label: this.L(p.label), color: p.color || '#BC6242',
+        tilt: (i % 2 === 0 ? -0.35 : 0.35).toFixed(2),
+        upColor: canUp ? '#6B6151' : '#E2D8C5', downColor: canDown ? '#6B6151' : '#E2D8C5',
+        onUp: () => this._move(id, -1), onDown: () => this._move(id, 1),
+      };
+    });
+
+    // stop
+    const d = (phase === 'stop') ? this.getStopDisp() : null;
+    // stop progress bar: first 8 nodes big (the effective scenes), last 9 small (optional); current highlighted
+    const _curN = (d && d.n) || (this.state.stopIndex + 1);
+    const stopDots = Array.from({ length: 17 }, (_, k) => {
+      const n = k + 1;
+      return { size: (k < 8 ? '11px' : '6px'), color: (n < _curN ? '#D9A88E' : (n === _curN ? '#BC6242' : '#E2D8C5')) };
+    });
+    const fr = s.figReveal;
+    const stopVals = d ? {
+      stopKicker: (t.stopKicker || 'Stop {n}').replace('{n}', d.n),
+      stopHigh: d.high, figAColor: d.figA.color, figBColor: d.figB.color,
+      figALabel: d.figA.label, figBLabel: d.figB.label, figAQ: d.figA.q, figBQ: d.figB.q,
+      stopMicPrompt: d.mic, investigatorText: d.investigator,
+      showFigA: fr >= 1, showFigB: fr >= 2, showInvestigator: fr >= 2, showStopMic: fr >= 3,
+    } : {};
+    const _cits = (this.liveStage && this.liveStage.citations) || {};
+    const _citeNum = {}; Object.keys(_cits).sort((a,b)=>(+a.slice(1))-(+b.slice(1))).forEach((tg,i)=>{ _citeNum[tg]=i+1; });
+    const figAFrags = d ? this._fragify(d.figA.q, _citeNum) : [];
+    const figBFrags = d ? this._fragify(d.figB.q, _citeNum) : [];
+    const investFrags = d ? this._fragify(d.investigator, _citeNum) : [];
+    const refItems = d ? Object.keys(_citeNum).map(tg=>({num:_citeNum[tg], label:(_cits[tg].university+' · '+_cits[tg].major), onClick:()=>this._showCite(tg)})) : [];
+
+    // ending
+    const labelOf = id => this.L(this._pairById(id).label);
+    const initialList = (this.initialOrder || []).map((id, i) => ({ rank: i + 1, label: labelOf(id) }));
+    const finalList = (this.order || []).map((id, i) => ({ rank: i + 1, label: labelOf(id) }));
+    let portrait = '', reportParas = [];
+    const le = this.liveEnding || {};
+    portrait = le.portrait || '';
+    const lr = le.report;
+    if (Array.isArray(lr)) reportParas = lr.map(x => ({ text: String(x).replace(/\*\*/g, '') }));
+    else reportParas = [{ text: String(lr || this.liveReport || '').replace(/\*\*/g, '') }];
+    const confFinal = s.confFinal || 0;
+    const confDots = [1, 2, 3, 4, 5].map(v => ({ bg: v <= confFinal ? '#BC6242' : '#FFFDF4', onClick: () => this._setConf(v) }));
+    const confLabel = confFinal ? (confFinal * 20) + '%' : (s.lang === 'cn' ? '点一下表示' : 'tap to set');
+
+    // post-stop rerank: conditional "what would have" voice prompt
+    const isPostStopRerank = phase === 'rerank' && this.rerankCtx === 'stop';
+    const rerankChanged = !this._arrEq(this.order || [], this.orderBeforeStop || []);
+    const rerankWhatPrompt = rerankChanged ? t.rerankWhatChanged : t.rerankWhatSame;
+
+    // report aggregates
+    const hist = this.orderHistory || [];
+    const statScenes = this.stopsCompleted || 0;
+    const statSwitches = this.orderChanges || 0;
+    let lingerLabel = '—', lingerMax = 0;
+    Object.keys(this.stopLog || {}).forEach(k => { const e = this.stopLog[k]; if (e && (e.answerLen || 0) > lingerMax) { lingerMax = e.answerLen; lingerLabel = e.factor || '—'; } });
+    if (lingerMax === 0) lingerLabel = '—';
+    let dwellLabel = '—', dwellMax = 0;
+    Object.keys(this.stopLog || {}).forEach(k => { const e = this.stopLog[k]; if (e && (e.dwellMs || 0) > dwellMax) { dwellMax = e.dwellMs; dwellLabel = e.factor || '—'; } });
+    if (dwellMax === 0) dwellLabel = '—';
+    const bumpEmpty = statSwitches === 0;
+    // per-change list
+    const changesList = [];
+    for (let c = 1; c < hist.length; c++) {
+      if (this._arrEq(hist[c], hist[c - 1])) continue;
+      const topChanged = hist[c][0] !== hist[c - 1][0];
+      const newTopId = hist[c][0];
+      const desc = topChanged ? (t.changeTopTo || '{x}').replace('{x}', this._shortLabel(this._pairById(newTopId))) : t.changeReorder;
+      const log = (this.stopLog || {})[c - 1] || {};
+      changesList.push({ n: c, color: this._pairById(newTopId).color || '#BC6242', desc, factor: log.factor || '', reason: (log.answer || '').trim(), hasReason: !!(log.answer || '').trim(), saidLabel: t.changeReasonSaid });
+    }
+    // things that would change my mind
+    const changeMindList = [];
+    Object.keys(this.stopLog || {}).sort((a, b) => a - b).forEach(k => {
+      const e = this.stopLog[k]; const w = (e && e.whatWould || '').trim();
+      if (w.length >= 8) changeMindList.push({ factor: e.factor || '', text: w, changed: !!e.whatWouldChanged });
+    });
+    // initial high-level views
+    const ia = this.intakeAnswers || {};
+    const shiftLabels = s.lang === 'cn'
+      ? { struggle: '你最纠结的', macro: '对未来的想法', values: '你最看重的' }
+      : { struggle: 'What tore you', macro: 'Your big-picture hope', values: 'What you valued' };
+    const initialViews = ['struggle', 'macro', 'values'].filter(id => (ia[id] || '').trim().length >= 4)
+      .map(id => ({ label: shiftLabels[id], text: (ia[id] || '').trim() }));
+
+    return {
+      t,
+      isLaunch: phase === 'launch', isIntake: phase === 'intake', isRerank: phase === 'rerank',
+      isStop: phase === 'stop', isEndChoice: phase === 'endchoice', isEnding: phase === 'ending', isLoading: phase === 'loading',
+      isError: phase === 'error', errMsg: s.errMsg,
+      badgeText: t.liveBadge,
+      badgeColor: '#53984F',
+      onLang: this.onLang, onStart: this.onStart,
+      expectItems,
+      progDots, qPrompt, qHint,
+      tapMic: this.tapMic, micStatus: micStatusMap[s.micState] || '',
+      showMic, showTranscript, transcript: s.transcript, showAdvance,
+      advanceLabel: t.nextBtn, advance: this.advance, addMore: this.addMore,
+      typing: s.typing, typedVal: s.typedVal, onType: this.onType, onSubmitType: this.onSubmitType,
+      showKbToggle, toggleKeyboard: this.toggleKeyboard,
+      rankItems, onRerankContinue: this.onRerankContinue,
+      isPostStopRerank, rerankWhatPrompt,
+      ...stopVals, stopDots, figAFrags, figBFrags, investFrags, refItems, showRefs: refItems.length > 0,
+      showCornerEnd: (_curN >= 6 || s.showCornerEnd) && phase === 'stop', onCornerEnd: this.onCornerEnd,
+      onFinish: this.onFinish, onNext: this.onNext,
+      portrait, initialList, finalList, reportParas,
+      statScenes, statSwitches, lingerLabel, dwellLabel, bumpEmpty,
+      changesList, hasChanges: changesList.length > 0,
+      changeMindList, hasChangeMind: changeMindList.length > 0, noChangeMind: changeMindList.length === 0,
+      reBody: (t.reBody || []).map(x => ({ text: String(x) })),
+      initialViews, hasInitialViews: initialViews.length > 0,
+      confDots, confLabel, confInitialPct: (this.confInitial || 50) + '%',
+      onReplay: this.onReplay,
+    };
+  }
+}
+</script>
+</body>
+</html>
