@@ -831,7 +831,7 @@ class Component extends DCLogic {
     this._enterRerank('stop'); this._scrollTop();
   }
   _decideAfterStop() {
-    if (!this.endChoiceShown && this.stopsCompleted >= this.minStops && this.consecNoChange >= this.minNoChange) {
+    if (!this.endChoiceShown && ((this.stopsCompleted >= this.minStops && this.consecNoChange >= this.minNoChange) || this.stopsCompleted >= 8)) {   // by stop 8 the 'you can end' window ALWAYS shows, even if they keep reranking (Yuhe)
       this.endChoiceShown = true; this.setState({ phase: 'endchoice' });
     } else {
       this._goNextStopOrEnd();
