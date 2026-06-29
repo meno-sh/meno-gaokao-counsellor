@@ -730,10 +730,12 @@ class Component extends DCLogic {
   }
   _expandIntake() {
     const GK = window.GK;
-    const perpair = (this.pairs || []).map(p => ({ kind: 'perpair', pair: p }));
+    const know = [{ kind: 'tail', id: 'know',
+      prompt: { cn: '关于你现在的专业和学校选择,你已经知道了些什么?', en: 'About your current major and school choices, what do you already know?' },
+      hint: { cn: '随便聊聊你的印象、担心,或者听来的说法。', en: "Just share your impressions, worries, or anything you've heard." } }];
     const tail = (GK.INTAKE.tail || []).map(t => ({ kind: 'tail', ...t }));
     const head = this.intakeQs.slice(0, this.state.qIndex + 1);
-    this.intakeQs = head.concat(perpair, tail);
+    this.intakeQs = head.concat(know, tail);
   }
   async _finishIntake() {
     this.order = (this.pairs || []).map(p => p.id);
@@ -743,6 +745,7 @@ class Component extends DCLogic {
       const A = this.intakeAnswers || {};
       const ok = v => v && !/^[\(（]/.test(v.trim());   // skip "(没听清)"/"(网络…)" placeholders + empties
       const parts = [];
+      if (ok(A.know)) parts.push('对所选专业/学校已经知道的:' + A.know.trim());
       if (ok(A.macro)) parts.push('对人生大方向的想法:' + A.macro.trim());
       if (ok(A.values)) parts.push('价值排序(钱/兴趣/影响力):' + A.values.trim());
       if (ok(A.dest)) parts.push('毕业去向倾向:' + A.dest.trim());
