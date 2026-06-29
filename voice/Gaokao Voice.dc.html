@@ -92,6 +92,7 @@
 
       <sc-if value="{{ showAdvance }}">
         <div style="display:flex;gap:12px;align-items:center;margin-top:18px;animation:gk-in .4s">
+          <button onClick="{{ redo }}" style="font-size:14px;color:#A14E2F;background:#FFFDF4;border:2px solid #E6C9BC;border-radius:13px;padding:8px 16px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#A14E2F">↺ {{ t.redoBtn }}</button>
           <button onClick="{{ addMore }}" style="font-size:16px;color:#6B6151;background:#FFFDF4;border:2px solid #D8CFBE;border-radius:14px;padding:9px 20px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#6B6151;color:#2A2218">＋ {{ t.addMore }}</button>
           <button onClick="{{ advance }}" style="font-size:18px;color:#fff;background:#53984F;border:2px solid #2A2218;border-radius:14px;padding:10px 26px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">{{ advanceLabel }} →</button>
         </div>
@@ -145,7 +146,8 @@
             </div>
           </sc-if>
           <sc-if value="{{ showAdvance }}">
-            <button onClick="{{ addMore }}" style="margin-top:8px;font-size:14px;color:#6B6151;background:#FFFDF4;border:2px solid #D8CFBE;border-radius:13px;padding:7px 16px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#6B6151;color:#2A2218">＋ {{ t.addMore }}</button>
+            <button onClick="{{ redo }}" style="font-size:14px;color:#A14E2F;background:#FFFDF4;border:2px solid #E6C9BC;border-radius:13px;padding:8px 16px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#A14E2F">↺ {{ t.redoBtn }}</button>
+          <button onClick="{{ addMore }}" style="margin-top:8px;font-size:14px;color:#6B6151;background:#FFFDF4;border:2px solid #D8CFBE;border-radius:13px;padding:7px 16px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#6B6151;color:#2A2218">＋ {{ t.addMore }}</button>
           </sc-if>
           <sc-if value="{{ showKbToggle }}">
             <button onClick="{{ toggleKeyboard }}" style="margin-top:10px;font-size:13px;color:#B0A48E;text-decoration:underline;text-underline-offset:3px">[非语音] {{ t.micKeyboard }}</button>
@@ -230,7 +232,8 @@
 
         <sc-if value="{{ showAdvance }}">
           <div style="display:flex;gap:12px;align-items:center;margin-top:14px;animation:gk-in .4s">
-            <button onClick="{{ addMore }}" style="font-size:15px;color:#6B6151;background:#FFFDF4;border:2px solid #D8CFBE;border-radius:13px;padding:8px 18px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#6B6151;color:#2A2218">＋ {{ t.addMore }}</button>
+            <button onClick="{{ redo }}" style="font-size:14px;color:#A14E2F;background:#FFFDF4;border:2px solid #E6C9BC;border-radius:13px;padding:8px 16px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#A14E2F">↺ {{ t.redoBtn }}</button>
+          <button onClick="{{ addMore }}" style="font-size:15px;color:#6B6151;background:#FFFDF4;border:2px solid #D8CFBE;border-radius:13px;padding:8px 18px;font-family:'Noto Sans SC',inherit" style-hover="border-color:#6B6151;color:#2A2218">＋ {{ t.addMore }}</button>
             <button onClick="{{ advance }}" style="font-size:18px;color:#fff;background:#53984F;border:2px solid #2A2218;border-radius:14px;padding:10px 26px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">{{ advanceLabel }} →</button>
           </div>
         </sc-if>
@@ -631,6 +634,13 @@ class Component extends DCLogic {
     this._appendBase = /^[\(（]/.test(cur) ? '' : cur;
     this._appending = true;
     this.setState({ transcriptDone: false });
+    this._startListening();
+  };
+  redo = () => {
+    // delete the last input entirely and re-record from scratch (Yuhe)
+    if (this._tw) clearInterval(this._tw);
+    this._appendBase = ''; this._appending = false;
+    this.setState({ transcript: '', typedVal: '', transcriptDone: false, micState: 'idle' });
     this._startListening();
   };
   async _startListening() {
@@ -1055,7 +1065,7 @@ class Component extends DCLogic {
       progDots, qPrompt, qHint,
       tapMic: this.tapMic, micStatus: micStatusMap[s.micState] || '',
       showMic, showTranscript, transcript: s.transcript, showAdvance,
-      advanceLabel: t.nextBtn, advance: this.advance, addMore: this.addMore,
+      advanceLabel: t.nextBtn, advance: this.advance, addMore: this.addMore, redo: this.redo,
       typing: s.typing, typedVal: s.typedVal, onType: this.onType, onSubmitType: this.onSubmitType,
       showKbToggle, toggleKeyboard: this.toggleKeyboard,
       rankItems, onRerankContinue: this.onRerankContinue,
