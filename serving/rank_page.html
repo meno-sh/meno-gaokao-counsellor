@@ -408,6 +408,16 @@ button.ghost:hover{background:#fff;border-color:var(--terra);color:var(--terra-d
 .ic-wait{opacity:.55}
 .ichat-row{display:flex;gap:8px}
 .ichat-in{flex:1;padding:9px 12px;border:1.5px solid var(--line-strong,#ddd);border-radius:10px;font-size:.92rem;font-family:inherit;background:var(--paper,#fff)}
+.cite{color:#BC6242;cursor:pointer;font-weight:700;font-size:.7em;padding:0 1px;vertical-align:super}
+.refs{margin:10px 0 0;padding:8px 10px;background:#FBF3E2;border:1px solid #E6DBC4;border-radius:8px;font-size:.85em}
+.refsh{color:#8A7B5C;font-weight:700;letter-spacing:.5px;margin-bottom:4px}
+.ref{cursor:pointer;padding:2px 0;color:#5a5246}.ref:hover{color:#BC6242}
+.refn{display:inline-block;min-width:1.3em;color:#BC6242;font-weight:700}
+.citeov{position:fixed;inset:0;background:rgba(43,36,25,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.citemodal{background:#FCF7EC;border:2px solid #2B2419;border-radius:14px;max-width:640px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:4px 4px 0 rgba(43,36,25,.2)}
+.citemh{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #E6DBC4;font-weight:700;color:#2B2419}
+.citex{border:none;background:none;font-size:1.4em;cursor:pointer;color:#8A7B5C}
+.citebody{padding:14px 16px;overflow-y:auto;line-height:1.6;color:#2A2218}
 </style></head><body>
 <div class="wrap" id=wrap>
   <header id=landing>
@@ -939,15 +949,17 @@ function journeyTrail(stage, cap){
 function renderStage(st){ _stageT=Date.now();
   ORDER=st.order;renderSide();LAST=st.last;
   window.EL={stage:st.stage,scene:(st.factor||{}).label||'',q:st.elicit||''};
+  window.CITES=st.citations||{};window.CITE_NUM={};Object.keys(window.CITES).sort(function(a,b){return (+a.slice(1))-(+b.slice(1));}).forEach(function(t,i){window.CITE_NUM[t]=i+1;});
   const s=document.getElementById('stage');
   s.innerHTML=`<div class="card stationcard">
     <div class=stationhdr><span class=step>第 ${st.stage} / ${st.cap} 站</span><span class=factor>${escHtml(st.factor.label)}</span></div>
     ${journeyTrail(st.stage, st.cap)}
     ${st.question?`<p class=qfocus>这一站,想和你一起想想这个问题。<b>${st.question}</b></p>`:''}
-    <p class=story>${escHtml(st.prose)}</p>
+    <p class=story>${citeHtml(st.prose)}</p>
     <div class=invest><b>🔎 调查员视角 · ${escHtml(st.factor.label)}</b> <span class=fabricnote>${tr('fabric')}</span><br>
-      <b>${escHtml(st.top)}</b>:${escHtml(st.top_take)}<br>
-      <span class=vs>对照</span> <b>${escHtml(st.contender)}</b>:${escHtml(st.contender_take)}</div>
+      <b>${escHtml(st.top)}</b>:${citeHtml(st.top_take)}<br>
+      <span class=vs>对照</span> <b>${escHtml(st.contender)}</b>:${citeHtml(st.contender_take)}</div>
+    ${refListHtml()}
     ${(st.sources&&st.sources.length)?`<p class="prog src">AI 参考过 ${st.sources.join('、')},但写出来的内容仍是虚构,请自己核实</p>`:''}
     <p class=caveat>${tr('caveatScene')}</p>
     ${st.elicit?`<div class=elicitbox><div id=chatlog><div class="cmsg cmsg-a">💬 ${st.elicit}</div></div><div class=elicitrow id=screlrow><input type=text id=elcin class=elicitin placeholder="${LANG==='en'?'Tell us what you really think… (optional)':'说说你的真实想法…(可选)'}"><button type=button class="ghost elmic" title="${tr('micTitle')}" onclick="recVoice(document.getElementById('elvst'),document.getElementById('elcin'),true)">🎙</button><button type=button class=elsend onclick="sendChat('elcin','chatlog','scene','screlrow')">${LANG==='en'?'Send':'发送'}</button></div><p class=inputnudge style="margin:.5em 0 0">${tr('inputNudge')}</p><span id=elvst class=prog></span> <span id=elstat class=prog></span></div>`:''}
@@ -1172,6 +1184,10 @@ function mdLite(t){
   if(inUl)html+='</ul>'; return html;
 }
 function escHtml(x){return (x||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function citeNum(t){return (window.CITE_NUM||{})[t]||'';}
+function citeHtml(x){return escHtml(x).replace(/\[(R\d+)\]/g,function(m,t){return (window.CITES&&window.CITES[t])?'<sup class=cite onclick="showCite(\''+t+'\')">'+citeNum(t)+'</sup>':'';});}
+function refListHtml(){var c=window.CITES||{},ks=Object.keys(window.CITE_NUM||{});if(!ks.length)return '';return '<div class=refs><div class=refsh>参考资料 / References</div>'+ks.map(function(t){return c[t]?('<div class=ref onclick="showCite(\''+t+'\')"><span class=refn>'+citeNum(t)+'</span> '+escHtml(c[t].university)+' · '+escHtml(c[t].major)+'</div>'):'';}).join('')+'</div>';}
+function showCite(t){var c=(window.CITES||{})[t];if(!c)return;var ov=document.createElement('div');ov.className='citeov';ov.onclick=function(e){if(e.target===ov)ov.remove();};ov.innerHTML='<div class=citemodal><div class=citemh><span>'+escHtml(c.university)+' · '+escHtml(c.major)+'</span><button class=citex onclick="this.closest(\'.citeov\').remove()">×</button></div><div class=citebody>'+escHtml(c.full_text).replace(/\n/g,"<br>")+'</div></div>';document.body.appendChild(ov);}
 function portraitBlock(portrait, EN){
   const p=(portrait||'').replace(/[<>]/g,'').trim(); if(!p) return '';
   const items=p.split(/\s*[·•‧]\s*/).map(function(x){return x.trim();}).filter(Boolean);
