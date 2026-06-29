@@ -342,8 +342,10 @@ _CITE_RULE = ("【务必·引用】上面【参考资料】是真实的「专业
 
 def _rag_refs(top, rest, considerations, cap=12, per_pick=5):
     """Build the 【参考资料】 block + a tag->piece map for the candidates. Fail-safe:
-    returns ('', {}) if the RAG module / corpus / embedding is unavailable (so generation
-    proceeds exactly as before when the corpus isn't deployed)."""
+    returns ('', {}) if RAG is disabled / module / corpus / embedding unavailable (so
+    generation proceeds exactly as before). Kill-switch: set env RAG_ENABLED=0 to disable."""
+    if os.environ.get("RAG_ENABLED", "1").lower() not in ("1", "true", "yes", "on"):
+        return "", {}
     try:
         import re as _re, json as _json
         from core import rag
