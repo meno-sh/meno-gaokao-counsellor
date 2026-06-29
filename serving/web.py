@@ -276,7 +276,7 @@ class H(BaseHTTPRequestHandler):
     def _send(self, code, body, ctype="application/json"):
         b = body if isinstance(body, bytes) else body.encode("utf-8")
         self.send_response(code); self.send_header("Content-Type", ctype); self._cors()
-        if ctype.startswith("text/html"):
+        if ctype.startswith("text/html") or "javascript" in ctype:
             self.send_header("Cache-Control", "no-cache, must-revalidate")  # always re-fetch HTML so updates show
         self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b)
     def _admin_ok(self):
@@ -292,7 +292,15 @@ class H(BaseHTTPRequestHandler):
         if _gp in ("/prompts", "/prompts_data", "/rank_log") and not self._admin_ok():
             return self._send(403, json.dumps({"error": "forbidden"}))
         if self.path == "/" or self.path.startswith("/?"):
+            self._send(200, _VOICE_HTML or _RANK_PAGE, "text/html; charset=utf-8")   # voice app = main link (Yuhe); web app kept at /classic
+        elif _gp == "/classic":
             self._send(200, _RANK_PAGE, "text/html; charset=utf-8")
+        elif _gp == "/data.js":
+            self._send(200, _VOICE_DATA, "application/javascript; charset=utf-8")
+        elif _gp == "/sketch.js":
+            self._send(200, _VOICE_SKETCH, "application/javascript; charset=utf-8")
+        elif _gp == "/support.js":
+            self._send(200, _VOICE_SUPPORT, "application/javascript; charset=utf-8")
         elif self.path == "/ab" or self.path.startswith("/ab?"):
             self._send(200, _PAGE, "text/html; charset=utf-8")
         elif self.path.startswith("/rank_quiz"):
@@ -1014,6 +1022,16 @@ async function poll(job){
 }
 </script></body></html>"""
 _RANK_PAGE = open(os.path.join(os.path.dirname(__file__), "rank_page.html"), encoding="utf-8").read()
+_VOICE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "voice")
+def _read_voice(_n):
+    try:
+        return open(os.path.join(_VOICE_DIR, _n), encoding="utf-8").read()
+    except Exception:
+        return ""
+_VOICE_HTML = _read_voice("Gaokao Voice.dc.html")
+_VOICE_DATA = _read_voice("data.js")
+_VOICE_SKETCH = _read_voice("sketch.js")
+_VOICE_SUPPORT = _read_voice("support.js")
 _PROMPTS_PAGE = open(os.path.join(os.path.dirname(__file__), "prompts_editor.html"), encoding="utf-8").read()
 _LOADING_PREVIEW = open(os.path.join(os.path.dirname(__file__), "loading_preview.html"), encoding="utf-8").read()
 _PAGE = _PAGE.replace("%AXES%", json.dumps(AXES, ensure_ascii=False))
