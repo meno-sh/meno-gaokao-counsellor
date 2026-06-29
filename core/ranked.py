@@ -359,6 +359,8 @@ def _rag_refs(top, rest, considerations, cap=12, per_pick=5):
                 break
             maj, uni = _split(lbl)
             for rr in rag.retrieve(maj, uni, considerations, stop_factor="", k=per_pick, _qvec=qvec):
+                if rr.get("_bucket") != 2:          # 宁缺毋滥: ONLY exact-major (same major, any school = real transferability); drop 同门类/other (the 核工程-for-CS noise)
+                    continue
                 if rr["id"] in seen or len(cmap) >= cap:
                     continue
                 seen.add(rr["id"]); tag = "R%d" % n; n += 1
@@ -642,6 +644,7 @@ class RankedSession:
                 "contender": result.get("contender", ""),
                 "top_take": result.get("top_take", ""),
                 "contender_take": result.get("contender_take", ""),
+                "investigator": result.get("investigator", ""),
                 "did_you_know": result.get("did_you_know", ""),
                 "sources": result.get("sources", []),
                 "citations": result.get("citations", {}),

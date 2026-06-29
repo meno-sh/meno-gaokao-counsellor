@@ -86,7 +86,7 @@
       <sc-if value="{{ showTranscript }}">
         <div style="max-width:30em;margin:14px 0 4px">
           <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;margin-bottom:4px">{{ t.youSaid }}</div>
-          <div style="font-size:19px;color:#2A2218;font-style:italic">「{{ transcript }}」</div>
+          <div style="font-size:19px;color:#2A2218;font-style:italic"><textarea value="{{ transcript }}" onInput="{{ onEditTranscript }}" rows="2" style="width:100%;border:1.5px solid #D8CFBE;border-radius:10px;background:#FFFDF4;color:#2A2218;font-style:normal;font-size:16px;line-height:1.5;padding:6px 9px;resize:vertical"></textarea></div>
         </div>
       </sc-if>
 
@@ -142,7 +142,7 @@
           <sc-if value="{{ showTranscript }}">
             <div style="max-width:26em;margin:8px 0 2px">
               <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;margin-bottom:3px">{{ t.youSaid }}</div>
-              <div style="font-size:16px;color:#2A2218;font-style:italic">「{{ transcript }}」</div>
+              <div style="font-size:16px;color:#2A2218;font-style:italic"><textarea value="{{ transcript }}" onInput="{{ onEditTranscript }}" rows="2" style="width:100%;border:1.5px solid #D8CFBE;border-radius:10px;background:#FFFDF4;color:#2A2218;font-style:normal;font-size:16px;line-height:1.5;padding:6px 9px;resize:vertical"></textarea></div>
             </div>
           </sc-if>
           <sc-if value="{{ showAdvance }}">
@@ -226,7 +226,7 @@
         <sc-if value="{{ showTranscript }}">
           <div style="max-width:28em;margin:10px 0 2px">
             <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;margin-bottom:3px">{{ t.youSaid }}</div>
-            <div style="font-size:17px;color:#2A2218;font-style:italic">「{{ transcript }}」</div>
+            <div style="font-size:17px;color:#2A2218;font-style:italic"><textarea value="{{ transcript }}" onInput="{{ onEditTranscript }}" rows="2" style="width:100%;border:1.5px solid #D8CFBE;border-radius:10px;background:#FFFDF4;color:#2A2218;font-style:normal;font-size:16px;line-height:1.5;padding:6px 9px;resize:vertical"></textarea></div>
           </div>
         </sc-if>
 
@@ -339,21 +339,6 @@
         <div style="font-size:14px;color:#B0A48E;margin-top:10px">{{ t.bumpEmpty }}</div>
       </sc-if>
 
-      <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:26px;margin:32px 0 6px">{{ t.changeMindTitle }}</div>
-      <p style="font-size:14px;color:#B0A48E;margin:0 0 12px">{{ t.changeMindLead }}</p>
-      <sc-if value="{{ hasChangeMind }}">
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <sc-for list="{{ changeMindList }}" as="m" hint-placeholder-count="2">
-            <div style="display:flex;gap:10px;align-items:flex-start;background:#FCF7E8;border:1.6px solid #E2D8C5;border-radius:12px;padding:12px 14px">
-              <span style="flex:0 0 auto;color:#BC6242;font-size:20px;line-height:1.2">›</span>
-              <div><div style="font-size:13px;color:#B0A48E">{{ m.factor }}</div><div style="font-size:16px;color:#2A2218;line-height:1.5">{{ m.text }}</div></div>
-            </div>
-          </sc-for>
-        </div>
-      </sc-if>
-      <sc-if value="{{ noChangeMind }}">
-        <div style="font-size:14px;color:#B0A48E">{{ t.changeMindEmpty }}</div>
-      </sc-if>
 
       <sc-if value="{{ hasInitialViews }}">
         <div style="font-family:'Caveat','Noto Sans SC',cursive;font-weight:700;font-size:26px;margin:32px 0 4px">{{ t.shiftsTitle }}</div>
@@ -565,6 +550,17 @@ class Component extends DCLogic {
     ctx.beginPath(); ctx.moveTo(lensC[0] - lensR * 0.62, lensC[1] - lensR * 0.08); ctx.lineTo(lensC[0] - lensR * 0.36, lensC[1] - lensR * 0.28); ctx.stroke();
     ctx.restore();
   }
+  _stripMd(x){
+    return String(x || '')
+      .replace(/^\s*#{1,6}\s*/gm, '')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*\n]+)\*/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^\s*[-*+]\s+/gm, '• ')
+      .replace(/[*#`_]{1,}/g, '')
+      .trim();
+  }
+  onEditTranscript = (e) => { this.setState({ transcript: e.target.value, transcriptDone: true }); };
   _drawFig(S, canvas, opts) {
     const { ctx, rc, W, H } = S.fit(canvas); S.clear(ctx, W, H);
     const scale = Math.min(W, H) / 112;
@@ -923,9 +919,9 @@ class Component extends DCLogic {
       const fl = s.factor && s.factor.label || '';
       const cn = this.state.lang === 'cn';
       // investigator = the OBJECTIVE trade-off (the two paths pull different ways; you cannot have both) — NOT "can you bear it"
-      const investigator = cn
-        ? `分歧点在「${fl}」。这两条路各有侧重、很难兼得 —— 选一个,就意味着在这件事上更偏向它、而让渡另一个。问题不是"哪个更好",而是:在「${fl}」上,你更想要 ${s.top} 那一面,还是 ${s.contender} 那一面?`
-        : `The split here is "${fl}". These two paths pull different ways — you can't fully have both, so picking one means leaning toward it and giving up some of the other. The question isn't "which is better" but: on "${fl}", do you want what ${s.top} offers, or what ${s.contender} offers?`;
+      const investigator = clean(s.investigator) || (cn
+        ? `在「${fl}」上,你更看重哪一面?`
+        : `On "${fl}", which side matters more to you?`);
       return {
         n: s.stage || (this.state.stopIndex + 1), factor: fl,
         high: cn ? `这一站,看看「${fl}」对你究竟意味着什么。` : `This stop: what "${fl}" really means for you.`,
@@ -1005,10 +1001,10 @@ class Component extends DCLogic {
     const finalList = (this.order || []).map((id, i) => ({ rank: i + 1, label: labelOf(id) }));
     let portrait = '', reportParas = [];
     const le = this.liveEnding || {};
-    portrait = le.portrait || '';
+    portrait = this._stripMd(le.portrait || '');
     const lr = le.report;
-    if (Array.isArray(lr)) reportParas = lr.map(x => ({ text: String(x).replace(/\*\*/g, '') }));
-    else reportParas = [{ text: String(lr || this.liveReport || '').replace(/\*\*/g, '') }];
+    if (Array.isArray(lr)) reportParas = lr.map(x => ({ text: this._stripMd(x) })).filter(x => x.text);
+    else reportParas = [{ text: this._stripMd(lr || this.liveReport || '') }].filter(x => x.text);
     const confFinal = s.confFinal || 0;
     const confDots = [1, 2, 3, 4, 5].map(v => ({ bg: v <= confFinal ? '#BC6242' : '#FFFDF4', onClick: () => this._setConf(v) }));
     const confLabel = confFinal ? (confFinal * 20) + '%' : (s.lang === 'cn' ? '点一下表示' : 'tap to set');
