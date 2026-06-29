@@ -665,6 +665,13 @@ class Component extends DCLogic {
   onType = (e) => { this.setState({ typedVal: e.target.value }); };
   onSubmitType = () => {
     const v = (this.state.typedVal || '').trim(); if (!v) return;
+    const cur = this.intakeQs[this.state.qIndex] || {};
+    // keyboard path for the candidates question: parse typed "A@X, B@Y" into pairs (voice path gets these from /voice_profile)
+    if (this.state.phase === 'intake' && cur.kind === 'pairs' && !(this.pairs || []).length) {
+      const cols = ['#BC6242', '#3873A8', '#53984F', '#7E55A4', '#E2882F', '#C44536'];
+      const labels = v.split(/[,，;；、\n]+/).map(x => x.trim()).filter(Boolean).slice(0, 6);
+      if (labels.length) this.pairs = labels.map((lb, i) => ({ id: 'p' + i, label: { cn: lb, en: lb }, know: { cn: '', en: '' }, color: cols[i % 6] }));
+    }
     this.setState({ typing: false, transcript: v, micState: 'done', transcriptDone: true });
   };
 
