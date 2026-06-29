@@ -333,6 +333,63 @@ def _dim_label(key):
             return f"{d.get('pole_a','')}↔{d.get('pole_b','')}"
     return str(key)
 
+_CITE_RULE = ("【务必·引用】上面【参考资料】是真实的「专业@学校」资料。写 top_take / contender_take / prose 时,"
+              "**优先改用其中的具体事实**(具体课程、出路去向、真实就读体验等)把两条路写得具体可信,不要泛泛而谈。"
+              "并在输出的 JSON 里**额外加一个字段 `cites`**,形如 "
+              "{\"top_take\":[\"R1\"],\"contender_take\":[\"R3\"],\"prose\":[],\"investigator\":[]} —— "
+              "列出每个正文字段**实际采信了哪些参考资料编号**(只列真用到的;没用到就留空数组 [];不要编造编号)。"
+              "记住要输出 cites 字段 —— 现在按前面的 schema 输出 JSON。")
+
+def _rag_refs(top, rest, considerations, cap=8, per_pick=3):
+    """Build the 【参考资料】 block + a tag->piece map for the candidates. Fail-safe:
+    returns ('', {}) if the RAG module / corpus / embedding is unavailable (so generation
+    proceeds exactly as before when the corpus isn't deployed)."""
+    try:
+        import re as _re, json as _json
+        from core import rag
+        def _split(lbl):
+            parts = _re.split(r"[@＠]", lbl or "", 1)
+            return (parts[0].strip(), parts[1].strip() if len(parts) > 1 else "")
+        qvec = rag.embed(considerations) if considerations else []
+        seen, lines, cmap, n = set(), [], {}, 1
+        for lbl in ([top] + list(rest)):
+            if len(cmap) >= cap:
+                break
+            maj, uni = _split(lbl)
+            for rr in rag.retrieve(maj, uni, considerations, stop_factor="", k=per_pick, _qvec=qvec):
+                if rr["id"] in seen or len(cmap) >= cap:
+                    continue
+                seen.add(rr["id"]); tag = "R%d" % n; n += 1
+                cmap[tag] = {"major": rr["major"], "university": rr["university"], "full_text": rr["full_text"]}
+                lines.append("[%s] (%s@%s): %s" % (tag, rr["major"], rr["university"], rr["full_text"][:600]))
+        if not lines:
+            return "", {}
+        return ("【参考资料】(真实的「专业@学校」介绍 —— 用来让两条路的描述更具体可信;不是非用不可)\n" + "\n".join(lines)), cmap
+    except Exception:
+        return "", {}
+
+def _extract_citations(result, cmap):
+    """Read the structured `cites` field (per-field ref lists). Returns the citations map
+    (tag -> {major, university, full_text}) for refs actually cited. Also normalizes
+    result["cites"] to only-valid tags for the frontend."""
+    if not cmap:
+        result.pop("cites", None); return {}
+    try:
+        cites = result.get("cites") or {}
+        used = set()
+        clean = {}
+        for field, tags in cites.items():
+            kept = [t for t in (tags or []) if t in cmap]
+            if kept: clean[field] = kept
+            used.update(kept)
+        # fallback: also catch any inline [Rn] the model left in the prose
+        import re as _re, json as _json
+        used.update(t for t in _re.findall(r"\[(R\d+)\]", _json.dumps(result, ensure_ascii=False)) if t in cmap)
+        result["cites"] = clean
+        return {t: cmap[t] for t in used}
+    except Exception:
+        return {}
+
 def unified_turn(top, rest, profile_text, seen_keys, rerank_log, examined_dims=None, scene_history=None, student_views=None, lang="cn"):
     """ONE inference doing WTE (pick scene) + investigator (contender/question/
     investigate) + story-writer (prose), driven by a human-dimension uncertainty
@@ -369,6 +426,9 @@ def unified_turn(top, rest, profile_text, seen_keys, rerank_log, examined_dims=N
                   "prose / top_take / contender_take / question / scene_gist in fluent, natural ENGLISH — the user selected English. "
                   "Translate every Chinese fact faithfully into English. Major & school names may remain Chinese with a short "
                   "English gloss in parentheses. Absolutely NO Chinese sentences in those fields — Chinese prose here is a hard error.")
+    _refs, _cmap = _rag_refs(top, rest, (profile_text or "")[:500])   # RAG grounding (fail-safe no-op if corpus absent)
+    if _refs:
+        prompt = prompt + "\n\n" + _refs + "\n" + _CITE_RULE
     r = _llm_json(prompt, online=_WEBSEARCH, max_tokens=2000)
     _gctx = (g_top or "") + "\n" + (g_rest or "")
     for k in ("prose", "top_take", "contender_take", "question"):
@@ -391,6 +451,7 @@ def unified_turn(top, rest, profile_text, seen_keys, rerank_log, examined_dims=N
                 r = r2
         except Exception:
             pass
+    r["citations"] = _extract_citations(r, _cmap)
     sk = r.get("scene")
     scene = next((s for s in pool if s["key"] == sk), None) or pool[0]
     r["_factor"] = {"key": scene["key"], "label": scene["label"]}
@@ -581,6 +642,7 @@ class RankedSession:
                 "contender_take": result.get("contender_take", ""),
                 "did_you_know": result.get("did_you_know", ""),
                 "sources": result.get("sources", []),
+                "citations": result.get("citations", {}),
                 "order": self.current_order(), "last": self.done()}
 
     def ending(self) -> dict:
