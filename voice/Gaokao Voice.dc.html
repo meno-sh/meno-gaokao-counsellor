@@ -86,7 +86,7 @@
       <sc-if value="{{ showTranscript }}">
         <div style="max-width:30em;margin:14px 0 4px">
           <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;margin-bottom:4px">{{ t.youSaid }}</div>
-          <div style="font-size:19px;color:#2A2218;font-style:italic"><textarea value="{{ transcript }}" onInput="{{ onEditTranscript }}" rows="2" style="width:100%;border:1.5px solid #D8CFBE;border-radius:10px;background:#FFFDF4;color:#2A2218;font-style:normal;font-size:16px;line-height:1.5;padding:6px 9px;resize:vertical"></textarea></div>
+          <sc-if value="{{ transcriptTyping }}"><div style="font-size:19px;color:#2A2218;font-style:italic">「{{ transcript }}」</div></sc-if><sc-if value="{{ transcriptDone }}"><textarea value="{{ transcript }}" onInput="{{ onEditTranscript }}" rows="2" style="width:100%;box-sizing:border-box;font-family:'Noto Sans SC',serif;font-style:italic;font-size:19px;color:#2A2218;background:transparent;border:none;border-bottom:1.5px dashed #C9BC9E;line-height:1.6;padding:2px 2px 5px;resize:none;outline:none"></textarea></sc-if>
         </div>
       </sc-if>
 
@@ -142,7 +142,7 @@
           <sc-if value="{{ showTranscript }}">
             <div style="max-width:26em;margin:8px 0 2px">
               <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;margin-bottom:3px">{{ t.youSaid }}</div>
-              <div style="font-size:16px;color:#2A2218;font-style:italic"><textarea value="{{ transcript }}" onInput="{{ onEditTranscript }}" rows="2" style="width:100%;border:1.5px solid #D8CFBE;border-radius:10px;background:#FFFDF4;color:#2A2218;font-style:normal;font-size:16px;line-height:1.5;padding:6px 9px;resize:vertical"></textarea></div>
+              <sc-if value="{{ transcriptTyping }}"><div style="font-size:16px;color:#2A2218;font-style:italic">「{{ transcript }}」</div></sc-if><sc-if value="{{ transcriptDone }}"><textarea value="{{ transcript }}" onInput="{{ onEditTranscript }}" rows="2" style="width:100%;box-sizing:border-box;font-family:'Noto Sans SC',serif;font-style:italic;font-size:16px;color:#2A2218;background:transparent;border:none;border-bottom:1.5px dashed #C9BC9E;line-height:1.6;padding:2px 2px 5px;resize:none;outline:none"></textarea></sc-if>
             </div>
           </sc-if>
           <sc-if value="{{ showAdvance }}">
@@ -226,7 +226,7 @@
         <sc-if value="{{ showTranscript }}">
           <div style="max-width:28em;margin:10px 0 2px">
             <div style="font-size:12px;letter-spacing:1px;color:#B0A48E;margin-bottom:3px">{{ t.youSaid }}</div>
-            <div style="font-size:17px;color:#2A2218;font-style:italic"><textarea value="{{ transcript }}" onInput="{{ onEditTranscript }}" rows="2" style="width:100%;border:1.5px solid #D8CFBE;border-radius:10px;background:#FFFDF4;color:#2A2218;font-style:normal;font-size:16px;line-height:1.5;padding:6px 9px;resize:vertical"></textarea></div>
+            <sc-if value="{{ transcriptTyping }}"><div style="font-size:17px;color:#2A2218;font-style:italic">「{{ transcript }}」</div></sc-if><sc-if value="{{ transcriptDone }}"><textarea value="{{ transcript }}" onInput="{{ onEditTranscript }}" rows="2" style="width:100%;box-sizing:border-box;font-family:'Noto Sans SC',serif;font-style:italic;font-size:17px;color:#2A2218;background:transparent;border:none;border-bottom:1.5px dashed #C9BC9E;line-height:1.6;padding:2px 2px 5px;resize:none;outline:none"></textarea></sc-if>
           </div>
         </sc-if>
 
@@ -1060,7 +1060,7 @@ class Component extends DCLogic {
       expectItems,
       progDots, qPrompt, qHint,
       tapMic: this.tapMic, micStatus: micStatusMap[s.micState] || '',
-      showMic, showTranscript, transcript: s.transcript, showAdvance,
+      showMic, showTranscript, transcript: s.transcript, transcriptDone: s.transcriptDone, transcriptTyping: !s.transcriptDone, showAdvance,
       advanceLabel: t.nextBtn, advance: this.advance, addMore: this.addMore, redo: this.redo,
       typing: s.typing, typedVal: s.typedVal, onType: this.onType, onSubmitType: this.onSubmitType,
       showKbToggle, toggleKeyboard: this.toggleKeyboard,
