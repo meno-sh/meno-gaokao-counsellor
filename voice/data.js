@@ -193,8 +193,8 @@
       hint: pair('随便聊聊你的印象、担心,或者听来的说法。', "Just share your impressions, your worries, or anything you've heard.") },
     tail: [
       { id: 'struggle',
-        prompt: pair('你最纠结的,到底是什么?', 'What are you most torn about?'),
-        hint: pair('', '') },
+        prompt: pair('你现在有什么纠结吗?', "Anything you're torn about right now?"),
+        hint: pair('如:不同目标之间的权衡、和父母想法不一致、未来选择等。不管有多艰难或与众不同,请大胆告诉 AI 你的想法。', 'E.g. trade-offs between goals, disagreeing with your parents, choices about the future… however hard or unusual it feels, tell the AI freely.') },
       { id: 'macro',
         prompt: pair('对以后的人生,你有什么大方向上的想法?', 'For your life ahead, what do you want in the big picture?'),
         hint: pair('不用具体,说说你想要怎样的生活。', "It doesn't have to be concrete. Just the kind of life you want.") },
