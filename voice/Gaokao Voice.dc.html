@@ -383,6 +383,24 @@
         <div style="font-size:12px;color:#B0A48E;margin-top:6px">{{ t.endingConfWas }}: {{ confInitialPct }}</div>
       </div>
 
+      <sc-if value="{{ fbOpen }}">
+      <div style="max-width:30em;margin:26px auto 0;padding:14px 16px;border:1.5px solid #E6DBC4;border-radius:14px;background:#FFFDF4">
+        <div style="font-size:15px;color:#2A2218;margin-bottom:8px">{{ fbTitleTxt }}</div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:10px">
+          <sc-for list="{{ fbStars }}" as="st" hint-placeholder-count="5">
+            <button onClick="{{ st.onClick }}" style="font-size:26px;line-height:1;background:none;border:none;cursor:pointer;color:#BC6242;opacity:{{ st.op }}" aria-label="star">★</button>
+          </sc-for>
+        </div>
+        <textarea value="{{ fbText }}" onInput="{{ onFbInput }}" placeholder="{{ fbPh }}" rows="2" style="width:100%;box-sizing:border-box;font-family:'Noto Sans SC',inherit;font-size:14px;color:#2A2218;background:#fff;border:1.5px solid #D8CFBE;border-radius:12px;padding:9px 12px;resize:vertical;outline:none"></textarea>
+        <div style="text-align:right;margin-top:8px"><button onClick="{{ submitFeedback }}" style="font-size:14px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:12px;padding:8px 18px;box-shadow:2px 2px 0 #2A2218;font-family:'Noto Sans SC',inherit">{{ fbSubmitTxt }}</button></div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ fbDone }}"><div style="max-width:30em;margin:26px auto 0;text-align:center;font-size:15px;color:#3f7d5b">{{ fbThanksTxt }}</div></sc-if>
+
+      <div style="text-align:center;margin-top:18px">
+        <button onClick="{{ downloadPDF }}" style="font-size:16px;color:#BC6242;background:#FFFDF4;border:2px solid #BC6242;border-radius:14px;padding:10px 24px;box-shadow:2px 2px 0 #BC6242;font-family:'Noto Sans SC',inherit">⬇ {{ pdfBtnTxt }}</button>
+      </div>
+
       <div style="text-align:center;margin-top:32px">
         <button onClick="{{ onReplay }}" style="font-size:18px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:15px;padding:12px 30px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">↻ {{ t.endingReplay }}</button>
       </div>
@@ -915,6 +933,22 @@ class Component extends DCLogic {
     this._enterStop(0); this._scrollTop();
   };
   _setConf = (v) => { this.setState({ confFinal: v }); };
+  _setFb = (v) => { this.setState({ fbRating: v }); };
+  onFbInput = (e) => { this.setState({ fbText: e.target.value }); };
+  submitFeedback = async () => {
+    const r = this.state.fbRating || 0; const t = (this.state.fbText || '').trim();
+    if (!r && !t) return;
+    try { const base = this.props.apiBase || ''; await fetch(base + '/rank_feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, feedback: (r ? ('[' + r + '/5] ') : '') + t, rating: r }) }); } catch (e) {}
+    this.setState({ fbDone: true });
+  };
+  downloadPDF = () => {
+    const md = this.liveReport || ''; if (!md) return;
+    const title = (this.state.lang === 'en' ? 'Your reflection report' : '你的反思小结');
+    const paras = md.split(/\n+/).map(x => x.trim()).filter(Boolean).map(x => '<p>' + x.replace(/[<>]/g, '') + '</p>').join('');
+    const w = window.open('', '_blank'); if (!w) return;
+    w.document.write('<!doctype html><meta charset=utf-8><title>' + title + '</title><style>body{font-family:"Noto Sans SC",sans-serif;max-width:44em;margin:2em auto;padding:0 1.2em;line-height:1.75;color:#2A2218}h1{color:#BC6242}@media print{@page{margin:1.6cm}}</style><h1>' + title + '</h1>' + paras);
+    w.document.close(); setTimeout(function () { try { w.focus(); w.print(); } catch (e) {} }, 350);
+  };
 
   _scrollTop() { try { window.scrollTo(0, 0); } catch (e) {} }
 
@@ -1107,6 +1141,14 @@ class Component extends DCLogic {
       initialViews, hasInitialViews: initialViews.length > 0,
       confDots, confLabel, confInitialPct: (this.confInitial || 50) + '%',
       onReplay: this.onReplay,
+      downloadPDF: this.downloadPDF, submitFeedback: this.submitFeedback, onFbInput: this.onFbInput,
+      fbText: s.fbText || '', fbOpen: !s.fbDone, fbDone: !!s.fbDone,
+      fbStars: [1, 2, 3, 4, 5].map(v => ({ op: v <= (s.fbRating || 0) ? 1 : 0.3, onClick: () => this._setFb(v) })),
+      fbTitleTxt: s.lang === 'en' ? 'How was this? (30s helps us a lot)' : '刚才这一趟怎么样?(花 30 秒,对我们帮助很大)',
+      fbPh: s.lang === 'en' ? 'Optional: anything you want to tell us…' : '可选:想说的都行…',
+      fbSubmitTxt: s.lang === 'en' ? 'Submit' : '提交',
+      fbThanksTxt: s.lang === 'en' ? '✓ Thank you!' : '✓ 谢谢!收到了。',
+      pdfBtnTxt: s.lang === 'en' ? 'Download PDF' : '下载 PDF',
     };
   }
 }
