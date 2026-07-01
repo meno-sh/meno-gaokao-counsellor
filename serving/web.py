@@ -359,6 +359,12 @@ class H(BaseHTTPRequestHandler):
             return self._send(500, json.dumps({"error": f"转写失败: {type(e).__name__}: {e}"}, ensure_ascii=False))
         if not transcript.strip():
             return self._send(200, json.dumps({"error": "没听清,请再说一次"}, ensure_ascii=False))
+        try:  # durable transcript -> box (Render /tmp is ephemeral); keeps verbatim voice text
+            _log_session({"event": "transcript", "sid": body.get("sid", ""),
+                          "mode": ("intake" if intake else "fast" if fast else "full"),
+                          "transcript": transcript[:8000]})
+        except Exception:
+            pass
         if fast:   # transcript-only (note/free-text mics) — skip the slow profile LLM
             return self._send(200, json.dumps({"transcript": transcript}, ensure_ascii=False))
         if intake:  # voice-as-whole-form: extract the志愿 intake from the speech
