@@ -663,7 +663,7 @@ class H(BaseHTTPRequestHandler):
         fb = str(body.get("feedback", "")).strip()
         if not fb:
             return self._send(400, json.dumps({"error": "empty feedback"}, ensure_ascii=False))
-        _log_session({"event": "feedback", "sid": body.get("sid"), "feedback": fb[:4000],
+        _log_session({"event": "feedback", "sid": body.get("sid"), "feedback": fb[:4000], "rating": body.get("rating", 0),
                       "order": sess.current_order() if sess else None})
         return self._send(200, json.dumps({"ok": True}, ensure_ascii=False))
 

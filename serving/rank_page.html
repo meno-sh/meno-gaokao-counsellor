@@ -673,7 +673,7 @@ button.ghost:hover{background:#fff;border-color:var(--terra);color:var(--terra-d
   };
 })();
 
-let NARR='';let SID=null, ORDER=[], CAP=7, CONF0=60, STAGE_CONF=60, _stageT=0, LAST=false, QUIZ=[], FR=[], FREE_TEXT='', MR=null, CHUNKS=[], DESTS=[], DEST_ORDER=[], DEST_OTHER='', ALLOC=[34,33,33];
+let NARR='';let _FBRATING=0;let SID=null, ORDER=[], CAP=7, CONF0=60, STAGE_CONF=60, _stageT=0, LAST=false, QUIZ=[], FR=[], FREE_TEXT='', MR=null, CHUNKS=[], DESTS=[], DEST_ORDER=[], DEST_OTHER='', ALLOC=[34,33,33];
 let LANG=(localStorage.getItem('rg_lang')||'cn');
 const T={
  cn:{title:"反思均衡 · 志愿推演",
@@ -1311,7 +1311,7 @@ function renderEnd(e){
     <input type=range id=fconf min=0 max=100 value=${CONF0} oninput="fcv.textContent=this.value;updateBadges(+this.value)">
     ${badgeShelfHTML()}
     <p class=note style="margin-top:16px">${blurb}</p>
-    <p class=stagebtns style="margin-top:18px"><button onclick=finish()>${EN?'Done':'完成'}</button> <button class=ghost onclick="toggleFeedback()">${EN?'💬 Give us feedback':'💬 给我们反馈,让我们做得更好!'}</button> <span id=fstat class=prog></span></p>
+    <p class=stagebtns style="margin-top:18px"><button onclick=finish()>${EN?'Done':'完成'}</button> <span id=fstat class=prog></span></p>
     <p class=revisitcode>${EN?'Your revisit code:':'你的回访码:'} <code>${SID}</code> <button class=ghost onclick="(navigator.clipboard&&navigator.clipboard.writeText(location.origin+'/?run=${SID}'));this.textContent='${EN?'copied ✓':'已复制链接 ✓'}'">${EN?'copy link':'复制回访链接'}</button><br><span class=muted style="font-size:.78rem">${EN?'Keep it to return to this result later.':'保存它,以后可凭此回到这个结果。'}</span></p>
     <hr class=qdiv>
     <div class=note style="margin-top:14px;text-align:left">
@@ -1319,18 +1319,22 @@ function renderEnd(e){
       <p style="font-size:.9rem;line-height:1.65;margin:.5em 0">${EN?'Our goal is not just to help you fill out an application form — it is to help you build decision-making skills that serve you for years. Over the past decade we have refined these ideas with hundreds of thousands of gaokao students, teachers and parents across China; now that experience, research and tooling live on one platform, open to more students.':'我们的目标不仅仅是帮你填出一张志愿表,更希望帮你建立一套受用很多年的思考和决策能力。过去十年,我们在全国数十万高考学生中不断打磨这些想法,与老师、学生和家长一起反复迭代;今天,我们把这些年积累的经验、研究和工具放到同一个平台,开放给更多学生。'}</p>
       <a href="https://gaokao.yusoong.com/" target=_blank rel=noopener style="font-weight:600;color:var(--terra,#C96442)">${EN?'Explore Yusoong →':'了解雨来 →'}</a>
     </div>
-    <div id=fbbox style="display:none;margin-top:12px">
-      <textarea id=fbtext rows=3 placeholder="${EN?'Anything goes. What worked, what felt off, ideas…':'随便说说,哪里好用、哪里别扭、有什么想法都行…'}"></textarea>
-      <p style="margin-top:8px"><button onclick=sendFeedback()>${EN?'Submit':'提交反馈'}</button> <span id=fbstat class=prog></span></p>
+    <div id=fbbox style="margin-top:14px;padding:12px 14px;border:1.5px solid var(--line-strong,#e3ddd0);border-radius:12px;background:var(--paper-2,#f6efe2)">
+      <div class=factor style="font-size:.92rem">${EN?'How was this? (30 seconds helps us a lot)':'刚才这一趟怎么样?(花 30 秒,对我们帮助很大)'}</div>
+      <div id=fbstars style="font-size:1.7rem;letter-spacing:6px;cursor:pointer;margin:6px 0 8px" aria-label="rating">${[1,2,3,4,5].map(function(i){return '<span data-star="'+i+'" onclick="setRating('+i+')" style="opacity:.3">\u2605</span>';}).join('')}</div>
+      <textarea id=fbtext rows=2 placeholder="${EN?'Optional: what worked, what felt off, ideas…':'可选:哪里好用、哪里别扭、有什么想法…'}"></textarea>
+      <p style="margin-top:8px"><button onclick=sendFeedback()>${EN?'Submit':'提交'}</button> <span id=fbstat class=prog></span></p>
     </div>
   </div>`;
   try{ loadReport(); }catch(e){}
 }
+function setRating(n){_FBRATING=n;var ss=document.querySelectorAll('#fbstars span');ss.forEach(function(el){el.style.opacity=(+el.getAttribute('data-star')<=n)?'1':'0.3';});}
 function toggleFeedback(){const b=document.getElementById('fbbox');b.style.display=b.style.display==='none'?'':'none';}
 async function sendFeedback(){const t=(document.getElementById('fbtext').value||'').trim();const EN=LANG==='en';
-  if(!t){document.getElementById('fbstat').textContent=EN?'Write something first':'写点什么吧';return;}
+  if(!_FBRATING && !t){document.getElementById('fbstat').textContent=EN?'Tap a star or write a note':'点个星或写一句吧';return;}
   document.getElementById('fbstat').textContent=EN?'Submitting…':'提交中…';
-  try{await fetch('/rank_feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID,feedback:t})});
+  const payload=(_FBRATING?('[\u2605'+_FBRATING+'/5] '):'')+t;
+  try{await fetch('/rank_feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:SID,feedback:payload,rating:_FBRATING})});
     document.getElementById('fbstat').textContent=EN?'✓ Thank you!':'✓ 谢谢!收到了。';document.getElementById('fbtext').disabled=true;
   }catch(e){document.getElementById('fbstat').textContent=EN?'Failed, try later':'提交失败,稍后再试';}
 }
