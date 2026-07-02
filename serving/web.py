@@ -530,7 +530,7 @@ class H(BaseHTTPRequestHandler):
         _spawn_prefetch(sess)
         if st is None:
             return self._send(200, json.dumps({"phase": "ending", "ending": sess.ending()}, ensure_ascii=False))
-        _log_session({"event": "stage", "sid": body.get("sid"), "stage": st.get("stage"), "dwell_ms": body.get("dwell_ms"), "factor": (st.get("factor") or {}).get("label")})  # drop-off funnel
+        _log_session({"event": "stage", "sid": body.get("sid"), "stage": st.get("stage"), "dwell_ms": body.get("dwell_ms"), "factor": (st.get("factor") or {}).get("label"), "stage_full": st})  # drop-off funnel + full scene the user saw
         return self._send(200, json.dumps({"stage": st}, ensure_ascii=False))
 
     def _handle_rank_reorder(self, body):
@@ -541,6 +541,10 @@ class H(BaseHTTPRequestHandler):
         _rank_save(body.get("sid"), sess)
         _spawn_prefetch(sess)  # reorder changes #1 → warm the new top's next stage
         order = sess.current_order()
+        try:
+            _log_session({"event": "reorder", "sid": body.get("sid"), "order": order, "top": (order[0] if order else ""), "stage": getattr(sess, "stage", None)})
+        except Exception:
+            pass
         return self._send(200, json.dumps({"order": order, "top": order[0] if order else ""}, ensure_ascii=False))
 
     def _handle_rank_profile(self, body):
