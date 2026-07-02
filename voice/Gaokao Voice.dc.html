@@ -155,7 +155,19 @@
         </div>
       </sc-if>
 
+      <sc-if value="{{ askReorderReason }}">
+      <div style="max-width:30em;margin:20px auto 0;padding:14px 16px;border:1.5px solid #E6DBC4;border-radius:14px;background:#FFFDF4;text-align:left">
+        <div style="font-size:15px;color:#2A2218;margin-bottom:8px">{{ reorderReasonQ }}</div>
+        <textarea value="{{ reorderReasonText }}" onInput="{{ onReorderReasonInput }}" placeholder="{{ reorderReasonPh }}" rows="2" style="width:100%;box-sizing:border-box;font-family:'Noto Sans SC',inherit;font-size:14px;color:#2A2218;background:#fff;border:1.5px solid #D8CFBE;border-radius:12px;padding:9px 12px;resize:vertical;outline:none"></textarea>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+          <button onClick="{{ skipReorderReason }}" style="font-size:14px;color:#6B6151;background:#FFFDF4;border:1.5px solid #D8CFBE;border-radius:12px;padding:8px 16px;font-family:'Noto Sans SC',inherit">{{ reorderReasonSkip }}</button>
+          <button onClick="{{ submitReorderReason }}" style="font-size:14px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:12px;padding:8px 18px;box-shadow:2px 2px 0 #2A2218;font-family:'Noto Sans SC',inherit">{{ reorderReasonSubmit }}</button>
+        </div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ notAskReorderReason }}">
       <button onClick="{{ onRerankContinue }}" style="margin-top:26px;font-size:19px;color:#fff;background:#BC6242;border:2px solid #2A2218;border-radius:15px;padding:12px 30px;box-shadow:3px 3px 0 #2A2218;font-family:'Noto Sans SC',inherit" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #2A2218">{{ t.rerankContinue }} →</button>
+      </sc-if>
     </div>
   </sc-if>
 
@@ -827,8 +839,8 @@ class Component extends DCLogic {
   // ---- rerank ----
   _enterRerank(ctx) {
     this.rerankCtx = ctx; this.orderAtRerankStart = this.order.slice();
-    this._resetMic();
-    this.setState({ phase: 'rerank', tick: this.state.tick + 1 });
+    this._resetMic(); this._reasonAsked = false;
+    this.setState({ phase: 'rerank', tick: this.state.tick + 1, askReorderReason: false });
   }
   _move(id, dir) {
     const i = this.order.indexOf(id); if (i < 0) return;
@@ -841,6 +853,25 @@ class Component extends DCLogic {
     this.setState({ tick: this.state.tick + 1 });
   }
   onRerankContinue = () => {
+    if (this.rerankCtx !== 'initial' && !this._reasonAsked) {
+      const changed = !this._arrEq(this.order, this.orderBeforeStop);
+      if (changed) {
+        this._reasonAsked = true;
+        this.setState({ askReorderReason: true, reorderReasonTop: this.L(this._pairById(this.order[0]).label), reorderReasonText: '' });
+        return;
+      }
+    }
+    this._reasonAsked = false;
+    this._doRerankContinue();
+  };
+  onReorderReasonInput = (e) => { this.setState({ reorderReasonText: e.target.value }); };
+  submitReorderReason = () => {
+    const r = (this.state.reorderReasonText || '').trim();
+    if (r) { try { const base = this.props.apiBase || ''; fetch(base + '/rank_reorder_reason', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, reason: r, top: this.state.reorderReasonTop, order: this.order.map(id2 => this.L(this._pairById(id2).label)), stop: this.state.stopIndex }) }).catch(() => {}); } catch (e) {} }
+    this._reasonAsked = false; this.setState({ askReorderReason: false }); this._doRerankContinue();
+  };
+  skipReorderReason = () => { this._reasonAsked = false; this.setState({ askReorderReason: false }); this._doRerankContinue(); };
+  _doRerankContinue = () => {
     if (this.rerankCtx === 'initial') {
       this.initialOrder = this.order.slice();
       this.orderHistory = [this.order.slice()];
@@ -1127,6 +1158,11 @@ class Component extends DCLogic {
       typing: s.typing, typedVal: s.typedVal, onType: this.onType, onSubmitType: this.onSubmitType, onEditTranscript: this.onEditTranscript,
       showKbToggle, toggleKeyboard: this.toggleKeyboard,
       rankItems, onRerankContinue: this.onRerankContinue,
+      askReorderReason: !!s.askReorderReason, notAskReorderReason: !s.askReorderReason,
+      reorderReasonText: s.reorderReasonText || '', onReorderReasonInput: this.onReorderReasonInput, submitReorderReason: this.submitReorderReason, skipReorderReason: this.skipReorderReason,
+      reorderReasonQ: (s.lang === 'en' ? ('Why did you move ' + (s.reorderReasonTop || 'this') + ' up? (optional)') : ('为什么把「' + (s.reorderReasonTop || '它') + '」排在前面?(可跳过)')),
+      reorderReasonPh: (s.lang === 'en' ? 'A few words — optional…' : '简单说几句,可留空…'),
+      reorderReasonSubmit: (s.lang === 'en' ? 'Submit & continue' : '提交并继续'), reorderReasonSkip: (s.lang === 'en' ? 'Skip' : '跳过'),
       isPostStopRerank, rerankWhatPrompt,
       ...stopVals, stopDots, figAFrags, figBFrags, investFrags, refItems, showRefs: refItems.length > 0,
       showCornerEnd: (_curN >= 6 || s.showCornerEnd) && phase === 'stop', onCornerEnd: this.onCornerEnd,

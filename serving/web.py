@@ -547,6 +547,16 @@ class H(BaseHTTPRequestHandler):
             pass
         return self._send(200, json.dumps({"order": order, "top": order[0] if order else ""}, ensure_ascii=False))
 
+    def _handle_rank_reorder_reason(self, body):
+        # skippable "why did you reorder" reason, bound to the reorder (pure data capture)
+        try:
+            _log_session({"event": "reorder_reason", "sid": body.get("sid"),
+                          "reason": str(body.get("reason", ""))[:2000], "top": body.get("top"),
+                          "order": body.get("order"), "stop": body.get("stop")})
+        except Exception:
+            pass
+        return self._send(200, json.dumps({"ok": True}))
+
     def _handle_rank_profile(self, body):
         """Live profile edit (free_text) — feeds the NEXT stage's generation."""
         sess = self._rank(body.get("sid"))
@@ -780,7 +790,7 @@ class H(BaseHTTPRequestHandler):
             if self.path == "/ig_start": return self._handle_ig_start(body)
             if self.path == "/ig_profile": return self._handle_ig_profile(body)
             return self._handle_ig_choose(body)
-        if self.path in ("/rank_start", "/rank_next", "/rank_reorder", "/rank_end", "/rank_translate", "/rank_frametest", "/rank_profile", "/rank_feedback", "/rank_replay", "/rank_elicit", "/rank_report", "/rank_chat", "/intake_chat"):
+        if self.path in ("/rank_start", "/rank_next", "/rank_reorder", "/rank_reorder_reason", "/rank_end", "/rank_translate", "/rank_frametest", "/rank_profile", "/rank_feedback", "/rank_replay", "/rank_elicit", "/rank_report", "/rank_chat", "/intake_chat"):
             n = int(self.headers.get("Content-Length", "0"))
             try:
                 body = json.loads(self.rfile.read(n) or b"{}")
@@ -789,6 +799,7 @@ class H(BaseHTTPRequestHandler):
             if self.path == "/rank_start": return self._handle_rank_start(body)
             if self.path == "/rank_next": return self._handle_rank_next(body)
             if self.path == "/rank_reorder": return self._handle_rank_reorder(body)
+            if self.path == "/rank_reorder_reason": return self._handle_rank_reorder_reason(body)
             if self.path == "/rank_translate": return self._handle_rank_translate(body)
             if self.path == "/rank_frametest": return self._handle_rank_frametest(body)
             if self.path == "/rank_profile": return self._handle_rank_profile(body)
