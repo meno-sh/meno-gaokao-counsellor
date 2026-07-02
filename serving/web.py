@@ -551,7 +551,7 @@ class H(BaseHTTPRequestHandler):
         # skippable "why did you reorder" reason, bound to the reorder (pure data capture)
         try:
             _log_session({"event": "reorder_reason", "sid": body.get("sid"),
-                          "reason": str(body.get("reason", ""))[:2000], "top": body.get("top"),
+                          "reason": str(body.get("reason", ""))[:2000], "shown": bool(body.get("shown", False)), "top": body.get("top"),
                           "order": body.get("order"), "stop": body.get("stop")})
         except Exception:
             pass

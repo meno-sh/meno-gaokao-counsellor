@@ -857,6 +857,7 @@ class Component extends DCLogic {
       const changed = !this._arrEq(this.order, this.orderBeforeStop);
       if (changed) {
         this._reasonAsked = true;
+        try { const base = this.props.apiBase || ''; fetch(base + '/rank_reorder_reason', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sid: this.sid, shown: true, top: this.L(this._pairById(this.order[0]).label), order: this.order.map(id2 => this.L(this._pairById(id2).label)), stop: this.state.stopIndex }) }).catch(() => {}); } catch (e) {}
         this.setState({ askReorderReason: true, reorderReasonTop: this.L(this._pairById(this.order[0]).label), reorderReasonText: '' });
         return;
       }
