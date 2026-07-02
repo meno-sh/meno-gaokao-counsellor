@@ -192,6 +192,7 @@ def _spawn_prefetch(sess):
 
 _LOG_PATH = os.path.join(os.environ.get("GAOKAO_DATA_DIR", "/data/reflection-game/gaokao-data"), "session_log.jsonl")
 _LOG_SINK = os.environ.get("GAOKAO_LOG_SINK", "")
+_INFLIGHT_POST = threading.Semaphore(int(os.environ.get("MAX_INFLIGHT_POST", "24")))  # shed load spikes as 503 instead of OOM
 _API_KEYS = set(k.strip() for k in os.environ.get("GAOKAO_API_KEYS", "").split(",") if k.strip())  # non-empty => API requires Bearer key (yulai/雨来 deployment); empty (main/public) => open
 import time as _time, collections as _collections
 _RL = _collections.defaultdict(list)                       # ip -> [rank_start timestamps], last hour
@@ -717,6 +718,13 @@ class H(BaseHTTPRequestHandler):
         return self._send(200, json.dumps({"ending": sess.ending()}, ensure_ascii=False))
 
     def do_POST(self):
+        if not _INFLIGHT_POST.acquire(blocking=False):
+            return self._send(503, json.dumps({"error": "server busy, please retry"}))
+        try:
+            return self._do_POST_impl()
+        finally:
+            _INFLIGHT_POST.release()
+    def _do_POST_impl(self):
         try:
             _clen = int(self.headers.get("Content-Length", "0") or "0")
         except Exception:
